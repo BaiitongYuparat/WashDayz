@@ -1,3 +1,9 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -7,10 +13,102 @@ datasource db {
   provider = "postgresql"
 }
 
-model ..... {
-                                  
+model User {
+  user_id    String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  phone      String
+  addresses  UserAddress[]
+  orders     Order[]
+  created_at DateTime @default(now())
 }
 
-model ..... {
-  
+model UserAddress {
+  address_id   String @id @default(uuid())
+  user_id      String
+  label        String
+  receiver_name String
+  district     String
+  postal_code  String
+  user User @relation(fields: [user_id], references: [user_id])
+}
+
+model Rider {
+  rider_id      String @id @default(uuid())
+  name          String
+  phone         String
+  license_plate String
+  Status          Int?
+  orders Order[]
+}
+
+model Branch {
+  branch_id   String @id @default(uuid())
+  branch_name String
+  queue       Int?
+  orders Order[]
+}
+
+model MainService {
+  main_service_id String @id @default(uuid())
+  name            String
+  description     String?
+  price_per_unit  Float
+  orderItems OrderItem[]
+}
+
+model AddonService {
+  addon_service_id String @id @default(uuid())
+  name             String
+  description      String?
+  price            Float
+  orderItemAddons OrderItemAddon[]
+}
+
+model Order {
+  order_id   String @id @default(uuid())
+  user_id    String
+  rider_id   String?
+  branch_id  String
+  service    String?
+  pieces     Int
+  price      Float
+  status     String
+  user   User   @relation(fields: [user_id], references: [user_id])
+  rider  Rider? @relation(fields: [rider_id], references: [rider_id])
+  branch Branch @relation(fields: [branch_id], references: [branch_id])
+  items  OrderItem[]
+  payment Payment?
+}
+
+model OrderItem {
+  order_item_id   String @id @default(uuid())
+  order_id        String
+  main_service_id String
+  quantity        Int
+  subtotal        Float
+  order       Order       @relation(fields: [order_id], references: [order_id])
+  mainService MainService @relation(fields: [main_service_id], references: [main_service_id])
+  addons OrderItemAddon[]
+}
+
+model OrderItemAddon {
+  id               String @id @default(uuid())
+  order_item_id    String
+  addon_service_id String
+  orderItem    OrderItem    @relation(fields: [order_item_id], references: [order_item_id])
+  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
+}
+
+model Payment {
+
+  payment_id      String @id @default(uuid())
+  order_id        String @unique
+  payment_method  String
+  status          String
+  transaction_ref String?
+  created_at DateTime @default(now())
+  paid_at    DateTime?
+  order Order @relation(fields: [order_id], references: [order_id])
 }
