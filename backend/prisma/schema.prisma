@@ -13,6 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum RiderStatus {
+  AVAILABLE
+  DELIVERING
+}
+
 model User {
   user_id    String   @id @default(uuid())
   name       String
@@ -22,6 +27,7 @@ model User {
   addresses  UserAddress[]
   orders     Order[]
   created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
 }
 
 model UserAddress {
@@ -39,7 +45,7 @@ model Rider {
   name          String
   phone         String
   license_plate String
-  Status          Int?
+  status        RiderStatus @default(AVAILABLE)
   orders Order[]
 }
 

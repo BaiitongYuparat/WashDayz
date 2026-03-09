@@ -1,37 +1,16 @@
 import express from 'express';
-import {prisma} from '../lib/prisma';
+import userRoutes from './routes/users'
+import riderRoutes from './routes/rider'
+import orderRoutes from './routes/order'
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('Hello from Prisma API!');
-});
-
-
-app.post('/users', async (req, res) => {
-    const { name, email, password, phone } = req.body;
-
-    try {
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password,
-                phone
-            },
-        });
-
-        res.status(201).json(user);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to create user' });
-    }
-});
-
-app.post('/users/')
-
+app.use('/users', userRoutes)
+app.use('/riders', riderRoutes)
+app.use('/orders', orderRoutes)
 
 
 app.listen(port, () => {
