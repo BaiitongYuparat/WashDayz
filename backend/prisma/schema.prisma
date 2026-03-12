@@ -18,6 +18,13 @@ enum RiderStatus {
   DELIVERING
 }
 
+enum OrderStatus {
+  WASHING
+  DELIVERING
+  WAITING
+  FINISHED
+}
+
 model User {
   user_id    String   @id @default(uuid())
   name       String
@@ -80,7 +87,7 @@ model Order {
   service    String?
   pieces     Int
   price      Float
-  status     String
+  status     OrderStatus @default(WAITING)
   user   User   @relation(fields: [user_id], references: [user_id])
   rider  Rider? @relation(fields: [rider_id], references: [rider_id])
   branch Branch @relation(fields: [branch_id], references: [branch_id])
@@ -118,3 +125,4 @@ model Payment {
   paid_at    DateTime?
   order Order @relation(fields: [order_id], references: [order_id])
 }
+
