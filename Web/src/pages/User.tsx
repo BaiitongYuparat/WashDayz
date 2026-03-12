@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUsers } from "../api/userApi";
 
-function Dashboard() {
+function User() {
   const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
@@ -30,4 +30,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default User;
