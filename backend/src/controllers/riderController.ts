@@ -2,14 +2,13 @@ import { Request, Response } from "express"
 import { prisma } from '../../lib/prisma';
 
 export const createRider = async (req: Request, res: Response) => {
-    const { name, phone , license_plate ,  orders} = req.body
+    const { name, phone , license_plate } = req.body
     try {
         const rider = await prisma.rider.create({
             data: {
                 name,
                 phone,
                 license_plate,
-                orders,  
             }
         })
         res.json(rider)
