@@ -75,3 +75,4 @@ export const deleteUserId = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to delete user' });
     }
 }
+

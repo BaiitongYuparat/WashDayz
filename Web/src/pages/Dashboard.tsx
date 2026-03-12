@@ -7,6 +7,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchUsers = async () => {
       const data = await getUsers();
+      console.log(data);
       setUsers(data);
     };
 
@@ -15,6 +16,16 @@ function Dashboard() {
 
   return (
     <div>
+      <h1>User List</h1>
+
+      {users.map((user) => (
+        <div key={user.user_id}>
+          <p>Name: {user.name}</p>
+          <p>Email: {user.email}</p>
+          <p>Phone: {user.phone}</p>
+          <hr />
+        </div>
+      ))}
     </div>
   );
 }

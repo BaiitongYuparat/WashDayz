@@ -19,5 +19,5 @@ export const createRider = async (req: Request, res: Response) => {
 }
 
 export const getRider = async (req: Request, res: Response) => {
-
+   
 }
