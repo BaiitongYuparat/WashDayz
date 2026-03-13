@@ -7,7 +7,13 @@ module.exports = {
       colors: {
         blue: {
           main: "#00ACC3",
+          second: "#01CCE6",
           light: "#90ECF9",
+        }
+      },
+      borderColor: {
+        blue: {
+          main: "#00ACC3",
         }
       }
     },
