@@ -9,31 +9,41 @@ export const createUser = async (req: Request, res: Response) => {
                 name,
                 email,
                 password,
-                phone
+                phone,
+                
             }
         })
 
         res.json(user)
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create user' })
+        console.error("CREATE USER ERROR:", error)
+        res.status(500).json(error)
     }
 }
 
 export const getUser = async (req: Request, res: Response) => {
     try {
-        const users = await prisma.user.findMany();
+        const users = await prisma.user.findMany({
+            include: {
+                addresses: true
+            }
+        });
+
         res.json(users);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch users' })
+        res.status(500).json({ error: "Failed to fetch users" });
     }
-}
+};
 
 export const getUserId = async (req: Request, res: Response) => {
-    const id = req.params.id as string
+    const id = Number(req.params.id)
     try {
         const user = await prisma.user.findUnique({
             where: {
                 user_id: id
+            },
+            include: {
+                addresses: true
             }
         })
         if (!user) {
@@ -46,7 +56,7 @@ export const getUserId = async (req: Request, res: Response) => {
 }
 
 export const putUserId = async (req: Request, res: Response) => {
-    const id = req.params.id as string
+    const id = Number(req.params.id)
     const { name, email } = req.body;
     try {
         const user = await prisma.user.update({
@@ -60,7 +70,7 @@ export const putUserId = async (req: Request, res: Response) => {
 }
 
 export const deleteUserId = async (req: Request, res: Response) => {
-    const id = req.params.id as string
+    const id = Number(req.params.id)
     try {
         const user = await prisma.user.delete({
             where: {
