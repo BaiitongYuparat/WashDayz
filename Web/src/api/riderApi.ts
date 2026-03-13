@@ -3,11 +3,11 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/riders";
 
 export type Rider = {
-    rider_id: number
-    name: string
-    phone: string
-    license_plate: string
-}
+  rider_id: number;
+  name: string;
+  phone: string;
+  license_plate: string;
+};
 
 export const getRider = async () => {
     const res = await axios.get(`${API_URL}`);

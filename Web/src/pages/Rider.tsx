@@ -3,7 +3,7 @@ import { getRider, deleteRider } from "../api/riderApi";
 import type { Rider } from "../api/riderApi";
 import { FaTrash } from "react-icons/fa";
 
-function Rider() {
+function Riders() {
     const [riders, setRiders] = useState<Rider[]>([]);
     const [search, setSearch] = useState("");
 
@@ -91,4 +91,4 @@ function Rider() {
     );
 }
 
-export default Rider;
+export default Riders;
