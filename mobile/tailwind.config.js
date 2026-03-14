@@ -9,6 +9,9 @@ module.exports = {
           main: "#00ACC3",
           second: "#01CCE6",
           light: "#90ECF9",
+        },
+        gray: {
+          light: "#F9F9F9",
         }
       },
       borderColor: {

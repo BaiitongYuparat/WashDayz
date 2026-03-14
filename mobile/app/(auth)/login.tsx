@@ -70,7 +70,7 @@ export default function Login() {
 
               <CustomInput 
               secureTextEntry
-                 value={password}
+                value={password}
               onChangeText={setPassword}
               placeholder="PassWord" />
             </View>

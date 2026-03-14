@@ -27,7 +27,7 @@ export default function CustomInput({
       {/* Input Field */}
       <TextInput
         className={`
-          w-full py-1 px-2 rounded-lg border-2 bg-slate-50 shadow-slate-100
+          w-full py-1 px-2 rounded-lg border-2 border-gray-100 bg-gray-light shadow-sm shadow-gray-200
           ${hasError ? "border-red-500" : "border-gray-200"}
           ${props.editable === false ? "bg-gray-100" : "bg-white"}
           text-base text-gray-800
