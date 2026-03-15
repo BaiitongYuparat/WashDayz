@@ -1,46 +1,53 @@
 import { router } from "expo-router";
-import { Button, Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import {
+  Button,
+  Pressable,
+  ScrollView,
+  View,
+  Text,
+  FlatList,
+} from "react-native";
+import { ServiceCard } from "@/features/service/ServiceCard";
+import { UserHeader } from "@/components/UserHeader";
 
-const products = [
-  { id: "1", name: "iPhone 15", price: "32,900" },
-  { id: "2", name: "iPad Air", price: "23,900" },
+const services = [
+  {
+    id: "1",
+    title: "ซักอบ",
+    img: require("/Users/jane/Desktop/PreProject/WashDayz/mobile/assets/icons/laudry_icon.png"),
+  },
+  {
+    id: "2",
+    title: "รีด",
+    img: require("/Users/jane/Desktop/PreProject/WashDayz/mobile/assets/icons/laudry_icon.png"),
+  },
 ];
+
+const userInfo = {
+  name: "Yuparat",
+  surname: "love numtee",
+  address : "ถนนประชาชื่น ทุ่งสองห้อง เขตหลักสี่ กรุงเทพฯ 10210"
+}
 export default function Index() {
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.title}>Welcom Home</Text>
-      <Button title="Go to Profile" onPress={() => router.push("/profile")} />
+    <View className="flex-1 justify-between">
+      <UserHeader user={userInfo}/>
+
+      <View className="flex-1 mt-3">
+        <Text className="font-bold text-xl px-4">All Service</Text>
+      <FlatList
+        data={services}
+        numColumns={2}
+        contentContainerStyle={{ padding: 3 }}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View className="flex-1">   
+            <ServiceCard service={item} />
+          </View>
+        )}
+      />
+      </View>
       
-    
-    </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollContent: {
-    padding: 20,
-    alignItems: "center",
-    gap: 15,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  productCard: {
-    padding: 15,
-    backgroundColor: "#f0f0f0",
-    marginBottom: 10,
-    width: "100%",
-    borderRadius: 8,
-  },
-  price: {
-    color: "#666",
-    marginTop: 5,
-  },
-});
