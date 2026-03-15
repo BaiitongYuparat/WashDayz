@@ -127,3 +127,8 @@ model Payment {
   paid_at         DateTime?
   order           Order     @relation(fields: [order_id], references: [order_id])
 }
+
+
+model Queue {
+  
+}

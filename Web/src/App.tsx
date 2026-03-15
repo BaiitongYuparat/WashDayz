@@ -7,9 +7,9 @@ import Sidebar from "./components/Sidebar"
 function App() {
   return (
     <BrowserRouter>
-      <div style={{ display: "flex" }}>
+      <div className="flex">
         <Sidebar />
-        <div style={{ padding: "20px", flex: 1 }}>
+        <div className="p-5 flex-1">
           <Routes>
             <Route path="/user" element={<User />} />
             <Route path="/rider" element={<Riders />} />

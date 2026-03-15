@@ -2,9 +2,7 @@ import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
 
 export const createAddresses = async (req: Request, res: Response) => {
-
     const { user_id, label, receiver_name, district, postal_code } = req.body
-
     try {
 
         const address = await prisma.userAddress.create({

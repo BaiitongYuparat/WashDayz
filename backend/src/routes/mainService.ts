@@ -1,9 +1,13 @@
 import express from 'express'
-import {createmainService} from '../controllers/mainServiceController'
+import {createMainService , getMainService , getMainServiceId ,putMainServiceId ,deleteMainServiceId} from '../controllers/mainServiceController'
 
 const router = express.Router()
 
 
-router.post('/' ,createmainService)
+router.post('/' ,createMainService)
+router.get('/',getMainService)
+router.get('/:id',getMainServiceId)
+router.put('/:id' ,putMainServiceId)
+router.delete('/:id' , deleteMainServiceId)
 
 export default router
