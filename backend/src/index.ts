@@ -26,7 +26,7 @@ app.use('/mainservices', mainserviceRoutes)
 app.use('/addonservice' , addonserviceRoutes)
 app.use('/payments', paymentRoutes)
 app.use('/orderitemaddons', orderItemAddonRoutes)
-app.use('orderitems',orderItemRoutes)
+app.use('/orderitems',orderItemRoutes)
 
 
 app.listen(port, () => {

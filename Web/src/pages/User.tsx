@@ -13,6 +13,7 @@ function User() {
   //   phone: "",
   // });
 
+  
   //delete id 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this user?")) return;
