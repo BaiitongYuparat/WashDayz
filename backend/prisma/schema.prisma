@@ -60,7 +60,6 @@ model Branch {
   branch_id   Int     @id @default(autoincrement())
   branch_name String
   queue       Int?
-  orders      Order[]
 }
 
 model MainService {
@@ -128,3 +127,6 @@ model Payment {
 }
 
 
+branch
+order
+q
