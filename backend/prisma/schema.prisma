@@ -123,5 +123,6 @@ model Payment {
   transaction_ref String?
   created_at DateTime @default(now())
   paid_at    DateTime?
+  updated_at DateTime @default(now()) @updatedAt
 }
 
