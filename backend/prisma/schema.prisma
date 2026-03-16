@@ -25,21 +25,22 @@ enum OrderStatus {
 }
 
 model User {
-  user_id    Int           @id @default(autoincrement())
-  googleId   String?       @unique
+  user_id    String   @id @default(uuid())
+  googleId String?  @unique
   name       String
   email      String        @unique
   password   String
   phone      String
   addresses  UserAddress[]
   orders     Order[]
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now()) @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+  
 }
 
 model UserAddress {
-  address_id    Int    @id @default(autoincrement())
-  user_id       Int
+  address_id    String @id @default(uuid())
+  user_id       String
   label         String
   receiver_name String
   district      String
@@ -48,7 +49,7 @@ model UserAddress {
 }
 
 model Rider {
-  rider_id      Int         @id @default(autoincrement())
+  rider_id      String @id @default(uuid())
   name          String
   phone         String
   license_plate String
@@ -57,13 +58,13 @@ model Rider {
 }
 
 model Branch {
-  branch_id   Int     @id @default(autoincrement())
+  branch_id   String @id @default(uuid())
   branch_name String
   queue       Int?
 }
 
 model MainService {
-  main_service_id Int         @id @default(autoincrement())
+  main_service_id String @id @default(uuid())
   name            String
   description     String?
   price_per_unit  Float
@@ -71,7 +72,7 @@ model MainService {
 }
 
 model AddonService {
-  addon_service_id Int              @id @default(autoincrement())
+  addon_service_id String @id @default(uuid())
   name             String
   description      String?
   price            Float
@@ -79,16 +80,15 @@ model AddonService {
 }
 
 model Order {
-  order_id  Int         @id @default(autoincrement())
-  user_id   Int
-  rider_id  Int?
-  branch_id Int
-  service   String?
-  pieces    Int
-  price     Float
-  status    OrderStatus @default(WAITING)
-
-  user   User   @relation(fields: [user_id], references: [user_id] ,onDelete: Cascade)
+  order_id   String @id @default(uuid())
+  user_id    String
+  rider_id   String?
+  branch_id  String
+  service    String?
+  pieces     Int
+  price      Float
+  status     OrderStatus @default(WAITING)
+  user   User   @relation(fields: [user_id], references: [user_id])
   rider  Rider? @relation(fields: [rider_id], references: [rider_id])
   branch Branch @relation(fields: [branch_id], references: [branch_id])
 
@@ -97,7 +97,7 @@ model Order {
 }
 
 model OrderItem {
-  order_item_id   Int              @id @default(autoincrement())
+  order_item_id   String @id @default(uuid())
   order_id        Int
   main_service_id Int
   quantity        Int
@@ -108,7 +108,7 @@ model OrderItem {
 }
 
 model OrderItemAddon {
-  id               Int          @id @default(autoincrement())
+  id               String @id @default(uuid())
   order_item_id    Int
   addon_service_id Int
   orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id])
@@ -116,17 +116,12 @@ model OrderItemAddon {
 }
 
 model Payment {
-  payment_id      Int       @id @default(autoincrement())
+  payment_id      String @id @default(uuid())
   order_id        Int       @unique
   payment_method  String
   status          String
   transaction_ref String?
-  created_at      DateTime  @default(now())
-  paid_at         DateTime?
-  order           Order     @relation(fields: [order_id], references: [order_id])
+  created_at DateTime @default(now())
+  paid_at    DateTime?
 }
 
-
-branch
-order
-q
