@@ -8,9 +8,9 @@ export const createOrder = async (req: Request, res: Response) => {
     try {
         const order = await prisma.order.create({
             data: {
-                user_id: Number(user_id),
-                branch_id: Number(branch_id),
-                rider_id: rider_id ? Number(rider_id) : undefined,
+                user_id: (user_id),
+                branch_id: (branch_id),
+                rider_id: rider_id ? (rider_id) : undefined,
                 service,
                 pieces,
                 price
@@ -32,7 +32,7 @@ export const getOrder = async (req: Request, res: Response) => {
 }
 
 export const getOrderId = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     try {
         const order = await prisma.order.findUnique({
             where: {
@@ -46,7 +46,7 @@ export const getOrderId = async (req: Request, res: Response) => {
 }
 
 export const putOrderId = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     const { user_id, rider_id, branch_id, service, pieces, price } = req.body
     try {
         const order = await prisma.order.update({
@@ -54,9 +54,9 @@ export const putOrderId = async (req: Request, res: Response) => {
                 order_id: id
             },
             data: {
-                user_id: Number(user_id),
-                branch_id: Number(branch_id),
-                rider_id: rider_id ? Number(rider_id) : undefined,
+                user_id: (user_id),
+                branch_id: (branch_id),
+                rider_id: rider_id ? (rider_id) : undefined,
                 service,
                 pieces,
                 price
@@ -69,7 +69,7 @@ export const putOrderId = async (req: Request, res: Response) => {
 }
 
 export const deleteOrderId = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     try {
         const order = await prisma.order.delete({
             where: {

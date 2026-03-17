@@ -6,8 +6,8 @@ export const createItemAddon = async (req: Request, res: Response) => {
   try {
     const itemAddon = await prisma.orderItemAddon.create({
       data: {
-        order_item_id: Number(order_item_id),
-        addon_service_id: Number(addon_service_id)
+        order_item_id: (order_item_id),
+        addon_service_id: (addon_service_id)
       }
     })
 

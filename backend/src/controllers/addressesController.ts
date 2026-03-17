@@ -30,7 +30,7 @@ export const getAddress = async (req: Request, res: Response) => {
 }
 
 export const getAddressId = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     try {
         const address = await prisma.userAddress.findUnique({
             where: {
@@ -44,7 +44,7 @@ export const getAddressId = async (req: Request, res: Response) => {
 }
 
 export const putAddress = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     const { user_id, label, receiver_name, district, postal_code } = req.body
     try {
         const address = await prisma.userAddress.update({
@@ -66,7 +66,7 @@ export const putAddress = async (req: Request, res: Response) => {
 }
 
 export const deleteAddress = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     try {
         const address = await prisma.userAddress.delete({
             where: {

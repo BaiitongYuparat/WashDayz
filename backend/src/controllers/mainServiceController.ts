@@ -30,7 +30,7 @@ export const getMainService = async (req: Request, res: Response) => {
 }
 
 export const getMainServiceId = async (req: Request, res: Response) => {
-    const { id } = req.params
+    const id = req.params.id as string
     try {
         const mainservice = await prisma.mainService.findUnique({
             where: {
@@ -45,8 +45,8 @@ export const getMainServiceId = async (req: Request, res: Response) => {
 }
 
 export const putMainServiceId = async (req: Request, res: Response) => {
-   const { id } = req.params
-    const {name, description, price_per_unit} = req.body
+    const id = req.params.id as string
+    const { name, description, price_per_unit } = req.body
     try {
         const mainservice = await prisma.mainService.update({
             where: {
@@ -66,7 +66,7 @@ export const putMainServiceId = async (req: Request, res: Response) => {
 }
 
 export const deleteMainServiceId = async (req: Request, res: Response) => {
-   const { id } = req.params
+    const id = req.params.id as string
     try {
         const mainservice = await prisma.mainService.delete({
             where: {

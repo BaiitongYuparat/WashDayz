@@ -37,7 +37,7 @@ export const getUser = async (req: Request, res: Response) => {
 
 
 export const getUserId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const id = req.params.id as string
     try {
         const user = await prisma.user.findUnique({
             where: {
@@ -57,7 +57,7 @@ export const getUserId = async (req: Request, res: Response) => {
 }
 
 export const putUserId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+   const id = req.params.id as string
     const { name, email } = req.body;
     try {
         const user = await prisma.user.update({
@@ -71,7 +71,7 @@ export const putUserId = async (req: Request, res: Response) => {
 }
 
 export const deleteUserId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const id = req.params.id as string
     try {
         const user = await prisma.user.delete({
             where: {
