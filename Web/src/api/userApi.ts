@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/users";
 
 export type User = {
-    user_id: number
+    user_id: string
     name: string
     email: string
     password: string
@@ -12,7 +12,7 @@ export type User = {
 };
 
 export type Address = {
-  address_id?: number
+  address_id?: string
   label: string
   receiver_name: string
   district: string
@@ -24,7 +24,7 @@ export const getUsers = async () => {
     return res.data;
 };
 
-export const getUsersById = async (id: number): Promise<User> => {
+export const getUsersById = async (id: string): Promise<User> => {
     const res = await axios.get(`${API_URL}/${id}`);
     return res.data;
 };
@@ -34,11 +34,11 @@ export const createUser = async (data: User): Promise<User> => {
   return res.data;
 };
 
-export const deleteUser = async (id: number): Promise<void> => {
+export const deleteUser = async (id: string): Promise<void> => {
   await axios.delete(`${API_URL}/${id}`);
 };
 
-export const putUser = async (id: number, data: { name: string; email: string }) => {
+export const putUser = async (id: string, data: { name: string; email: string }) => {
   const res = await axios.put(`${API_URL}/${id}`, data);
   return res.data;
 };

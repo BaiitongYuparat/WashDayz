@@ -3,7 +3,6 @@ import { prisma } from "../../lib/prisma"
 
 export const createOrderItem = async (req: Request, res: Response) => {
   const { order_id, main_service_id, quantity, subtotal } = req.body
-
   try {
     const orderItem = await prisma.orderItem.create({
       data: {

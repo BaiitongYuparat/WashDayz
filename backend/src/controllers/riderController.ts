@@ -28,7 +28,7 @@ export const getRider = async (req: Request, res: Response) => {
 }
 
 export const getRiderId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const rider = await prisma.rider.findUnique({
             where : {
@@ -42,7 +42,7 @@ export const getRiderId = async (req: Request, res: Response) => {
 }
 
 export const putRiderId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     const  { name, phone, license_plate ,  } = req.body
     try {
         const rider = await prisma.rider.update({
@@ -62,7 +62,7 @@ export const putRiderId = async (req: Request, res: Response) => {
 }
 
 export const deleteRiderId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const rider = await prisma.rider.delete({
             where : {

@@ -61,6 +61,7 @@ model Branch {
   branch_id   String @id @default(uuid())
   branch_name String
   queue       Int?
+  orders Order[]
 }
 
 model MainService {
@@ -92,14 +93,14 @@ model Order {
   rider  Rider? @relation(fields: [rider_id], references: [rider_id])
   branch Branch @relation(fields: [branch_id], references: [branch_id])
 
-  items   OrderItem[]
+ items   OrderItem[]
   payment Payment?
 }
 
 model OrderItem {
   order_item_id   String @id @default(uuid())
-  order_id        Int
-  main_service_id Int
+  order_id        String
+  main_service_id String
   quantity        Int
   subtotal        Float
   order           Order            @relation(fields: [order_id], references: [order_id])
@@ -109,20 +110,20 @@ model OrderItem {
 
 model OrderItemAddon {
   id               String @id @default(uuid())
-  order_item_id    Int
-  addon_service_id Int
+  order_item_id    String
+  addon_service_id String
   orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id])
   addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
 }
 
 model Payment {
   payment_id      String @id @default(uuid())
-  order_id        Int       @unique
+  order_id        String      @unique
   payment_method  String
   status          String
-  transaction_ref String?
   created_at DateTime @default(now())
   paid_at    DateTime?
+  order Order @relation(fields: [order_id], references: [order_id])
   updated_at DateTime @default(now()) @updatedAt
 }
 

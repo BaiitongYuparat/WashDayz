@@ -3,7 +3,6 @@ import { prisma } from "../../lib/prisma"
 
 export const createPayment = async (req: Request, res: Response) => {
   const { order_id, payment_method, status, transaction_ref, paid_at } = req.body
-
   try {
     const payment = await prisma.payment.create({
       data: {

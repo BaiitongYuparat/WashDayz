@@ -32,7 +32,7 @@ export const getOrder = async (req: Request, res: Response) => {
 }
 
 export const getOrderId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const order = await prisma.order.findUnique({
             where: {
@@ -46,7 +46,7 @@ export const getOrderId = async (req: Request, res: Response) => {
 }
 
 export const putOrderId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     const { user_id, rider_id, branch_id, service, pieces, price } = req.body
     try {
         const order = await prisma.order.update({
@@ -69,7 +69,7 @@ export const putOrderId = async (req: Request, res: Response) => {
 }
 
 export const deleteOrderId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const order = await prisma.order.delete({
             where: {

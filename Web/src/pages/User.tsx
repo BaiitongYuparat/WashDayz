@@ -13,9 +13,9 @@ function User() {
   //   phone: "",
   // });
 
-  
+
   //delete id 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Delete this user?")) return;
     await deleteUser(id);
     setUsers(users.filter((user) => user.user_id !== id));
@@ -47,7 +47,7 @@ function User() {
 
   //คัดกรองข้อมูลผู้ใช้
   const filteredUsers = users.filter((user) =>
-    user.user_id === Number(search) ||
+    user.user_id === (search) ||
     user.name.toLowerCase().includes(search.toLowerCase()) || //เช็คว่า name ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
     user.email.toLowerCase().includes(search.toLowerCase()) || //เช็คว่า email ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
     user.phone.includes(search) //เช็คว่าเบอร์โทรของ userมีตัวเลขที่ค้นหาหรือไม่
@@ -90,7 +90,7 @@ function User() {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.user_id} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="p-5">WDZ-{String(user.user_id).padStart(3, "0")}</td>
+                <td className="p-5">{user.user_id}</td>
                 <td className="p-5">{user.name}</td>
                 <td className="p-5">{user.phone}</td>
                 <td className="p-5">{user.email}</td>

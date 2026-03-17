@@ -35,6 +35,7 @@ export const getUser = async (req: Request, res: Response) => {
     }
 };
 
+
 export const getUserId = async (req: Request, res: Response) => {
     const id = Number(req.params.id)
     try {

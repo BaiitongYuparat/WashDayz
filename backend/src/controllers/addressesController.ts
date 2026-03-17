@@ -4,19 +4,16 @@ import { prisma } from "../../lib/prisma"
 export const createAddresses = async (req: Request, res: Response) => {
     const { user_id, label, receiver_name, district, postal_code } = req.body
     try {
-
         const address = await prisma.userAddress.create({
             data: {
-                user_id: Number(user_id),
+                user_id,
                 label,
                 receiver_name,
                 district,
                 postal_code
             }
         })
-
         res.json(address)
-
     } catch (error) {
         console.error("CREATE USER ERROR:", error)
         res.status(500).json(error)
@@ -33,45 +30,43 @@ export const getAddress = async (req: Request, res: Response) => {
 }
 
 export const getAddressId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const address = await prisma.userAddress.findUnique({
             where: {
                 address_id: id
             }
-        });
-        res.json({
-            message: 'address deleted successfully',
-            address: address
-        });
+        })
+        res.json(address)
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete address' });
+        res.status(500).json({ error: 'Failed to fetch address' })
     }
 }
 
 export const putAddress = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     const { user_id, label, receiver_name, district, postal_code } = req.body
     try {
-        const addres = await prisma.userAddress.update({
+        const address = await prisma.userAddress.update({
             where: {
                 address_id: id
             },
             data: {
-                user_id: Number(user_id),
+                user_id,
                 label,
                 receiver_name,
                 district,
                 postal_code
             }
         })
+        res.json(address)
      } catch (error) {
         res.status(500).json({ error: 'Failed to delete address' });
     }
 }
 
 export const deleteAddress = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const address = await prisma.userAddress.delete({
             where: {

@@ -27,7 +27,7 @@ export const getBranch = async (req: Request, res: Response) => {
 }
 
 export const getBranchId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     try {
         const branch = await prisma.branch.findUnique({
             where: {
@@ -45,7 +45,7 @@ export const getBranchId = async (req: Request, res: Response) => {
 
 
 export const putBranchId = async (req: Request, res: Response) => {
-    const id = Number(req.params.id)
+    const { id } = req.params
     const { branch_name } = req.body
 
     try {
@@ -61,7 +61,7 @@ export const putBranchId = async (req: Request, res: Response) => {
 
 
 export const deleteBranch = async (req: Request , res : Response) => {
-     const id = Number(req.params.id)
+     const { id } = req.params
     try {
         const branch = await prisma.branch.delete({
             where: {

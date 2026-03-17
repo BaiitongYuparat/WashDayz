@@ -8,7 +8,7 @@ function Riders() {
     const [search, setSearch] = useState("");
 
     // delete rider
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (!confirm("Delete this rider?")) return;
 
         await deleteRider(id);
@@ -16,9 +16,9 @@ function Riders() {
     };
 
     const filteredRiders = riders.filter((rider) =>
-        rider.rider_id.toString().includes(search) ||
+        rider.rider_id.toString().includes(search) || 
         rider.name.toLowerCase().includes(search.toLowerCase()) ||
-        rider.phone.includes(search) ||
+        rider.phone.includes(search) || 
         rider.license_plate.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -64,12 +64,8 @@ function Riders() {
                     <tbody>
                         {filteredRiders.map((rider) => (
                             <tr
-                                key={rider.rider_id}
-                                className="border-b border-gray-200 hover:bg-gray-50"
-                            >
-                                <td className="p-5">
-                                    RDZ-{String(rider.rider_id).padStart(3, "0")}
-                                </td>
+                                key= {rider.rider_id} className="border-b border-gray-200 hover:bg-gray-50">
+                                <td className="p-5">{rider.rider_id}</td>
                                 <td className="p-5">{rider.name}</td>
                                 <td className="p-5">{rider.phone}</td>
                                 <td className="p-5">{rider.license_plate}</td>
