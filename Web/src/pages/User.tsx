@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { getUsers, deleteUser,  } from "../api/userApi";
+import { getUsers, deleteUser, } from "../api/userApi";
 import type { User as UserType } from "../api/userApi";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { CustomButton } from "../components/Button"
+import SearchInput from "../components/SearchInput";
 
 function User() {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -47,7 +48,6 @@ function User() {
 
   //คัดกรองข้อมูลผู้ใช้
   const filteredUsers = users.filter((user) =>
-    user.user_id === (search) ||
     user.name.toLowerCase().includes(search.toLowerCase()) || //เช็คว่า name ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
     user.email.toLowerCase().includes(search.toLowerCase()) || //เช็คว่า email ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
     user.phone.includes(search) //เช็คว่าเบอร์โทรของ userมีตัวเลขที่ค้นหาหรือไม่
@@ -64,15 +64,11 @@ function User() {
       </div>
 
       {/* Search */}
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search here..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 rounded-full border border-gray-300 w-[400px] text-base outline-none focus:ring-2 focus:ring-blue-200"
-        />
-      </div>
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Search user..."
+      />
 
       <div className="overflow-hidden rounded-xl shadow-md">
         <table className="w-full bg-white border-collapse">

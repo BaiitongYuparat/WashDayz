@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getRider, deleteRider } from "../api/riderApi";
 import type { Rider } from "../api/riderApi";
 import { FaTrash } from "react-icons/fa";
+import SearchInput from "../components/SearchInput";
 
 function Riders() {
     const [riders, setRiders] = useState<Rider[]>([]);
@@ -16,9 +17,9 @@ function Riders() {
     };
 
     const filteredRiders = riders.filter((rider) =>
-        rider.rider_id.toString().includes(search) || 
+        rider.rider_id.toString().includes(search) ||
         rider.name.toLowerCase().includes(search.toLowerCase()) ||
-        rider.phone.includes(search) || 
+        rider.phone.includes(search) ||
         rider.license_plate.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -39,15 +40,11 @@ function Riders() {
             </div>
 
             {/* Search */}
-            <div className="mb-6">
-                <input
-                    type="text"
-                    placeholder="Search here..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="px-4 py-2 rounded-full border border-gray-300 w-[400px] text-base outline-none focus:ring-2 focus:ring-blue-200"
-                />
-            </div>
+            <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Search user..."
+            />
 
             <div className="overflow-hidden rounded-xl shadow-md">
                 <table className="w-full bg-white border-collapse">
@@ -64,7 +61,7 @@ function Riders() {
                     <tbody>
                         {filteredRiders.map((rider) => (
                             <tr
-                                key= {rider.rider_id} className="border-b border-gray-200 hover:bg-gray-50">
+                                key={rider.rider_id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="p-5">{rider.rider_id}</td>
                                 <td className="p-5">{rider.name}</td>
                                 <td className="p-5">{rider.phone}</td>
