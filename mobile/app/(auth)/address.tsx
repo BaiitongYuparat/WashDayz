@@ -1,9 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient"
-import { View ,Text, KeyboardAvoidingView, Alert} from "react-native"
+import { View ,Text, KeyboardAvoidingView, Platform, Alert} from "react-native"
 import CustomInput from "@/components/ui/CustomInput"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { FlatList } from "react-native-reanimated/lib/typescript/Animated"
 import { CustomButton } from "@/components/ui/CustomButton"
+import { useLocalSearchParams } from "expo-router"
 
 export default function AddressForm () {
     const [houseNo , setHouseNo] = useState('') //บ้านเลขที่
@@ -13,7 +14,9 @@ export default function AddressForm () {
     const [postCode, setPostCode] = useState('') //ไปรษณีย์
     const [phone , setPhone] = useState('')  
     const [details , setDetails] = useState('') 
-    
+    const params = useLocalSearchParams();
+    console.log(params)
+
     const handleSubmit = async () => {
         console.log('press handlesubmit')
         if(!houseNo || !dist || !subdist ||!province || !postCode || !phone) {

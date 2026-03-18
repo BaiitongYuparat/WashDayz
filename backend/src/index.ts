@@ -9,6 +9,7 @@ import addonserviceRoutes from './routes/addonService'
 import paymentRoutes from './routes/payment'
 import orderItemAddonRoutes from './routes/orderItemAddon'
 import orderItemRoutes from './routes/orderItem'
+import authRoutes from './routes/auth'
 import cors from "cors";
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/addonservice' , addonserviceRoutes)
 app.use('/payments', paymentRoutes)
 app.use('/orderitemaddons', orderItemAddonRoutes)
 app.use('/orderitems',orderItemRoutes)
+app.use('/auth', authRoutes)
 
 
 app.listen(port, () => {

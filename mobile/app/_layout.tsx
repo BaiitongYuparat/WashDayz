@@ -7,8 +7,6 @@ export default function RootLayout() {
     screenOptions={{headerShown: false}}
     >
       <Stack.Screen name="index" options={{title: "Home"}} />
-      <Stack.Screen
-      name="profile" options={{title: "Profile"}} />
     </Stack>
   )
 }

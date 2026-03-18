@@ -28,9 +28,10 @@ model User {
   user_id    String   @id @default(uuid())
   googleId String?  @unique
   name       String
-  email      String        @unique
-  password   String
-  phone      String
+  email      String   @unique
+  password   String?
+  phone      String?
+  role      String @default("user")
   addresses  UserAddress[]
   orders     Order[]
   created_at DateTime @default(now())
@@ -43,9 +44,15 @@ model UserAddress {
   user_id       String
   label         String
   receiver_name String
-  district      String
-  postal_code   String
-  user     User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  district     String
+  subDistrict String
+  province String
+  postal_code  String
+  details      String?
+  lat   Float?
+  lng Float?
+  phone String
+  user User @relation(fields: [user_id], references: [user_id])
 }
 
 model Rider {
