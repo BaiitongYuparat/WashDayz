@@ -9,6 +9,7 @@ export type User = {
     password: string
     phone: string
     addresses?: Address[]
+    role: string
 };
 
 export type Address = {
@@ -22,6 +23,7 @@ export type Address = {
 export const getUsers = async () => {
     const res = await axios.get(`${API_URL}`);
     return res.data;
+    
 };
 
 export const getUsersById = async (id: string): Promise<User> => {

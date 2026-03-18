@@ -24,6 +24,11 @@ enum OrderStatus {
   FINISHED
 }
 
+enum RoleStatus {
+ USER
+ ADMIN
+}
+
 model User {
   user_id    String   @id @default(uuid())
   googleId String?  @unique
@@ -31,7 +36,7 @@ model User {
   email      String   @unique
   password   String?
   phone      String?
-  role      String @default("user")
+  role RoleStatus @default(USER)
   addresses  UserAddress[]
   orders     Order[]
   created_at DateTime @default(now())

@@ -79,6 +79,7 @@ function User() {
               <th className="p-5 text-left">Phone</th>
               <th className="p-5 text-left">Email</th>
               <th className="p-5 text-left">Address</th>
+              <th className="p-5 text-left">Role</th>
               <th className="p-5 text-left">Action</th>
             </tr>
           </thead>
@@ -97,6 +98,7 @@ function User() {
                     </div>
                   ))}
                 </td>
+                 <td className="p-5">{user.role}</td>
 
                 <td className="p-5">
                   <button

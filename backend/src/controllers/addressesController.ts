@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
 
 export const createAddresses = async (req: Request, res: Response) => {
-    const { user_id, label, receiver_name, district, postal_code } = req.body
+    const { user_id, label, receiver_name, district, postal_code  , subDistrict , province , phone} = req.body
     try {
         const address = await prisma.userAddress.create({
             data: {
@@ -10,7 +10,10 @@ export const createAddresses = async (req: Request, res: Response) => {
                 label,
                 receiver_name,
                 district,
-                postal_code
+                subDistrict,
+                province,
+                postal_code,
+                phone
             }
         })
         res.json(address)
@@ -60,7 +63,7 @@ export const putAddress = async (req: Request, res: Response) => {
             }
         })
         res.json(address)
-     } catch (error) {
+    } catch (error) {
         res.status(500).json({ error: 'Failed to delete address' });
     }
 }
