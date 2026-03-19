@@ -5,7 +5,7 @@ export default function ScreensLayout() {
   return (
     <Stack 
   screenOptions={{
-    headerTitle: '',             // ไม่มีข้อความ
+    headerTitle: '',            
   }} 
     >
       <Stack.Screen name="order" options={{ title: "Order" }} />

@@ -23,6 +23,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import axios from "axios";
 import { useRouter } from "expo-router";
 import * as AuthSession from "expo-auth-session";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from "@/provider/UserProvider";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -38,6 +40,7 @@ export default function Login() {
     responseType: "id_token",
   });
   const router = useRouter();
+  const {user,setUser} = useUser();
 
   useEffect(() => {
     
@@ -55,18 +58,16 @@ export default function Login() {
   const handleGoogleLogin = async (idToken: string) => {
   try {
     const result = await sendTokenToBackend(idToken);
+    await AsyncStorage.setItem("token", result.token);
 
-    console.log("backend result:", result);
-
+    console.log("result:", result.token)
     if (result.isNewUser || !result.hasAddress) {
-      router.push({
-        pathname:("/address"),
-        params: {userId: result.user.userId}
-      })
-      console.log("backend result:", result);
+      router.push("/address");
+
     } else {
       router.replace("/(tabs)");
     }
+    setUser(result.user)
 
   } catch (err) {
     console.log(err);
@@ -145,6 +146,7 @@ export default function Login() {
             <Ionicons name="logo-google" size={18} />
             <Text className="text-gray-500">Continue With Google</Text>
           </Pressable>
+          <Text>{user?.email}</Text>
         </View>
       </KeyboardAwareScrollView>
     </LinearGradient>
