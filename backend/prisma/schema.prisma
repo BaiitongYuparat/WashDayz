@@ -29,6 +29,8 @@ enum RoleStatus {
  ADMIN
 }
 
+
+
 model User {
   user_id    String   @id @default(uuid())
   googleId String?  @unique
@@ -72,7 +74,7 @@ model Rider {
 model Branch {
   branch_id   String @id @default(uuid())
   branch_name String
-  queue       Int?
+  queues Queue[]
   orders Order[]
 }
 
@@ -97,15 +99,15 @@ model Order {
   user_id    String
   rider_id   String?
   branch_id  String
-  service    String?
   pieces     Int
   price      Float
+  queue Queue?
   status     OrderStatus @default(WAITING)
   user   User   @relation(fields: [user_id], references: [user_id])
   rider  Rider? @relation(fields: [rider_id], references: [rider_id])
   branch Branch @relation(fields: [branch_id], references: [branch_id])
 
- items   OrderItem[]
+  items   OrderItem[]
   payment Payment?
 }
 
@@ -139,3 +141,21 @@ model Payment {
   updated_at DateTime @default(now()) @updatedAt
 }
 
+model Queue {
+  queue_id     String @id @default(uuid())
+  order_id     String @unique
+  branch_id    String
+
+  queue_number Int
+
+  created_at   DateTime @default(now())
+  called_at    DateTime?
+  finished_at  DateTime?
+
+
+  order  Order  @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  branch Branch @relation(fields: [branch_id], references: [branch_id])
+
+  @@unique([branch_id, queue_number])
+  @@index([branch_id])
+}

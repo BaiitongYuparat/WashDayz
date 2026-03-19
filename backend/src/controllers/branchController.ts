@@ -12,8 +12,8 @@ export const createBranch = async (req: Request, res: Response) => {
         res.json(branch)
 
     } catch (error) {
-        console.error(error)
-        res.status(500).json({ error: "Failed to create branch" })
+        console.error("CREATE BRANCH ERROR:", error)
+        res.status(500).json(error)
     }
 }
 
@@ -55,7 +55,7 @@ export const putBranchId = async (req: Request, res: Response) => {
         })
         res.json(branch);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch Branch' })
+        res.status(500).json({ error: 'Failed to update Branch' })
     }
 }
 

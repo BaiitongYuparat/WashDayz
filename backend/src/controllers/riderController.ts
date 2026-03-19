@@ -2,8 +2,11 @@ import { Request, Response } from "express"
 import { prisma } from '../../lib/prisma';
 
 export const createRider = async (req: Request, res: Response) => {
-    const { name, phone, license_plate ,  } = req.body
+    const { name, phone, license_plate } = req.body
     try {
+        if (!name || !phone || !license_plate) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
         const rider = await prisma.rider.create({
             data: {
                 name,
@@ -19,7 +22,7 @@ export const createRider = async (req: Request, res: Response) => {
 }
 
 export const getRider = async (req: Request, res: Response) => {
-      try {
+    try {
         const rider = await prisma.rider.findMany()
         res.json(rider);
     } catch (error) {
@@ -31,22 +34,25 @@ export const getRiderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
         const rider = await prisma.rider.findUnique({
-            where : {
+            where: {
                 rider_id: id
             }
         })
+        if (!rider) {
+            return res.status(404).json({ error: "Rider not found" });
+        }
         res.json(rider);
-    }catch (error) {
+    } catch (error) {
         res.status(500).json({ error: "Failed to fetch rider" });
     }
 }
 
 export const putRiderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const  { name, phone, license_plate ,  } = req.body
+    const { name, phone, license_plate, } = req.body
     try {
         const rider = await prisma.rider.update({
-            where : {
+            where: {
                 rider_id: id
             },
             data: {
@@ -56,7 +62,7 @@ export const putRiderId = async (req: Request, res: Response) => {
             }
         })
         res.json(rider);
-    }catch (error) {
+    } catch (error) {
         res.status(500).json({ error: "Failed to fetch rider" });
     }
 }
@@ -65,7 +71,7 @@ export const deleteRiderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
         const rider = await prisma.rider.delete({
-            where : {
+            where: {
                 rider_id: id
             }
         });
@@ -73,7 +79,7 @@ export const deleteRiderId = async (req: Request, res: Response) => {
             message: 'Rider deleted successfully',
             user: rider
         });
-    }catch (error) {
+    } catch (error) {
         res.status(500).json({ error: "Failed to fetch rider" });
     }
 }

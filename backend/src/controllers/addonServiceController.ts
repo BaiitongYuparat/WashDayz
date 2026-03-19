@@ -10,7 +10,7 @@ export const createAddonService = async (req: Request, res: Response) => {
             data: {
                 name,
                 description,
-                price: Number(price)
+                price
             }
         })
 
@@ -39,6 +39,9 @@ export const getAddonServiceId = async (req: Request, res: Response) => {
                 addon_service_id: id
             }
         })
+        if (!service) {
+            return res.status(404).json({ error: "AddonService not found" })
+        }
 
         res.json(service)
     } catch (error) {
@@ -59,7 +62,7 @@ export const putAddonServiceId = async (req: Request, res: Response) => {
             data: {
                 name,
                 description,
-                price: Number(price)
+                price
             }
         })
 

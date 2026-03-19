@@ -2,8 +2,11 @@ import { Request, Response } from "express"
 import { prisma } from '../../lib/prisma';
 
 export const createUser = async (req: Request, res: Response) => {
-    const { name, email, password, phone , role} = req.body
+    const { name, email, password, phone, role } = req.body
     try {
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
         const user = await prisma.user.create({
             data: {
                 name,
@@ -12,6 +15,7 @@ export const createUser = async (req: Request, res: Response) => {
                 phone,
                 role
             }
+            
         })
 
         res.json(user)
@@ -57,7 +61,7 @@ export const getUserId = async (req: Request, res: Response) => {
 }
 
 export const putUserId = async (req: Request, res: Response) => {
-   const id = req.params.id as string
+    const id = req.params.id as string
     const { name, email } = req.body;
     try {
         const user = await prisma.user.update({

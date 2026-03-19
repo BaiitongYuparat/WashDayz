@@ -10,6 +10,7 @@ import paymentRoutes from './routes/payment'
 import orderItemAddonRoutes from './routes/orderItemAddon'
 import orderItemRoutes from './routes/orderItem'
 import authRoutes from './routes/auth'
+import queuRoutes from './routes/queue'
 import cors from "cors";
 
 const app = express();
@@ -21,7 +22,7 @@ app.use(cors());
 app.use('/users', userRoutes)
 app.use('/riders', riderRoutes)
 app.use('/orders', orderRoutes)
-app.use('/branchs', branchRoutes)
+app.use('/branches', branchRoutes)
 app.use('/addresses', addressesRoutes)
 app.use('/mainservices', mainserviceRoutes)
 app.use('/addonservice' , addonserviceRoutes)
@@ -29,6 +30,7 @@ app.use('/payments', paymentRoutes)
 app.use('/orderitemaddons', orderItemAddonRoutes)
 app.use('/orderitems',orderItemRoutes)
 app.use('/auth', authRoutes)
+app.use('/queues',queuRoutes)
 
 
 app.listen(port, () => {
