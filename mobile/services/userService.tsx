@@ -1,21 +1,17 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = "http://localhost:8080/auth"
-
-export type Users = {
-    userId : string;
-    email: string;
-    password: string;
-}
+const API_URL = "http://localhost:8080/auth";
 
 export type User = {
-    email: string;
-    password: string;
-    name:string;
-    sub: string;
-}
+  user_id: string;
+  email: string;
+  name: string;
+  phone: string;
+  role: string;
+};
+
 
 export const createUser = async (data: User) => {
-    const res = await axios.post(API_URL, data)
-    return res.data
-}
+  const res = await axios.post(API_URL, data);
+  return res.data;
+};
