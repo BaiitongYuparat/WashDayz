@@ -44,3 +44,4 @@ export const putUser = async (id: string, data: { name: string; email: string })
   const res = await axios.put(`${API_URL}/${id}`, data);
   return res.data;
 };
+

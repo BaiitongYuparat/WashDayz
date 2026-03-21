@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { prisma } from '../../lib/prisma';
+import {hashPassword } from '../utils/bcryptjs'
 
 export const createUser = async (req: Request, res: Response) => {
     const { name, email, password, phone, role } = req.body
@@ -7,11 +8,13 @@ export const createUser = async (req: Request, res: Response) => {
         if (!name || !email || !password) {
             return res.status(400).json({ error: "Missing required fields" });
         }
+        const hashedPassword = await hashPassword(password);
+
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
-                password,
+                password: hashedPassword,
                 phone,
                 role
             }
@@ -90,4 +93,6 @@ export const deleteUserId = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to delete user' });
     }
 }
+
+
 

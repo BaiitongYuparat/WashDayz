@@ -16,6 +16,7 @@ export const createOrder = async (req: Request, res: Response) => {
                 rider_id: rider_id ?? undefined,
                 pieces,
                 price,
+
                 items: {
                     create: items.map((item: any) => ({
                         main_service_id: item.main_service_id,
@@ -29,7 +30,9 @@ export const createOrder = async (req: Request, res: Response) => {
                     include: {
                         mainService: true
                     }
-                }
+                },
+                user: true,
+                rider: true,
             }
         })
 
@@ -44,6 +47,8 @@ export const getOrder = async (req: Request, res: Response) => {
     try {
         const order = await prisma.order.findMany({
             include: {
+                user: true,       
+                rider: true, 
                 items: {
                     include: {
                         mainService: true

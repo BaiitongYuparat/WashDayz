@@ -2,6 +2,16 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/orders";
 
+export type OrderItem = {
+  quantity: number;
+  subtotal: number;
+  mainService?: {
+    name: string;
+  };
+};
+
+export type OrderStatus = "WAITING" | "PROCESSING" | "DONE";
+
 export type Order = {
     order_id: string
     user_id: string
@@ -10,6 +20,14 @@ export type Order = {
     service: string
     pieces: number
     price: number
+    user: {
+        name: string;
+    };
+    rider?: {
+        name: string;
+    };
+   items: OrderItem[];
+   status: string;
 };
 
 

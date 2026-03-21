@@ -9,6 +9,21 @@ function Sidebar() {
             </label>
 
             <ul className="list-none p-0 mt-6 space-y-3">
+
+                <li>
+                    <NavLink
+                        to="/order"
+                        className={({ isActive }) =>
+                            `block py-2 transition ${isActive
+                                ? "text-blue-400 font-bold text-2xl"
+                                : "text-gray-500 text-lg hover:text-blue-400"
+                            }`
+                        }
+                    >
+                        Order
+                    </NavLink>
+                </li>
+
                 <li>
                     <NavLink
                         to="/service"

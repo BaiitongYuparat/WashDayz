@@ -4,6 +4,8 @@ import type { User as UserType } from "../api/userApi";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { CustomButton } from "../components/Button"
 import SearchInput from "../components/SearchInput";
+import { useNavigate } from "react-router-dom";
+import { isAdmin } from "../utils/auth";
 
 function User() {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -53,6 +55,25 @@ function User() {
     user.phone.includes(search) //เช็คว่าเบอร์โทรของ userมีตัวเลขที่ค้นหาหรือไม่
   );
 
+  const navigate = useNavigate();
+
+  //ถ้ายังไม่ login ห้ามเข้า
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+    }
+  }, []);
+
+  //ไม่ใช่ ADMIN ห้ามเข้า
+  useEffect(() => {
+    if (!isAdmin()) {
+      navigate("/dashboard");
+    }
+  }, []);
+
+
 
   return (
     <div className="p-8">
@@ -98,7 +119,7 @@ function User() {
                     </div>
                   ))}
                 </td>
-                 <td className="p-5">{user.role}</td>
+                <td className="p-5">{user.role}</td>
 
                 <td className="p-5">
                   <button
