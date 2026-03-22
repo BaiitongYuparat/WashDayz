@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { getRider, deleteRider } from "../api/riderApi";
 import type { Rider } from "../api/riderApi";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash , FaEdit} from "react-icons/fa";
 import SearchInput from "../components/SearchInput";
+import { CustomButton } from "../components/Button"
 
 function Riders() {
     const [riders, setRiders] = useState<Rider[]>([]);
@@ -35,9 +36,21 @@ function Riders() {
 
     return (
         <div className="p-8">
-            <div className="mb-6">
-                <label className="text-black text-3xl font-bold">Rider</label>
+            <div className="mb-6 flex justify-between items-center">
+                <label className="text-black text-3xl font-bold">
+                    Rider
+                </label>
+
+                <CustomButton
+                    title="+ Add Rider"
+                    variant="primary"
+                    size="md"
+                    onPress={() => (true)}
+
+
+                />
             </div>
+
 
             {/* Search */}
             <SearchInput
@@ -74,6 +87,8 @@ function Riders() {
                                     >
                                         <FaTrash />
                                     </button>
+
+                                    
                                 </td>
                             </tr>
                         ))}

@@ -4,6 +4,7 @@ import Riders from "./pages/Rider";
 import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
 import Orders from "./pages/Order";
+import Services from "./pages/Service";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/order" element={<Orders />} />
                     <Route path="/user" element={<User />} />
                     <Route path="/rider" element={<Riders />} />
+                    <Route path="/service" element={<Services />} />
                   </Routes>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getUsers, deleteUser, } from "../api/userApi";
-import type { User as UserType } from "../api/userApi";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { getUsers, deleteUser, createUser, putUser, createAddress, getAddress, updateAddress, deleteAddress, } from "../api/userApi";
+import type { User as UserType, Address } from "../api/userApi";
+import { FaTrash, FaEdit, FaMapMarkerAlt } from "react-icons/fa";
 import { CustomButton } from "../components/Button"
 import SearchInput from "../components/SearchInput";
 import { useNavigate } from "react-router-dom";
@@ -10,11 +10,25 @@ import { isAdmin } from "../utils/auth";
 function User() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [search, setSearch] = useState("");
-  // const [Data, setData] = useState({
-  //   name: "",
-  //   email: "",
-  //   phone: "",
-  // });
+  const [Data, setData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [address, setAddress] = useState({
+    label: "",
+    receiver_name: "",
+    district: "",
+    subDistrict: "",
+    province: "",
+    postal_code: "",
+    phone: "",
+  })
+  const [openAddressModal, setOpenAddressModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+
 
 
   //delete id 
@@ -24,22 +38,25 @@ function User() {
     setUsers(users.filter((user) => user.user_id !== id));
   };
 
-  //postข้อมูลใหม่
-  // const handleAddUser = async () => {
-  //   await createRider(Data);
+  // postข้อมูลใหม่
+  const handleAddUser = async () => {
+    await createUser(Data);
 
-  //   const data = await getUsers(); // อัพเดตข้อมูลใหม่
-  //   setUsers(data);
+    const data = await getUsers(); // อัพเดตข้อมูลใหม่
+    setUsers(data);
 
-  //   setData({
-  //     name: "",
-  //     email: "",
-  //     phone: "",
-  //   });
-  // }
+    setData({
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+    });
+  }
+  const [openModal, setOpenModal] = useState(false);
 
-
+  //ดึงข้อมูล
   useEffect(() => {
+
     const fetchUsers = async () => {
       const data = await getUsers();
       setUsers(data);
@@ -64,6 +81,7 @@ function User() {
     if (!token) {
       navigate("/login");
     }
+
   }, []);
 
   //ไม่ใช่ ADMIN ห้ามเข้า
@@ -72,6 +90,16 @@ function User() {
       navigate("/dashboard");
     }
   }, []);
+
+  //ที่อยู่
+  const handleAddAddress = async (userId: string) => {
+    await createAddress({
+      ...address,
+      user_id: userId,
+    });
+  };
+
+
 
 
 
@@ -82,6 +110,69 @@ function User() {
         <label className="text-black text-3xl font-bold">
           User
         </label>
+
+        <CustomButton
+          title="+ Add User"
+          variant="primary"
+          size="md"
+          onPress={() => setOpenModal(true)}
+
+
+        />
+        {openModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+
+            <div className="bg-white p-6 rounded-xl w-[400px] shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Add User</h2>
+              <input
+                className="w-full border p-2 mb-3 rounded"
+                placeholder="Name"
+                value={Data.name}
+                onChange={(e) => setData({ ...Data, name: e.target.value })}
+              />
+
+              <input
+                className="w-full border p-2 mb-3 rounded"
+                placeholder="Email"
+                value={Data.email}
+                onChange={(e) => setData({ ...Data, email: e.target.value })}
+              />
+
+              <input
+                className="w-full border p-2 mb-3 rounded"
+                placeholder="Phone"
+                value={Data.phone}
+                onChange={(e) => setData({ ...Data, phone: e.target.value })}
+              />
+
+              <input
+                type="password"
+                className="w-full border p-2 mb-4 rounded"
+                placeholder="Password"
+                value={Data.password}
+                onChange={(e) => setData({ ...Data, password: e.target.value })}
+              />
+
+              <div className="flex justify-end gap-2">
+                <CustomButton
+                  title="Cancel"
+                  variant="danger"
+                  onPress={() => setOpenModal(false)}
+                />
+
+                <CustomButton
+                  title="Add"
+                  variant="success"
+                  onPress={async () => {
+                    await handleAddUser();
+                    setOpenModal(false);
+                  }}
+                />
+              </div>
+            </div>
+
+          </div>
+        )}
       </div>
 
       {/* Search */}
@@ -128,6 +219,17 @@ function User() {
                   >
                     <FaTrash />
                   </button>
+                  <button
+                    onClick={() => {
+                      setSelectedUserId(user.user_id);
+                      setOpenAddressModal(true);
+                    }}
+                    className="text-gray-600 text-xl hover:text-gray-700 transition"
+                  >
+                    <FaMapMarkerAlt />
+                  </button>
+                 
+
                 </td>
 
               </tr>
