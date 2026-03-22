@@ -14,8 +14,10 @@ import { useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useUser } from "@/provider/UserProvider";
-
+import { createAddress } from "@/services/address";
+import { useRouter } from "expo-router";
 export default function AddressForm() {
+  const router = useRouter();
   const [houseNo, setHouseNo] = useState(""); //บ้านเลขที่
   const [dist, setDist] = useState(""); //เขต อำเภอ
   const [subdist, setSubDist] = useState(""); // แขวง/ตำบล
@@ -23,27 +25,28 @@ export default function AddressForm() {
   const [postCode, setPostCode] = useState(""); //ไปรษณีย์
   const [phone, setPhone] = useState("");
   const [details, setDetails] = useState("");
-    const { user } = useUser();
+  const [label, setLabel] = useState("");
+  const [name, setName] = useState("");
+  const { user } = useUser();
+
   useEffect(() => {
     const getToken = async () => {
       try {
+        const token = await AsyncStorage.getItem("token");
+        console.log("token:", token);
 
-      const token = await AsyncStorage.getItem("token");
-      console.log("token:", token);
-
-      const res = await axios.get("http://localhost:8080/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("res:", res.data);
-    } catch (err) {
-      console.log("ERROR:", err);
-    }
+        const res = await axios.get("http://localhost:8080/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("res:", res.data);
+      } catch (err) {
+        console.log("ERROR:", err);
+      }
     };
     getToken();
   }, []);
-
 
   const handleSubmit = async () => {
     console.log("press handlesubmit");
@@ -52,14 +55,35 @@ export default function AddressForm() {
       console.log("alert");
       return;
     }
-    const data = { userId: user?.user_id, houseNo, dist, subdist, province, postCode, phone ,details};
+    if (!user?.user_id) {
+      Alert.alert("User not found");
+      return;
+    }
+    const data = {
+      user_id: user?.user_id,
+      label: houseNo,
+      receiver_name: name,
+      district: dist,
+      subDistrict: subdist,
+      province,
+      postal_code: postCode,
+      details,
+      phone,
+      lat:0,
+      lng:0
+    };
     try {
-        const token = await AsyncStorage.getItem("token");
-      const res = await axios.post("http://localhost:8080/useraddress", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert("Address saved!");
-    } catch (error) {}
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        alert("No token");
+        return;
+      }
+      await createAddress(data,token);
+      router.replace("/(tabs)");
+
+    } catch (error) {
+      console.log("Error create Address", error)
+    }
   };
 
   return (
@@ -78,6 +102,11 @@ export default function AddressForm() {
         <KeyboardAvoidingView>
           <View className="flex-1 justify-start">
             {/* adddress field */}
+            <CustomInput
+              value={name}
+              onChangeText={setName}
+              placeholder="ชื่อผู้รับ"
+            />
             <CustomInput
               value={houseNo}
               onChangeText={setHouseNo}
