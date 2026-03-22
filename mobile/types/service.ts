@@ -1,7 +1,7 @@
 import { ImageSourcePropType } from "react-native";
 
 export type Service = {
-  id: string
-  title: string
-  img: ImageSourcePropType;
+  main_service_id: string
+  name: string
+  img?: ImageSourcePropType;
 }

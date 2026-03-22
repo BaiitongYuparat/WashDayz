@@ -9,19 +9,10 @@ import {
 } from "react-native";
 import { ServiceCard } from "@/features/service/ServiceCard";
 import { UserHeader } from "@/components/UserHeader";
+import { useEffect , useState} from "react";
+import { getMainServices } from "@/services/mainServices";
+import { MainService } from "@/services/mainServices";
 
-const services = [
-  {
-    id: "1",
-    title: "ซักอบ",
-    img: require("/Users/jane/Desktop/PreProject/WashDayz/mobile/assets/icons/laudry_icon.png"),
-  },
-  {
-    id: "2",
-    title: "รีด",
-    img: require("/Users/jane/Desktop/PreProject/WashDayz/mobile/assets/icons/laudry_icon.png"),
-  },
-];
 
 const userInfo = {
   name: "Yuparat",
@@ -29,10 +20,34 @@ const userInfo = {
   address : "ถนนประชาชื่น ทุ่งสองห้อง เขตหลักสี่ กรุงเทพฯ 10210"
 }
 export default function Index() {
+  const [services, setServices] = useState<MainService[]>([]);
+
+  useEffect(() => {
+  const fetchMainService = async() => {
+    try {
+      const services = await getMainServices();
+      setServices(services)
+      console.log("Fetch services Info success")
+    } catch (error) {
+      console.log("Error while fetch MainService data: ", error)
+    }
+  }
+  fetchMainService();
+},[])
+
+  const onPress = (services: MainService) => {
+    router.push({
+      pathname: '/screens/order',
+      params: {
+        serviceId: services.main_service_id,
+      }
+    })
+  }
+
   return (
     <View className="flex-1 justify-between">
-      <UserHeader user={userInfo}/>
-
+     
+      <UserHeader />
 
       <View className="flex-1 mt-3 p-2 rounded-xl">
         <Text className="font-bold text-xl px-4">All Service</Text>
@@ -40,10 +55,12 @@ export default function Index() {
         data={services}
         numColumns={2}
         contentContainerStyle={{ padding: 3 }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.main_service_id}
         renderItem={({ item }) => (
-          <View className="flex-1 m-1">   
-            <ServiceCard service={item} />
+          <View className="w-1/2 p-2">   
+            <ServiceCard 
+            service={item} 
+            onPress={() => onPress(item)}/>
           </View>
         )}
       />

@@ -146,7 +146,6 @@ export default function Login() {
             <Ionicons name="logo-google" size={18} />
             <Text className="text-gray-500">Continue With Google</Text>
           </Pressable>
-          <Text>{user?.email}</Text>
         </View>
       </KeyboardAwareScrollView>
     </LinearGradient>
