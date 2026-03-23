@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 enum RiderStatus {
@@ -25,92 +25,83 @@ enum OrderStatus {
 }
 
 enum RoleStatus {
- USER
- ADMIN
+  USER
+  ADMIN
 }
 
 model User {
-  user_id    String   @id @default(uuid())
-  googleId String?  @unique
+  user_id    String        @id @default(uuid())
+  googleId   String?       @unique
   name       String
-  email      String   @unique
+  email      String        @unique
   password   String?
   phone      String?
-  role RoleStatus @default(USER)
+  role       RoleStatus    @default(USER)
   addresses  UserAddress[]
   orders     Order[]
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
-  
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now()) @updatedAt
 }
 
 model UserAddress {
-  address_id    String @id @default(uuid())
+  address_id    String  @id @default(uuid())
   user_id       String
   label         String
+  houseNo       String?
   receiver_name String
-  district     String
-  subDistrict String
-  province String
-  postal_code  String
-  details      String?
-  lat   Float?
-  lng Float?
-  phone String
-  user User @relation(fields: [user_id], references: [user_id])
-}
-
-model Rider {
-  rider_id      String @id @default(uuid())
-  name          String
+  district      String
+  subDistrict   String
+  province      String
+  postal_code   String
+  details       String?
+  lat           Float?
+  lng           Float?
   phone         String
-  license_plate String
-  status        RiderStatus @default(AVAILABLE)
-  orders        Order[]
+  user          User    @relation(fields: [user_id], references: [user_id])
 }
 
 model Branch {
-  branch_id   String @id @default(uuid())
+  branch_id   String  @id @default(uuid())
   branch_name String
-  queue       Int?
-  orders Order[]
+  queues      Queue[]
+  orders      Order[]
 }
 
 model MainService {
-  main_service_id String @id @default(uuid())
+  main_service_id String      @id @default(uuid())
   name            String
   description     String?
   price_per_unit  Float
   orderItems      OrderItem[]
+  services        Service[]
 }
 
 model AddonService {
-  addon_service_id String @id @default(uuid())
+  addon_service_id String           @id @default(uuid())
   name             String
   description      String?
   price            Float
   orderItemAddons  OrderItemAddon[]
+  services         Service[]
 }
 
 model Order {
-  order_id   String @id @default(uuid())
-  user_id    String
-  rider_id   String?
-  branch_id  String
-  service    String?
-  pieces     Int
-  price      Float
-  status     OrderStatus @default(WAITING)
-  user   User   @relation(fields: [user_id], references: [user_id])
-  rider  Rider? @relation(fields: [rider_id], references: [rider_id])
-  branch Branch @relation(fields: [branch_id], references: [branch_id])
+  order_id  String      @id @default(uuid())
+  user_id   String
+  branch_id String
+  pieces    Int
+  price     Float
+  queue     Queue?
+  status    OrderStatus @default(WAITING)
+  user      User        @relation(fields: [user_id], references: [user_id])
+  branch    Branch      @relation(fields: [branch_id], references: [branch_id])
 
- items   OrderItem[]
+  items   OrderItem[]
   payment Payment?
 }
 
 model OrderItem {
-  order_item_id   String @id @default(uuid())
+  order_item_id   String           @id @default(uuid())
   order_id        String
   main_service_id String
   quantity        Int
@@ -121,7 +112,7 @@ model OrderItem {
 }
 
 model OrderItemAddon {
-  id               String @id @default(uuid())
+  id               String       @id @default(uuid())
   order_item_id    String
   addon_service_id String
   orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id])
@@ -129,13 +120,40 @@ model OrderItemAddon {
 }
 
 model Payment {
-  payment_id      String @id @default(uuid())
-  order_id        String      @unique
-  payment_method  String
-  status          String
-  created_at DateTime @default(now())
-  paid_at    DateTime?
-  order Order @relation(fields: [order_id], references: [order_id])
-  updated_at DateTime @default(now()) @updatedAt
+  payment_id     String    @id @default(uuid())
+  order_id       String    @unique
+  payment_method String
+  status         String
+  created_at     DateTime  @default(now())
+  paid_at        DateTime?
+  order          Order     @relation(fields: [order_id], references: [order_id])
+  updated_at     DateTime  @default(now()) @updatedAt
 }
 
+model Queue {
+  queue_id  String @id @default(uuid())
+  order_id  String @unique
+  branch_id String
+
+  queue_number Int
+
+  created_at  DateTime  @default(now())
+  called_at   DateTime?
+  finished_at DateTime?
+
+  order  Order  @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  branch Branch @relation(fields: [branch_id], references: [branch_id])
+
+  @@unique([branch_id, queue_number])
+  @@index([branch_id])
+}
+
+model Service {
+  main_service_id  String
+  addon_service_id String
+
+  mainService  MainService  @relation(fields: [main_service_id], references: [main_service_id])
+  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
+
+  @@id([main_service_id, addon_service_id]) 
+}

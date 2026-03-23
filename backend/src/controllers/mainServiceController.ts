@@ -37,6 +37,9 @@ export const getMainServiceId = async (req: Request, res: Response) => {
                 main_service_id: id
             }
         });
+        if (!mainservice) {
+            return res.status(404).json({ error: "MainService not found" })
+        }
         res.json(mainservice)
     } catch (error) {
         console.error(error)

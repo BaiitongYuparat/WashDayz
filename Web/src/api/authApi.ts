@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080", // ✅ เอา /auth ออก
+  baseURL: "http://localhost:8080",
 });
 
 api.interceptors.request.use((config) => {
@@ -25,30 +25,7 @@ export type Auth = {
 };
 
 
-export const login = async (
-  email: string,
-  password: string
-): Promise<Auth> => {
-  const res = await api.post("/auth/login", { email, password }); // ✅ ถูกแล้ว
-  return res.data;
-};
-
-export const register = async (
-  email: string,
-  password: string,
-  name: string
-): Promise<Auth> => {
-  const res = await api.post("/auth/register", {
-    email,
-    password,
-    name,
-  });
-
-  return res.data;
-};
-
-
-export const getProfile = async () => {
-  const res = await api.get("/users/me");
+export const login = async ( email: string, password: string ): Promise<Auth> => {
+  const res = await api.post("/auth/login", { email, password }); 
   return res.data;
 };
