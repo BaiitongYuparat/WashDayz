@@ -65,11 +65,11 @@ export const getUserId = async (req: Request, res: Response) => {
 
 export const putUserId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { name, email } = req.body;
+    const { name, email , phone } = req.body;
     try {
         const user = await prisma.user.update({
             where: { user_id: id },
-            data: { name, email }
+            data: { name, email , phone }
         });
         res.json(user);
     } catch (error) {

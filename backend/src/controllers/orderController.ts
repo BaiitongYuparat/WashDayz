@@ -13,7 +13,6 @@ export const createOrder = async (req: Request, res: Response) => {
             data: {
                 user_id,
                 branch_id,
-                rider_id: rider_id ?? undefined,
                 pieces,
                 price,
 
@@ -32,7 +31,6 @@ export const createOrder = async (req: Request, res: Response) => {
                     }
                 },
                 user: true,
-                rider: true,
             }
         })
 
@@ -48,7 +46,6 @@ export const getOrder = async (req: Request, res: Response) => {
         const order = await prisma.order.findMany({
             include: {
                 user: true,       
-                rider: true, 
                 items: {
                     include: {
                         mainService: true
@@ -93,7 +90,6 @@ export const putOrderId = async (req: Request, res: Response) => {
             data: {
                 user_id,
                 branch_id,
-                rider_id: rider_id ?? undefined,
                 pieces,
                 price
             }

@@ -73,7 +73,6 @@ function Services() {
                     <table className="w-full bg-white border-collapse">
                         <thead>
                             <tr className="bg-blue-50">
-                                <th className="p-5 text-left">Main ID</th>
                                 <th className="p-5 text-left">Name</th>
                                 <th className="p-5 text-left">Description</th>
                                 <th className="p-5 text-left">Price</th>
@@ -84,7 +83,6 @@ function Services() {
                         <tbody>
                             {filteredMain.map((item) => (
                                 <tr key={item.main_service_id}>
-                                    <td className="p-4">{item.main_service_id}</td>
                                     <td className="p-4">{item.name}</td>
                                     <td className="p-4">{item.description}</td>
                                     <td className="p-4">{item.price_per_unit}</td>
@@ -118,7 +116,6 @@ function Services() {
                     <table className="w-full bg-white border-collapse">
                         <thead>
                             <tr className="bg-blue-50">
-                                <th className="p-5 text-left">Addon ID</th>
                                 <th className="p-5 text-left">Name</th>
                                 <th className="p-5 text-left">Description</th>
                                 <th className="p-5 text-left">Price</th>
@@ -130,7 +127,6 @@ function Services() {
 
                             {filteredAddon.map((item) => (
                                 <tr key={item.addon_service_id}>
-                                    <td className="p-4">{item.addon_service_id}</td>
                                     <td className="p-4">{item.name}</td>
                                     <td className="p-4">{item.description}</td>
                                     <td className="p-4">{item.price}</td>

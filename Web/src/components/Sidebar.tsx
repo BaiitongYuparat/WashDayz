@@ -52,7 +52,7 @@ function Sidebar() {
                     </NavLink>
                 </li>
 
-                <li>
+                {/* <li>
                     <NavLink
                         to="/rider"
                         className={({ isActive }) =>
@@ -64,7 +64,7 @@ function Sidebar() {
                     >
                         Rider
                     </NavLink>
-                </li>
+                </li> */}
 
             </ul>
         </div>

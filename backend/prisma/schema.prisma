@@ -60,15 +60,6 @@ model UserAddress {
   user          User    @relation(fields: [user_id], references: [user_id])
 }
 
-model Rider {
-  rider_id      String      @id @default(uuid())
-  name          String
-  phone         String
-  license_plate String
-  status        RiderStatus @default(AVAILABLE)
-  orders        Order[]
-}
-
 model Branch {
   branch_id   String  @id @default(uuid())
   branch_name String
@@ -77,12 +68,12 @@ model Branch {
 }
 
 model MainService {
-  main_service_id String         @id @default(uuid())
+  main_service_id String      @id @default(uuid())
   name            String
   description     String?
   price_per_unit  Float
   orderItems      OrderItem[]
-  addons          AddonService[]
+  services        Service[]
 }
 
 model AddonService {
@@ -90,22 +81,19 @@ model AddonService {
   name             String
   description      String?
   price            Float
-  main_service_id String? 
   orderItemAddons  OrderItemAddon[]
-  mainService     MainService? @relation(fields: [main_service_id], references: [main_service_id])
+  services         Service[]
 }
 
 model Order {
   order_id  String      @id @default(uuid())
   user_id   String
-  rider_id  String?
   branch_id String
   pieces    Int
   price     Float
   queue     Queue?
   status    OrderStatus @default(WAITING)
   user      User        @relation(fields: [user_id], references: [user_id])
-  rider     Rider?      @relation(fields: [rider_id], references: [rider_id])
   branch    Branch      @relation(fields: [branch_id], references: [branch_id])
 
   items   OrderItem[]
@@ -158,4 +146,14 @@ model Queue {
 
   @@unique([branch_id, queue_number])
   @@index([branch_id])
+}
+
+model Service {
+  main_service_id  String
+  addon_service_id String
+
+  mainService  MainService  @relation(fields: [main_service_id], references: [main_service_id])
+  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
+
+  @@id([main_service_id, addon_service_id]) 
 }
