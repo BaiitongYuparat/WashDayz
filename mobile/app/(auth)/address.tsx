@@ -61,7 +61,8 @@ export default function AddressForm() {
     }
     const data = {
       user_id: user?.user_id,
-      label: houseNo,
+      label,
+      houseNo,
       receiver_name: name,
       district: dist,
       subDistrict: subdist,
