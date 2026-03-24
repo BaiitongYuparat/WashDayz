@@ -77,11 +77,19 @@ export const deleteAddonServiceId = async (req: Request, res: Response) => {
     const id = req.params.id as string
 
     try {
+        await prisma.orderItemAddon.deleteMany({
+            where: { addon_service_id: id },
+        });
+
+        await prisma.service.deleteMany({
+            where: { addon_service_id: id },
+        });
+
+        // 🔥 แล้วค่อยลบตัวแม่
         const service = await prisma.addonService.delete({
-            where: {
-                addon_service_id: id
-            }
-        })
+            where: { addon_service_id: id },
+        });
+
 
         res.json(service)
     } catch (error) {

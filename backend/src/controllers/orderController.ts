@@ -101,18 +101,40 @@ export const putOrderId = async (req: Request, res: Response) => {
 }
 
 export const deleteOrderId = async (req: Request, res: Response) => {
-    const id = req.params.id as string
+    const id = req.params.id as string;
+
     try {
-        const order = await prisma.order.delete({
-            where: {
-                order_id: id
-            }
+        const items = await prisma.orderItem.findMany({
+            where: { order_id: id },
+            select: { order_item_id: true }
         });
+
+        const itemIds = items.map(i => i.order_item_id);
+
+        //  เช็คก่อนลบ
+        if (itemIds.length > 0) {
+            await prisma.orderItemAddon.deleteMany({
+                where: {
+                    order_item_id: { in: itemIds }
+                }
+            });
+        }
+
+        await prisma.orderItem.deleteMany({
+            where: { order_id: id }
+        });
+
+        const order = await prisma.order.delete({
+            where: { order_id: id }
+        });
+
         res.json({
             message: 'Order deleted successfully',
-            user: order
-        })
+            order
+        });
+
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch Order' })
+        console.error("DELETE ERROR:", error);
+        res.status(500).json({ error: 'Delete failed' });
     }
-}
+};

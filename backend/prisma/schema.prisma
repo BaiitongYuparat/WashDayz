@@ -46,8 +46,8 @@ model User {
 model UserAddress {
   address_id    String  @id @default(uuid())
   user_id       String
-  label         String
   houseNo       String?
+  label         String
   receiver_name String
   district      String
   subDistrict   String
@@ -63,8 +63,8 @@ model UserAddress {
 model Branch {
   branch_id   String  @id @default(uuid())
   branch_name String
-  queues      Queue[]
   orders      Order[]
+  queue       Queue[]
 }
 
 model MainService {
@@ -73,7 +73,7 @@ model MainService {
   description     String?
   price_per_unit  Float
   orderItems      OrderItem[]
-  services        Service[]
+  service         Service[]
 }
 
 model AddonService {
@@ -82,22 +82,23 @@ model AddonService {
   description      String?
   price            Float
   orderItemAddons  OrderItemAddon[]
-  services         Service[]
+  service          Service[]
 }
 
 model Order {
   order_id  String      @id @default(uuid())
   user_id   String
   branch_id String
+  service   String?
   pieces    Int
   price     Float
-  queue     Queue?
   status    OrderStatus @default(WAITING)
   user      User        @relation(fields: [user_id], references: [user_id])
   branch    Branch      @relation(fields: [branch_id], references: [branch_id])
 
   items   OrderItem[]
   payment Payment?
+  queue   Queue[]
 }
 
 model OrderItem {
@@ -106,17 +107,17 @@ model OrderItem {
   main_service_id String
   quantity        Int
   subtotal        Float
-  order           Order            @relation(fields: [order_id], references: [order_id])
-  mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id])
-  addons          OrderItemAddon[]
+  order           Order            @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
+  orderItemAddons OrderItemAddon[]
 }
 
 model OrderItemAddon {
   id               String       @id @default(uuid())
   order_item_id    String
   addon_service_id String
-  orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id])
-  addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
+  orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id], onDelete: Cascade)
+  addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
 }
 
 model Payment {
@@ -128,6 +129,16 @@ model Payment {
   paid_at        DateTime?
   order          Order     @relation(fields: [order_id], references: [order_id])
   updated_at     DateTime  @default(now()) @updatedAt
+}
+
+model Service {
+  main_service_id  String
+  addon_service_id String
+
+  mainService  MainService  @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
+  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
+
+  @@id([main_service_id, addon_service_id])
 }
 
 model Queue {
@@ -146,14 +157,4 @@ model Queue {
 
   @@unique([branch_id, queue_number])
   @@index([branch_id])
-}
-
-model Service {
-  main_service_id  String
-  addon_service_id String
-
-  mainService  MainService  @relation(fields: [main_service_id], references: [main_service_id])
-  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
-
-  @@id([main_service_id, addon_service_id]) 
 }
