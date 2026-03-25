@@ -1,15 +1,17 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
+import { AuthRequest } from "../types/authRequest"
 
-export const createAddresses = async (req: Request, res: Response) => {
-    const { user_id, label, receiver_name, district, postal_code, subDistrict, province, phone } = req.body
+export const createAddresses = async (req: AuthRequest, res: Response) => {
+    const {label, receiver_name, district, postal_code, subDistrict, province, phone } = req.body
     try {
-        if (!user_id || !receiver_name || !district || !province || !postal_code) {
+        const userId = req.user?.user_id
+        if (!userId ||!receiver_name || !district || !province || !postal_code) {
             return res.status(400).json({ error: "Missing required fields" });
         }
         const address = await prisma.userAddress.create({
             data: {
-                user_id,
+                user_id: userId,
                 label,
                 receiver_name,
                 district,
@@ -26,18 +28,31 @@ export const createAddresses = async (req: Request, res: Response) => {
     }
 }
 
-export const getAddress = async (req: Request, res: Response) => {
+export const getAddress = async (req: AuthRequest, res: Response) => {
     try {
-        const users = await prisma.userAddress.findMany();
+        const userId = req.user?.user_id
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        const users = await prisma.userAddress.findMany({
+            where: {user_id: userId}
+        });
+        console.log("USER ID:", userId);
+        console.log("ADDRESS RESULT:", users);
         res.json(users);
     } catch (error) {
+        console.log("❌ REAL ERROR:", error)
         res.status(500).json({ error: "Failed to fetch users" });
     }
 }
 
-export const getAddressId = async (req: Request, res: Response) => {
+export const getAddressId = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
     try {
+        const userId = req.user?.user_id;
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
         const address = await prisma.userAddress.findUnique({
             where: {
                 address_id: id
@@ -46,22 +61,37 @@ export const getAddressId = async (req: Request, res: Response) => {
         if (!address) {
             return res.status(404).json({ error: "Address not found" });
         }
+        if (address.user_id !== userId) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+        console.log("USER ID:", userId);
         res.json(address)
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch address' })
-    }
+    } catch (error: any) {
+  console.log("ERROR DATA:", error.response?.data);
+}
 }
 
-export const putAddress = async (req: Request, res: Response) => {
+export const putAddress = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
-     const { user_id, label, receiver_name, district, subDistrict, province, postal_code, phone } = req.body;
+     const {label, receiver_name, district, subDistrict, province, postal_code, phone } = req.body;
     try {
+        const userId = req.user?.user_id;
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        const existing = await prisma.userAddress.findUnique({
+            where: { address_id: id },
+        });
+
+        if (!existing || existing.user_id !== userId) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
         const address = await prisma.userAddress.update({
             where: {
                 address_id: id
             },
             data: {
-                 user_id,
                 label,
                 receiver_name,
                 district,
@@ -78,14 +108,27 @@ export const putAddress = async (req: Request, res: Response) => {
     }
 }
 
-export const deleteAddress = async (req: Request, res: Response) => {
+export const deleteAddress = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
     try {
-        const address = await prisma.userAddress.delete({
+        const userId = req.user?.user_id;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        
+        const address = await prisma.userAddress.deleteMany({
             where: {
-                address_id: id
-            }
-        });
+                address_id: id,
+                user_id: userId,
+            },
+            });
+
+        if (address.count === 0) {
+        return res.status(403).json({ error: "Forbidden" });
+        }
+            
         res.json({
             message: 'address deleted successfully',
             address: address
