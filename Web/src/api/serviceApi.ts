@@ -2,11 +2,11 @@ import axios from "axios";
 
 const MAIN_API = "http://localhost:8080/mainservices"; 
 const ADDON_API = "http://localhost:8080/addonservice"; 
+
 export type MainService = {
      main_service_id: string
     name: string
     description: string
-    price_per_unit: number
 }
 
 export type AddonService = {
@@ -58,3 +58,4 @@ export const updateAddonService = async (id: string, data: { name: string; descr
 export const updateMainService = async (id: string, data: { name: string; description: string;  price: number; }): Promise<void> => {
   await axios.put(`${MAIN_API}/${id}`, data);
 };
+

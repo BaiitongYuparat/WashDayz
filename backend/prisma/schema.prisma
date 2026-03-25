@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,103 +6,86 @@ datasource db {
   provider = "postgresql"
 }
 
-enum RiderStatus {
-  AVAILABLE
-  DELIVERING
-}
-
-enum OrderStatus {
-  WASHING
-  DELIVERING
-  WAITING
-  FINISHED
-}
-
-enum RoleStatus {
-  USER
-  ADMIN
-}
-
 model User {
-  user_id    String        @id @default(uuid())
-  googleId   String?       @unique
   name       String
   email      String        @unique
   password   String?
   phone      String?
-  role       RoleStatus    @default(USER)
-  addresses  UserAddress[]
-  orders     Order[]
   created_at DateTime      @default(now())
   updated_at DateTime      @default(now()) @updatedAt
+  googleId   String?       @unique
+  user_id    String        @id @default(uuid())
+  role       RoleStatus    @default(USER)
+  orders     Order[]
+  addresses  UserAddress[]
 }
 
 model UserAddress {
-  address_id    String  @id @default(uuid())
-  user_id       String
-  houseNo       String?
   label         String
   receiver_name String
   district      String
-  subDistrict   String
-  province      String
   postal_code   String
+  address_id    String  @id @default(uuid())
+  user_id       String
   details       String?
   lat           Float?
   lng           Float?
   phone         String
+  province      String
+  subDistrict   String
+  houseNo       String?
   user          User    @relation(fields: [user_id], references: [user_id])
 }
 
 model Branch {
-  branch_id   String  @id @default(uuid())
   branch_name String
+  branch_id   String  @id @default(uuid())
+  lat_branch  Float?
+  lng_branch  Float?
   orders      Order[]
   queue       Queue[]
 }
 
 model MainService {
-  main_service_id String      @id @default(uuid())
   name            String
   description     String?
-  price_per_unit  Float
+  main_service_id String      @id @default(uuid())
   orderItems      OrderItem[]
   service         Service[]
 }
 
 model AddonService {
-  addon_service_id String           @id @default(uuid())
   name             String
   description      String?
   price            Float
+  addon_service_id String           @id @default(uuid())
   orderItemAddons  OrderItemAddon[]
   service          Service[]
 }
 
 model Order {
+  pieces    Int
+  price     Float
+  status    OrderStatus @default(WAITING)
   order_id  String      @id @default(uuid())
   user_id   String
   branch_id String
   service   String?
-  pieces    Int
-  price     Float
-  status    OrderStatus @default(WAITING)
-  user      User        @relation(fields: [user_id], references: [user_id])
   branch    Branch      @relation(fields: [branch_id], references: [branch_id])
-
-  items   OrderItem[]
-  payment Payment?
-  queue   Queue[]
+  user      User        @relation(fields: [user_id], references: [user_id])
+  items     OrderItem[]
+  payment   Payment?
+  queue     Queue?
 }
 
 model OrderItem {
+  quantity        Int
+  subtotal        Float
   order_item_id   String           @id @default(uuid())
   order_id        String
   main_service_id String
-  quantity        Int
-  subtotal        Float
-  order           Order            @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
   mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
+  order           Order            @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
   orderItemAddons OrderItemAddon[]
 }
 
@@ -116,45 +93,52 @@ model OrderItemAddon {
   id               String       @id @default(uuid())
   order_item_id    String
   addon_service_id String
-  orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id], onDelete: Cascade)
   addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
+  orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id], onDelete: Cascade)
 }
 
 model Payment {
-  payment_id     String    @id @default(uuid())
-  order_id       String    @unique
   payment_method String
   status         String
   created_at     DateTime  @default(now())
   paid_at        DateTime?
-  order          Order     @relation(fields: [order_id], references: [order_id])
+  payment_id     String    @id @default(uuid())
+  order_id       String    @unique
   updated_at     DateTime  @default(now()) @updatedAt
+  order          Order     @relation(fields: [order_id], references: [order_id])
 }
 
 model Service {
   main_service_id  String
   addon_service_id String
-
-  mainService  MainService  @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
-  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
+  addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
+  mainService      MainService  @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
 
   @@id([main_service_id, addon_service_id])
 }
 
 model Queue {
-  queue_id  String @id @default(uuid())
-  order_id  String @unique
-  branch_id String
-
+  queue_id     String    @id @default(uuid())
+  order_id     String    @unique
+  branch_id    String
   queue_number Int
-
-  created_at  DateTime  @default(now())
-  called_at   DateTime?
-  finished_at DateTime?
-
-  order  Order  @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
-  branch Branch @relation(fields: [branch_id], references: [branch_id])
+  created_at   DateTime  @default(now())
+  called_at    DateTime?
+  finished_at  DateTime?
+  branch       Branch    @relation(fields: [branch_id], references: [branch_id])
+  order        Order     @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
 
   @@unique([branch_id, queue_number])
   @@index([branch_id])
+}
+
+enum OrderStatus {
+  WASHING
+  WAITING
+  FINISHED
+}
+
+enum RoleStatus {
+  USER
+  ADMIN
 }

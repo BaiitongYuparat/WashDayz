@@ -4,12 +4,22 @@ import { prisma } from "../../lib/prisma"
 export const createService = async (req: Request, res: Response) => {
   const { main_service_id, addon_service_id } = req.body;
 
+  // เช็ค input
+  if (!main_service_id || !Array.isArray(addon_service_id) || addon_service_id.length === 0) {
+    return res.status(400).json({
+      error: "main_service_id and addon_service_ids (array) are required",
+    });
+  }
+
   try {
-    const service = await prisma.service.create({
-      data: {
+    const service = await prisma.service.createMany({
+      // map array  แปลงเป็นหลาย row
+      data: addon_service_id.map((addon_service_id: string) => ({
         main_service_id,
         addon_service_id,
-      },
+      })),
+      //กัน insert ซ้ำ
+      skipDuplicates: true,
     });
 
     res.json(service);
@@ -18,6 +28,7 @@ export const createService = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create service relation" });
   }
 };
+
 
 export const getService = async (req: Request, res: Response) => {
   try {

@@ -3,13 +3,12 @@ import { prisma } from "../../lib/prisma"
 
 
 export const createMainService = async (req: Request, res: Response) => {
-    const { name, description, price_per_unit } = req.body
+    const { name, description } = req.body
     try {
         const mainservice = await prisma.mainService.create({
             data: {
                 name,
-                description,
-                price_per_unit
+                description
             }
         })
         res.json(mainservice)
@@ -49,7 +48,7 @@ export const getMainServiceId = async (req: Request, res: Response) => {
 
 export const putMainServiceId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { name, description, price_per_unit } = req.body
+    const { name, description } = req.body
     try {
         const mainservice = await prisma.mainService.update({
             where: {
@@ -57,8 +56,7 @@ export const putMainServiceId = async (req: Request, res: Response) => {
             },
             data: {
                 name,
-                description,
-                price_per_unit
+                description
             }
         });
         res.json(mainservice)
@@ -79,7 +77,7 @@ export const deleteMainServiceId = async (req: Request, res: Response) => {
             where: { main_service_id: id },
         });
 
-        // 🔥 ลบแม่
+        // ลบแม่
         const mainservice = await prisma.mainService.delete({
             where: { main_service_id: id },
         });

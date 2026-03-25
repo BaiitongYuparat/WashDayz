@@ -85,7 +85,7 @@ export const deleteAddonServiceId = async (req: Request, res: Response) => {
             where: { addon_service_id: id },
         });
 
-        // 🔥 แล้วค่อยลบตัวแม่
+        // ค่อยลบตัวแม่
         const service = await prisma.addonService.delete({
             where: { addon_service_id: id },
         });
