@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma"
 import { AuthRequest } from "../types/authRequest"
 
 export const createAddresses = async (req: AuthRequest, res: Response) => {
-    const {label, receiver_name, district, postal_code, subDistrict, province, phone } = req.body
+    const {label, houseNo , receiver_name, district, postal_code, subDistrict, province, phone } = req.body
     try {
         const userId = req.user?.user_id
         if (!userId ||!receiver_name || !district || !province || !postal_code) {
@@ -13,6 +13,7 @@ export const createAddresses = async (req: AuthRequest, res: Response) => {
             data: {
                 user_id: userId,
                 label,
+                houseNo,
                 receiver_name,
                 district,
                 subDistrict,
@@ -73,7 +74,7 @@ export const getAddressId = async (req: AuthRequest, res: Response) => {
 
 export const putAddress = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
-     const {label, receiver_name, district, subDistrict, province, postal_code, phone } = req.body;
+     const {label,houseNo, receiver_name, district, subDistrict, province, postal_code, phone } = req.body;
     try {
         const userId = req.user?.user_id;
         if (!userId) {
@@ -93,6 +94,7 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
             },
             data: {
                 label,
+                houseNo,
                 receiver_name,
                 district,
                 subDistrict,
@@ -102,6 +104,7 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
             }
         })
         res.json(address)
+        console.log("Address Update", address)
     } catch (error) {
         console.error("CREATE ADDRESS ERROR:", error)
         res.status(500).json(error)

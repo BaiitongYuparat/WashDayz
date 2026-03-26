@@ -16,6 +16,10 @@ import axios from "axios";
 import { useUser } from "@/provider/UserProvider";
 import { createAddress } from "@/services/address";
 import { useRouter } from "expo-router";
+import { useDispatch } from "react-redux";
+import { setSelectedAddress } from "../redux/addressSlice";
+
+
 export default function AddressForm() {
   const router = useRouter();
   const [houseNo, setHouseNo] = useState(""); //บ้านเลขที่
@@ -28,6 +32,7 @@ export default function AddressForm() {
   const [label, setLabel] = useState("");
   const [name, setName] = useState("");
   const { user } = useUser();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const getToken = async () => {
@@ -79,7 +84,8 @@ export default function AddressForm() {
         alert("No token");
         return;
       }
-      await createAddress(data,token);
+      const res = await createAddress(data,token);
+      dispatch(setSelectedAddress(res));
       router.replace("/(tabs)");
 
     } catch (error) {
@@ -148,6 +154,11 @@ export default function AddressForm() {
               placeholder="รายละเอียดเพิ่มเติม"
               multiline
               numberOfLines={3}
+            />
+            <CustomInput
+              value={label}
+              onChangeText={setLabel}
+              placeholder="บันทึกชื่อที่อยู่ เช่น บ้าน หอพัก"
             />
           </View>
         </KeyboardAvoidingView>

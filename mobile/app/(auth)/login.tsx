@@ -82,15 +82,27 @@ export default function Login() {
       return;
     }
     try {
-      console.log("wait for resource");
-      await login(email, password);
+       const result = await login(email, password); // login → response จาก backend
+    console.log("login result:", result);
+
+    // เก็บ token
+    await AsyncStorage.setItem("token", result.token);
+
+    // เก็บ user ใน context
+    setUser(result.user);
+
+    // redirect ตาม hasAddress
+    if (!result.hasAddress) {
+      router.push("/address");
+    } else {
       router.replace("/(tabs)");
-      console.log();
+    }
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
 
         if (status === 401 || status == 404) {
+          console.log(response)
           alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
         } else {
           alert("เกิดข้อผิดพลาด")

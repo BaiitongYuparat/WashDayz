@@ -81,7 +81,8 @@ export const googleAuth = async (req: Request, res: Response) => {
 
 
     let user = await prisma.user.findUnique({
-      where: { email }
+      where: { email } ,
+      include: { addresses: true }
 
     });
 
@@ -100,13 +101,15 @@ export const googleAuth = async (req: Request, res: Response) => {
           phone: "",
           password: null,
           role: "USER" 
-        }
+        },
+        include : {addresses: true}
       });
       isNewUser = true;
     } else if (!user.googleId) {
       user = await prisma.user.update({
         where: { email },
-        data: { googleId }
+        data: { googleId },
+        include: {addresses: true}
       });
     }
   
@@ -138,16 +141,11 @@ export const loginUser = async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({
       where: {
         email: email
-      }
+      },
+      include: { addresses: true }
     })
     if (!user || !user.password) {
       return res.status(404).json({ message: "User not found" });
-    }
-
-     if (!user || !user.password) {
-      return res.status(404).json({
-        message: "User not found or use Google login"
-      });
     }
 
     const isMatch = await comparePassword(password, user.password); 
@@ -160,12 +158,18 @@ export const loginUser = async (req: Request, res: Response) => {
     const token = generateToken({ user_id: user.user_id, role: user.role });
     const refreshToken = generateRefreshToken(user.user_id);
 
+    const addressCount = await prisma.userAddress.count({
+      where: { user_id: user.user_id }
+    });
+    const hasAddress = addressCount > 0;
+
     const { password: _, ...safeUser } = user;
     return res.status(200).json({
       message: "Login success",
       token,
       user:safeUser,
-      refreshToken
+      refreshToken,
+      hasAddress
     });
   }
   catch (error) {

@@ -38,6 +38,11 @@ export default function ProfileScreen() {
         icon = {<Ionicons name="home" size={20} className="text-blue-main" />}
         onPress={() => router.push('/screens/AddressListScreen')}
         />
+         <ProfileMenuButton 
+        title="ข้อมูลส่วนตัว"
+        icon = {<Ionicons name="person" size={20} className="text-blue-main" />}
+        onPress={() => router.push('/screens/profile/user/user_edit')}
+        />
       </View>
       <Button title="LogOut" onPress={handleLogout} />
     </View>
