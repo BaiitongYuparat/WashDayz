@@ -1,4 +1,5 @@
 import axios from "axios";
+import { UserAddresses } from "./address";
 
 const API_URL = "http://localhost:8080/auth";
 
@@ -23,7 +24,7 @@ export type User = {
   name: string;
   phone: string;
   role: string;
-  addresses: Address[];
+  addresses: UserAddresses[];
 };
 
 
@@ -31,3 +32,12 @@ export const createUser = async (data: User) => {
   const res = await axios.post(API_URL, data);
   return res.data;
 };
+
+export const updateUser = async(id: string,data:User,token:string ): Promise<User> => {
+  const res = await axios.put(`${API_URL}/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return res.data
+}
