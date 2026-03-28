@@ -14,6 +14,8 @@ import queuRoutes from './routes/queue'
 import profileRoutes from './routes/profile'
 import serviceRoutes from './routes/service'
 import machineRoutes from './routes/machine'
+import mcpRouter from "./mcpRouter";
+import chatRouter from './chatRouter'
 import cors from "cors";
 
 const app = express();
@@ -37,6 +39,9 @@ app.use('/queues',queuRoutes)
 app.use('/profile', profileRoutes)
 app.use('/services', serviceRoutes)
 app.use('/machines', machineRoutes)
+app.use("/mcp", mcpRouter);
+app.use('/chat', chatRouter);
+
 
 
 app.listen(port, () => {
