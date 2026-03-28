@@ -2,8 +2,8 @@ import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
 
 export const createQueue = async (req: Request, res: Response) => {
+     const { order_id, branch_id } = req.body
     try {
-        const { order_id, branch_id } = req.body
         if (!order_id || !branch_id) {
             return res.status(400).json({ message: "order_id and branch_id are required" })
         }
@@ -39,15 +39,43 @@ export const createQueue = async (req: Request, res: Response) => {
                 ? lastQueue.queue_number + 1
                 : 1
 
+
+
             // สร้าง queue
             const queue = await tx.queue.create({
                 data: {
                     order_id,
                     branch_id,
                     queue_number: nextQueueNumber,
-                    
                 }
             })
+
+            // หาเครื่องว่าง
+            const machine = await tx.machine.findFirst({
+                where: {
+                    branch_id,
+                    status: "AVAILABLE"
+                }
+            })
+
+            // ถ้ามีเครื่อง → assign
+            if (machine) {
+                // 1. ใส่ machine_id ให้ queue
+                await tx.queue.update({
+                    where: { queue_id: queue.queue_id },
+                    data: {
+                        machine_id: machine.machine_id
+                    }
+                })
+
+                // 2. เปลี่ยนสถานะเครื่อง
+                await tx.machine.update({
+                    where: { machine_id: machine.machine_id },
+                    data: {
+                        status: "UNAVAILABLE"
+                    }
+                })
+            }
 
             return queue
         })
@@ -61,20 +89,20 @@ export const createQueue = async (req: Request, res: Response) => {
         console.error("CREATE QUEUE ERROR:", error)
 
         //handle error แบบชัดเจน
-        if (error.message === "ORDER_NOT_FOUND") {
+        if (error) {
             return res.status(404).json({
                 message: "Order not found"
             })
         }
 
-        if (error.message === "QUEUE_ALREADY_EXISTS") {
+        if (error) {
             return res.status(400).json({
                 message: "Queue already exists for this order"
             })
         }
 
         //กัน queue_number ซ้ำ
-        if (error.code === "P2002") {
+        if (error) {
             return res.status(409).json({
                 message: "Queue number conflict, please retry"
             })
@@ -136,7 +164,7 @@ export const deleteQueuId = async (req: Request, res: Response) => {
         res.json(queue)
     }
     catch (error: any) {
-        if (error.code === "P2025") {
+        if (error) {
             return res.status(404).json({ message: "Queue not found" })
         }
         res.status(500).json({ error: 'Failed to delete queu' })
@@ -186,16 +214,77 @@ export const finishQueue = async (req: Request, res: Response) => {
     const id = req.params.id as string
 
     try {
-        const queue = await prisma.queue.update({
-            where: { queue_id: id },
-            data: {
-                finished_at: new Date()
+        const result = await prisma.$transaction(async (tx) => {
+
+            // update queue
+            const queue = await tx.queue.update({
+                where: { queue_id: id },
+                data: {
+                    finished_at: new Date()
+                }
+            })
+
+            // หา machine จาก queue
+            const machine = queue.machine_id
+                ? await tx.machine.findUnique({
+                    where: { machine_id: queue.machine_id }
+                })
+                : null
+
+            if (machine) {
+                // คืนเครื่อง
+                await tx.machine.update({
+                    where: { machine_id: machine.machine_id },
+                    data: {
+                        status: "AVAILABLE"
+                    }
+                })
+
+                // เอา machine ออกจาก queue
+                await tx.queue.update({
+                    where: { queue_id: id },
+                    data: {
+                        machine_id: null
+                    }
+                })
+
+                // หา queue ถัดไป (ที่ยังไม่มีเครื่อง)
+                const nextQueue = await tx.queue.findFirst({
+                    where: {
+                        branch_id: machine.branch_id,
+                        finished_at: null,
+                        machine_id: null
+                    },
+                    orderBy: {
+                        created_at: "asc"
+                    }
+                })
+
+                if (nextQueue) {
+                    // assign เครื่องให้ queue ถัดไป
+                    await tx.queue.update({
+                        where: { queue_id: nextQueue.queue_id },
+                        data: {
+                            machine_id: machine.machine_id
+                        }
+                    })
+
+                    await tx.machine.update({
+                        where: { machine_id: machine.machine_id },
+                        data: {
+                            status: "UNAVAILABLE"
+                        }
+                    })
+                }
             }
+
+            return queue
         })
 
-        res.json(queue)
+        res.json(result)
+
     } catch (error: any) {
-        if (error.code === "P2025") {
+        if (error) {
             return res.status(404).json({ message: "Queue not found" })
         }
 

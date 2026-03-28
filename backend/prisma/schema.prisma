@@ -39,11 +39,12 @@ model UserAddress {
 
 model Branch {
   branch_name String
-  branch_id   String  @id @default(uuid())
+  branch_id   String    @id @default(uuid())
   lat_branch  Float?
   lng_branch  Float?
   orders      Order[]
   queue       Queue[]
+  machine     Machine[]
 }
 
 model MainService {
@@ -127,9 +128,21 @@ model Queue {
   finished_at  DateTime?
   branch       Branch    @relation(fields: [branch_id], references: [branch_id])
   order        Order     @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  machine      Machine?  @relation(fields: [machine_id], references: [machine_id])
+  machine_id   String?   
 
   @@unique([branch_id, queue_number])
   @@index([branch_id])
+}
+
+model Machine {
+  machine_id String        @id @default(uuid())
+  branch_id  String
+  status     MachineStatus @default(AVAILABLE)
+  type       MachineType //ซักอบ
+  capacity   Int  // 10kg 20kg
+  branch     Branch        @relation(fields: [branch_id], references: [branch_id])
+  queues     Queue[]       
 }
 
 enum OrderStatus {
@@ -141,4 +154,14 @@ enum OrderStatus {
 enum RoleStatus {
   USER
   ADMIN
+}
+
+enum MachineStatus {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+enum MachineType {
+  WASHER
+  DRYER
 }

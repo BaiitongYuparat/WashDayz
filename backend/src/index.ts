@@ -13,6 +13,7 @@ import authRoutes from './routes/auth'
 import queuRoutes from './routes/queue'
 import profileRoutes from './routes/profile'
 import serviceRoutes from './routes/service'
+import machineRoutes from './routes/machine'
 import cors from "cors";
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/auth', authRoutes)
 app.use('/queues',queuRoutes)
 app.use('/profile', profileRoutes)
 app.use('/services', serviceRoutes)
+app.use('/machines', machineRoutes)
 
 
 app.listen(port, () => {
