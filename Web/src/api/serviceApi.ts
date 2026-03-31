@@ -1,16 +1,17 @@
 import axios from "axios";
 
-const MAIN_API = "http://localhost:8080/mainservices"; 
-const ADDON_API = "http://localhost:8080/addonservice"; 
+const MAIN_API = "http://localhost:8080/mainservices";
+const ADDON_API = "http://localhost:8080/addonservice";
+// const SERVICE_API = "http://localhost:8080/services";
+
 export type MainService = {
-     main_service_id: string
+    main_service_id: string
     name: string
     description: string
-    price_per_unit: number
 }
 
 export type AddonService = {
-     addon_service_id: string
+    addon_service_id: string
     name: string
     description: string
     price: number
@@ -20,6 +21,20 @@ export type ServiceResponse = {
     main: MainService[]
     addon: AddonService[]
 }
+
+// export type ServiceRelation = {
+//     main_service_id: string;
+//     addon_service_id: string;
+//     mainService: {
+//         name: string;
+//         description: string;
+//     };
+//     addonService: {
+//         name: string;
+//         description: string;
+//         price: number;
+//     };
+// };
 
 export const getMainService = async (): Promise<MainService[]> => {
     const res = await axios.get<MainService[]>(MAIN_API);
@@ -44,17 +59,32 @@ export const getService = async (): Promise<ServiceResponse> => {
 };
 
 export const deleteMainService = async (id: string): Promise<void> => {
-  await axios.delete(`${MAIN_API}/${id}`);
+    await axios.delete(`${MAIN_API}/${id}`);
 };
 
 export const deleteAddonService = async (id: string): Promise<void> => {
-  await axios.delete(`${ADDON_API}/${id}`);
+    await axios.delete(`${ADDON_API}/${id}`);
 };
 
-export const updateAddonService = async (id: string, data: { name: string; description: string;   price_per_unit: number; }): Promise<void> => {
-  await axios.put(`${ADDON_API}/${id}`, data);
+export const updateAddonService = async (id: string, data: { name: string; description: string; price_per_unit: number; }): Promise<void> => {
+    await axios.put(`${ADDON_API}/${id}`, data);
 };
 
-export const updateMainService = async (id: string, data: { name: string; description: string;  price: number; }): Promise<void> => {
-  await axios.put(`${MAIN_API}/${id}`, data);
+export const updateMainService = async (id: string, data: { name: string; description: string; price: number; }): Promise<void> => {
+    await axios.put(`${MAIN_API}/${id}`, data);
 };
+
+// export const getServiceRelations = async (): Promise<ServiceRelation[]> => {
+//     const res = await axios.get<ServiceRelation[]>(SERVICE_API);
+//     return res.data;
+// };
+
+// export const createServiceRelation = async ( main_service_id: string, addon_service_id: string[] ): Promise<void> => {
+//     await axios.post(SERVICE_API, { main_service_id, addon_service_id });
+// };
+
+// export const deleteServiceRelation = async (main_service_id: string, addon_service_id: string ): Promise<void> => {
+//     await axios.delete(SERVICE_API, {
+//         data: { main_service_id, addon_service_id },
+//     });
+// };

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,14 +6,147 @@ datasource db {
   provider = "postgresql"
 }
 
-enum RiderStatus {
-  AVAILABLE
-  DELIVERING
+model User {
+  name       String
+  email      String        @unique
+  password   String?
+  phone      String?
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now()) @updatedAt
+  googleId   String?       @unique
+  user_id    String        @id @default(uuid())
+  role       RoleStatus    @default(USER)
+  orders     Order[]
+  addresses  UserAddress[]
+}
+
+model UserAddress {
+  label         String
+  receiver_name String
+  district      String
+  postal_code   String
+  address_id    String  @id @default(uuid())
+  user_id       String
+  details       String?
+  lat           Float?
+  lng           Float?
+  phone         String
+  province      String
+  subDistrict   String
+  houseNo       String?
+  user          User    @relation(fields: [user_id], references: [user_id])
+}
+
+model Branch {
+  branch_name String
+  branch_id   String    @id @default(uuid())
+  lat_branch  Float?
+  lng_branch  Float?
+  orders      Order[]
+  queue       Queue[]
+  machine     Machine[]
+}
+
+model MainService {
+  name            String
+  description     String?
+  main_service_id String      @id @default(uuid())
+  orderItems      OrderItem[]
+  service         Service[]
+}
+
+model AddonService {
+  name             String
+  description      String?
+  price            Float
+  addon_service_id String           @id @default(uuid())
+  orderItemAddons  OrderItemAddon[]
+  service          Service[]
+}
+
+model Order {
+  pieces    Int
+  price     Float
+  status    OrderStatus @default(WAITING)
+  order_id  String      @id @default(uuid())
+  user_id   String
+  branch_id String
+  service   String?
+  branch    Branch      @relation(fields: [branch_id], references: [branch_id])
+  user      User        @relation(fields: [user_id], references: [user_id])
+  items     OrderItem[]
+  payment   Payment?
+  queue     Queue?
+}
+
+model OrderItem {
+  quantity        Int
+  subtotal        Float
+  order_item_id   String           @id @default(uuid())
+  order_id        String
+  main_service_id String
+  mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
+  order           Order            @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  orderItemAddons OrderItemAddon[]
+}
+
+model OrderItemAddon {
+  id               String       @id @default(uuid())
+  order_item_id    String
+  addon_service_id String
+  addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
+  orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id], onDelete: Cascade)
+}
+
+model Payment {
+  payment_method String
+  status         String
+  created_at     DateTime  @default(now())
+  paid_at        DateTime?
+  payment_id     String    @id @default(uuid())
+  order_id       String    @unique
+  updated_at     DateTime  @default(now()) @updatedAt
+  order          Order     @relation(fields: [order_id], references: [order_id])
+}
+
+model Service {
+  main_service_id  String
+  addon_service_id String
+  addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id], onDelete: Cascade)
+  mainService      MainService  @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
+
+  @@id([main_service_id, addon_service_id])
+}
+
+model Queue {
+  queue_id     String    @id @default(uuid())
+  order_id     String    @unique
+  branch_id    String
+  queue_number Int
+  created_at   DateTime  @default(now())
+  called_at    DateTime?
+  finished_at  DateTime?
+  branch       Branch    @relation(fields: [branch_id], references: [branch_id])
+  order        Order     @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  machine      Machine?  @relation(fields: [machine_id], references: [machine_id])
+  machine_id   String?   
+
+  @@unique([branch_id, queue_number])
+  @@index([branch_id])
+}
+
+model Machine {
+  machine_id String        @id @default(uuid())
+  branch_id  String
+  status     MachineStatus @default(AVAILABLE)
+  type       MachineType //ซักอบ
+  capacity   Int  // 10kg 20kg
+  branch     Branch        @relation(fields: [branch_id], references: [branch_id])
+  queues     Queue[]       
 }
 
 enum OrderStatus {
   WASHING
-  DELIVERING
   WAITING
   FINISHED
 }
@@ -29,131 +156,12 @@ enum RoleStatus {
   ADMIN
 }
 
-model User {
-  user_id    String        @id @default(uuid())
-  googleId   String?       @unique
-  name       String
-  email      String        @unique
-  password   String?
-  phone      String?
-  role       RoleStatus    @default(USER)
-  addresses  UserAddress[]
-  orders     Order[]
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now()) @updatedAt
+enum MachineStatus {
+  AVAILABLE
+  UNAVAILABLE
 }
 
-model UserAddress {
-  address_id    String  @id @default(uuid())
-  user_id       String
-  label         String
-  houseNo       String?
-  receiver_name String
-  district      String
-  subDistrict   String
-  province      String
-  postal_code   String
-  details       String?
-  lat           Float?
-  lng           Float?
-  phone         String
-  user          User    @relation(fields: [user_id], references: [user_id])
-}
-
-model Branch {
-  branch_id   String  @id @default(uuid())
-  branch_name String
-  queues      Queue[]
-  orders      Order[]
-}
-
-model MainService {
-  main_service_id String      @id @default(uuid())
-  name            String
-  description     String?
-  price_per_unit  Float
-  orderItems      OrderItem[]
-  services        Service[]
-}
-
-model AddonService {
-  addon_service_id String           @id @default(uuid())
-  name             String
-  description      String?
-  price            Float
-  orderItemAddons  OrderItemAddon[]
-  services         Service[]
-}
-
-model Order {
-  order_id  String      @id @default(uuid())
-  user_id   String
-  branch_id String
-  pieces    Int
-  price     Float
-  queue     Queue?
-  status    OrderStatus @default(WAITING)
-  user      User        @relation(fields: [user_id], references: [user_id])
-  branch    Branch      @relation(fields: [branch_id], references: [branch_id])
-
-  items   OrderItem[]
-  payment Payment?
-}
-
-model OrderItem {
-  order_item_id   String           @id @default(uuid())
-  order_id        String
-  main_service_id String
-  quantity        Int
-  subtotal        Float
-  order           Order            @relation(fields: [order_id], references: [order_id])
-  mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id])
-  addons          OrderItemAddon[]
-}
-
-model OrderItemAddon {
-  id               String       @id @default(uuid())
-  order_item_id    String
-  addon_service_id String
-  orderItem        OrderItem    @relation(fields: [order_item_id], references: [order_item_id])
-  addonService     AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
-}
-
-model Payment {
-  payment_id     String    @id @default(uuid())
-  order_id       String    @unique
-  payment_method String
-  status         String
-  created_at     DateTime  @default(now())
-  paid_at        DateTime?
-  order          Order     @relation(fields: [order_id], references: [order_id])
-  updated_at     DateTime  @default(now()) @updatedAt
-}
-
-model Queue {
-  queue_id  String @id @default(uuid())
-  order_id  String @unique
-  branch_id String
-
-  queue_number Int
-
-  created_at  DateTime  @default(now())
-  called_at   DateTime?
-  finished_at DateTime?
-
-  order  Order  @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
-  branch Branch @relation(fields: [branch_id], references: [branch_id])
-
-  @@unique([branch_id, queue_number])
-  @@index([branch_id])
-}
-
-model Service {
-  main_service_id  String
-  addon_service_id String
-
-  mainService  MainService  @relation(fields: [main_service_id], references: [main_service_id])
-  addonService AddonService @relation(fields: [addon_service_id], references: [addon_service_id])
-
-  @@id([main_service_id, addon_service_id]) 
+enum MachineType {
+  WASHER
+  DRYER
 }

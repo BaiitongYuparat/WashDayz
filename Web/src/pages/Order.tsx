@@ -55,7 +55,6 @@ function Orders() {
                         <tr className="bg-blue-50">
                             <th className="p-5 text-left">Order ID</th>
                             <th className="p-5 text-left">Customer Name</th>
-                            <th className="p-5 text-left">Rider</th>
                             <th className="p-5 text-left">Laundry Type</th>
                             <th className="p-5 text-left">Price</th>
                             <th className="p-5 text-left">Status</th>
@@ -69,7 +68,6 @@ function Orders() {
                                 key={order.order_id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="p-5">{order.order_id}</td>
                                 <td className="p-5">{order.user?.name || "-"}</td>
-                                <td className="p-5">{order.rider?.name || "-"}</td>
                                 <td className="p-5">
                                     {order.items?.map((item: OrderItem, index: number) => (
                                         <div key={index}>
