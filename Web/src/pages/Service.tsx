@@ -131,7 +131,7 @@ function Services() {
         setEditRelation(item)
         setSelectedAddonIds(addonIdsByMain[item.main_service_id] ?? []);
     }
-    //
+     //ติ๊กเลือกแอดออน
     const toggleAddon = (id: string) => {
         setSelectedAddonIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
     };
@@ -187,18 +187,14 @@ function Services() {
     }
 
     const handleCreateAddon = async () => {
-    await createAddonService(newAddon);
-    const data = await getService();
-    setService(data);
-    setNewAddon({ name: "", description: "", price: 0 });
-    setOpenCreateAddon(false);
-};
-
-    const toggleNewAddon = (id: string) => {
-        setNewRelationAddonIds((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
+        await createAddonService(newAddon);
+        const data = await getService();
+        setService(data);
+        setNewAddon({ name: "", description: "", price: 0 });
+        setOpenCreateAddon(false);
     };
+
+    
 
 
     return (
@@ -253,7 +249,7 @@ function Services() {
                                                     type="checkbox"
                                                     className="w-4 h-4 accent-blue-500"
                                                     checked={newRelationAddonIds.includes(addon.addon_service_id)}
-                                                    onChange={() => toggleNewAddon(addon.addon_service_id)}
+                                                    onChange={() => toggleAddon(addon.addon_service_id)}
                                                 />
                                                 <span className="text-sm font-medium">{addon.name}</span>
                                                 <span className="text-xs text-gray-400 ml-auto">{addon.price} ฿</span>
@@ -485,7 +481,7 @@ function Services() {
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
                                     <button onClick={() => setOpenCreateAddon(false)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                                    <button onClick={handleCreateAddon } className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Create</button>
+                                    <button onClick={handleCreateAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Create</button>
                                 </div>
                             </div>
                         </div>
