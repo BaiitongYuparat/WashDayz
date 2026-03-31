@@ -49,7 +49,7 @@ function User() {
       name: "",
       email: "",
       phone: "",
-      password: "",
+      password: ""
     });
   }
   const [openModal, setOpenModal] = useState(false);
@@ -120,57 +120,69 @@ function User() {
 
         />
         {openModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-            <div className="bg-white p-6 rounded-xl w-[400px] shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Add User</h2>
-              <input
-                className="w-full border p-2 mb-3 rounded"
-                placeholder="Name"
-                value={Data.name}
-                onChange={(e) => setData({ ...Data, name: e.target.value })}
-              />
+            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
 
-              <input
-                className="w-full border p-2 mb-3 rounded"
-                placeholder="Email"
-                value={Data.email}
-                onChange={(e) => setData({ ...Data, email: e.target.value })}
-              />
+              <h2 className="text-xl font-bold">Add User</h2>
 
-              <input
-                className="w-full border p-2 mb-3 rounded"
-                placeholder="Phone"
-                value={Data.phone}
-                onChange={(e) => setData({ ...Data, phone: e.target.value })}
-              />
-
-              <input
-                type="password"
-                className="w-full border p-2 mb-4 rounded"
-                placeholder="Password"
-                value={Data.password}
-                onChange={(e) => setData({ ...Data, password: e.target.value })}
-              />
-
-              <div className="flex justify-end gap-2">
-                <CustomButton
-                  title="Cancel"
-                  variant="danger"
-                  onPress={() => setOpenModal(false)}
+              <div className="space-y-1">
+                <label className="text-sm text-gray-500">Name</label>
+                <input
+                  className="w-full border rounded-lg p-2 text-sm"
+                  value={Data.name}
+                  onChange={(e) => setData({ ...Data, name: e.target.value })}
                 />
+              </div>
 
-                <CustomButton
-                  title="Add"
-                  variant="success"
-                  onPress={async () => {
+              <div className="space-y-1">
+                <label className="text-sm text-gray-500">Email</label>
+                <input
+                  className="w-full border rounded-lg p-2 text-sm"
+                  value={Data.email}
+                  onChange={(e) => setData({ ...Data, email: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm text-gray-500">Phone</label>
+                <input
+                  className="w-full border rounded-lg p-2 text-sm"
+                  value={Data.phone}
+                  onChange={(e) => setData({ ...Data, phone: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm text-gray-500">Password</label>
+                <input
+                  type="password"
+                  className="w-full border rounded-lg p-2 text-sm"
+                  value={Data.password}
+                  onChange={(e) => setData({ ...Data, password: e.target.value })}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setOpenModal(false)}
+                  className="px-4 py-2 rounded-lg border text-sm"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={async () => {
                     await handleAddUser();
                     setOpenModal(false);
                   }}
-                />
+                  className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
+                >
+                  Add
+                </button>
               </div>
-            </div>
 
+            </div>
           </div>
         )}
       </div>
@@ -214,6 +226,11 @@ function User() {
 
                 <td className="p-5">
                   <button
+                    className="text-yellow-400 text-xl hover:text-yellow-500 transition"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
                     onClick={() => handleDelete(user.user_id)}
                     className="text-red-500 text-xl hover:text-red-700 transition"
                   >
@@ -228,7 +245,7 @@ function User() {
                   >
                     <FaMapMarkerAlt />
                   </button>
-                 
+
 
                 </td>
 

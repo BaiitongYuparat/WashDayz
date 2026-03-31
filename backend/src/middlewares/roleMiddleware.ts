@@ -1,7 +1,5 @@
 //ยูเซอกับแอดมินใครครวเข้าถึงบ้าง
 
-
-
 export const roleMiddleware = (requiredRole: string) => {
   return async (req: any, res: any, next: any) => {
     if (!req.user?.user_id) {
