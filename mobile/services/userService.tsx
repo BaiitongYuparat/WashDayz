@@ -1,7 +1,7 @@
 import axios from "axios";
 import { UserAddresses } from "./address";
 
-const API_URL = "http://localhost:8080/auth";
+const API_URL = "http://172.20.10.2:8080/auth";
 
 export type Address = {
   address_id: string;

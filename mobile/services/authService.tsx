@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = "http://localhost:8080/auth"
+const API_URL = "http://172.20.10.2:8080/auth"
 
 
 export const login = async (email:string, password: string) => {

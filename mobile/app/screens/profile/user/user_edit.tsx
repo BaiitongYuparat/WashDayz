@@ -50,11 +50,13 @@ export default function EditProfileScreen() {
                 value={name}
                 onChangeText={setName}
                 placeholder="ชื่อผู้รับ"
+                label="ชื่อ"
               />
               <CustomInput
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="บ้านเลขที่"
+                label="เบอร์โทร"
               />
         </View>
 

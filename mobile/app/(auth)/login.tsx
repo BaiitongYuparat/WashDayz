@@ -32,10 +32,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:
-      "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
     androidClientId:
-      "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
+      "835147090474-mqutule76dtajpbkbobgdlijbnjdtv62.apps.googleusercontent.com",
     webClientId:  "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
     responseType: "id_token",
   });

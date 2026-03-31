@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import {
   View,
+  ScrollView,
   Text,
   KeyboardAvoidingView,
   Platform,
@@ -16,9 +17,9 @@ import axios from "axios";
 import { useUser } from "@/provider/UserProvider";
 import { createAddress } from "@/services/address";
 import { useRouter } from "expo-router";
-import { useDispatch } from "react-redux";
-import { setSelectedAddress } from "../redux/addressSlice";
-
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedAddress , setSelectedLocation} from "../redux/addressSlice";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function AddressForm() {
   const router = useRouter();
@@ -33,6 +34,9 @@ export default function AddressForm() {
   const [name, setName] = useState("");
   const { user } = useUser();
   const dispatch = useDispatch();
+  const selectedLocation = useSelector(
+  (state: any) => state.address.selectedLocation
+);
 
   useEffect(() => {
     const getToken = async () => {
@@ -75,8 +79,9 @@ export default function AddressForm() {
       postal_code: postCode,
       details,
       phone,
-      lat:0,
-      lng:0
+      
+      lat: selectedLocation.latitude,
+      lng: selectedLocation.longtitude,
     };
     try {
       const token = await AsyncStorage.getItem("token");
@@ -84,12 +89,11 @@ export default function AddressForm() {
         alert("No token");
         return;
       }
-      const res = await createAddress(data,token);
+      const res = await createAddress(data, token);
       dispatch(setSelectedAddress(res));
       router.replace("/(tabs)");
-
     } catch (error) {
-      console.log("Error create Address", error)
+      console.log("Error create Address", error);
     }
   };
 
@@ -98,7 +102,8 @@ export default function AddressForm() {
       colors={["#00ACC3", "#C7ECF7"]}
       className="flex-1 bg-blue-light justify-between"
     >
-      <View className="flex-1 mt-14 p-8 rounded-t-3xl bg-white shadow-xl shadow-blue-main justify-between">
+      <View style={{ flexShrink: 0, width: '100%' }}
+      className="flex-1 mt-14 p-8 rounded-t-3xl bg-white shadow-xl shadow-blue-main justify-between">
         <View className="items-center gap-2 mb-4">
           <Text className="text-lg font-semibold">กรอกที่อยู่จัดส่ง</Text>
           <Text className="text-gray-400">
@@ -106,7 +111,12 @@ export default function AddressForm() {
           </Text>
         </View>
 
-        <KeyboardAvoidingView>
+        <KeyboardAwareScrollView
+        enableOnAndroid
+        extraScrollHeight={100}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        >
           <View className="flex-1 justify-start">
             {/* adddress field */}
             <CustomInput
@@ -147,7 +157,11 @@ export default function AddressForm() {
               keyboardType="phone-pad"
             />
             {/* map */}
-
+            <CustomButton
+            className="mb-4"
+              title="📍 ปักหมุดบนแผนที่"
+              onPress={() => router.push("/map-picker")}
+            />
             <CustomInput
               value={details}
               onChangeText={setDetails}
@@ -160,8 +174,13 @@ export default function AddressForm() {
               onChangeText={setLabel}
               placeholder="บันทึกชื่อที่อยู่ เช่น บ้าน หอพัก"
             />
+              {selectedLocation && (
+                <Text>
+                  📍 เลือกแล้ว: {selectedLocation.latitude}, {selectedLocation.longitude}
+                </Text>
+              )}
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
         <CustomButton onPress={handleSubmit} title="บันทึกที่อยู่่" size="md" />
       </View>
     </LinearGradient>
