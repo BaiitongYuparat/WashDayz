@@ -22,12 +22,12 @@ function Services() {
 
     //บันทึกการอัพเดต
     const [formMain, setFormMain] = useState({ name: "", description: "" });
-    const [formAddon, setFormAddon] = useState({ name: "", description: "", price: 0 });
+    const [formAddon, setFormAddon] = useState({ name: "", description: "", price: 0, type: "" });
     const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
 
     //post
     const [newMain, setNewMain] = useState({ name: "", description: "" });
-    const [newAddon, setNewAddon] = useState({ name: "", description: "", price: 0 });
+    const [newAddon, setNewAddon] = useState({ name: "", description: "", price: "", type: "" });
     const [newRelationMainId, setNewRelationMainId] = useState("");
     const [newRelationAddonIds, setNewRelationAddonIds] = useState<string[]>([]);
     const [openCreateMain, setOpenCreateMain] = useState(false);
@@ -101,7 +101,7 @@ function Services() {
     //
     const handleSaveMain = async () => {
         if (!editMain) return;
-        await updateMainService(editMain.main_service_id, { ...formMain, price: 0 });
+        await updateMainService(editMain.main_service_id, { ...formMain});
         setService((prev) => ({
             ...prev,
             main: prev.main.map((m) => m.main_service_id === editMain.main_service_id ? { ...m, ...formMain } : m)
@@ -113,12 +113,12 @@ function Services() {
     //แก้ไขแอดออน
     const openEditAddon = (item: AddonService) => {
         setEditAddon(item);
-        setFormAddon({ name: item.name, description: item.description, price: item.price })
+        setFormAddon({ name: item.name, description: item.description, price: item.price, type: item.type })
     }
     //
     const handleSaveAddon = async () => {
         if (!editAddon) return;
-        await updateAddonService(editAddon.addon_service_id, { name: formAddon.name, description: formAddon.description, price_per_unit: formAddon.price });
+        await updateAddonService(editAddon.addon_service_id, { name: formAddon.name, description: formAddon.description,  price: formAddon.price, type: formAddon.type });
         setService((prev) => ({
             ...prev,
             addon: prev.addon.map((a) => a.addon_service_id === editAddon.addon_service_id ? { ...a, ...formAddon } : a)
@@ -131,7 +131,7 @@ function Services() {
         setEditRelation(item)
         setSelectedAddonIds(addonIdsByMain[item.main_service_id] ?? []);
     }
-     //ติ๊กเลือกแอดออน
+    //ติ๊กเลือกแอดออน
     const toggleAddon = (id: string) => {
         setSelectedAddonIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
     };
@@ -190,11 +190,11 @@ function Services() {
         await createAddonService(newAddon);
         const data = await getService();
         setService(data);
-        setNewAddon({ name: "", description: "", price: 0 });
+        setNewAddon({ name: "", description: "", price: "", type: "" });
         setOpenCreateAddon(false);
     };
 
-    
+
 
 
     return (
@@ -476,9 +476,18 @@ function Services() {
                                         type="number"
                                         className="w-full border rounded-lg p-2 text-sm"
                                         value={newAddon.price}
-                                        onChange={(e) => setNewAddon({ ...newAddon, price: Number(e.target.value) })}
+                                        onChange={(e) => setNewAddon({ ...newAddon, price: e.target.value })}
                                     />
                                 </div>
+                                <select
+                                    className="w-full border rounded-lg p-2 text-sm"
+                                    value={newAddon.type}
+                                    onChange={(e) => setNewAddon({ ...newAddon, type: e.target.value })}
+                                >
+                                    <option value=""> -- type -- </option>
+                                    <option value="ADDON">ADDON</option>
+                                    <option value="EXTRA">EXTRA</option>
+                                </select>
                                 <div className="flex justify-end gap-2 pt-2">
                                     <button onClick={() => setOpenCreateAddon(false)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
                                     <button onClick={handleCreateAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Create</button>
@@ -542,6 +551,14 @@ function Services() {
                             <label className="text-sm text-gray-500">Price</label>
                             <input type="number" className="w-full border rounded-lg p-2 text-sm" value={formAddon.price} onChange={(e) => setFormAddon({ ...formAddon, price: Number(e.target.value) })} />
                         </div>
+                        <div className="space-y-1">
+                        <label className="text-sm text-gray-500"> Type </label>
+                        <select className="w-full border rounded-lg p-2 text-sm"  value={formAddon.type} onChange={(e) => setFormAddon({ ...formAddon, type: e.target.value })} >
+                            <option value="ADDON">ADDON</option>
+                            <option value="EXTRA">EXTRA</option>
+                        </select>
+                        </div>
+
                         <div className="flex justify-end gap-2 pt-2">
                             <button onClick={() => setEditAddon(null)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
                             <button onClick={handleSaveAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Save</button>

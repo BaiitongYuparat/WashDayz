@@ -15,6 +15,7 @@ export type AddonService = {
     name: string
     description: string
     price: number
+    type: string
 }
 
 export type ServiceResponse = {
@@ -66,11 +67,11 @@ export const deleteAddonService = async (id: string): Promise<void> => {
     await axios.delete(`${ADDON_API}/${id}`);
 };
 
-export const updateAddonService = async (id: string, data: { name: string; description: string; price_per_unit: number; }): Promise<void> => {
+export const updateAddonService = async (id: string, data: { name: string; description: string; price: number; type: string; }): Promise<void> => {
     await axios.put(`${ADDON_API}/${id}`, data);
 };
 
-export const updateMainService = async (id: string, data: { name: string; description: string; price: number; }): Promise<void> => {
+export const updateMainService = async (id: string, data: { name: string; description: string;  }): Promise<void> => {
     await axios.put(`${MAIN_API}/${id}`, data);
 };
 

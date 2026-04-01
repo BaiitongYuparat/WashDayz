@@ -3,14 +3,16 @@ import { prisma } from "../../lib/prisma"
 
 
 export const createAddonService = async (req: Request, res: Response) => {
-    const { name, description, price } = req.body
+    const { name, description, price , type } = req.body
 
     try {
         const addonservice = await prisma.addonService.create({
             data: {
                 name,
                 description,
-                price
+                price,
+                type
+                
             }
         })
 
@@ -52,7 +54,7 @@ export const getAddonServiceId = async (req: Request, res: Response) => {
 
 export const putAddonServiceId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { name, description, price } = req.body
+    const { name, description, price , type } = req.body
 
     try {
         const service = await prisma.addonService.update({
@@ -62,7 +64,8 @@ export const putAddonServiceId = async (req: Request, res: Response) => {
             data: {
                 name,
                 description,
-                price
+                price,
+                type
             }
         })
 

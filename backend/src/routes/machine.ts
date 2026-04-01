@@ -1,10 +1,11 @@
 import express from "express";
-import {createMachine , countMachines} from "../controllers/machineController"
+import {createMachine ,deleteMachineId , getMachine} from "../controllers/machineController"
 
 const router = express.Router();
 
 router.post("/", createMachine);
-router.get("/:id" ,countMachines)
+router.delete("/:id" ,deleteMachineId)
+router.get('/',getMachine)
 
 
 export default router;

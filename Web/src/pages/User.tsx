@@ -27,6 +27,7 @@ function User() {
   })
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  
 
 
 
@@ -98,6 +99,8 @@ function User() {
       user_id: userId,
     });
   };
+
+
 
 
 
@@ -244,6 +247,7 @@ function User() {
                     className="text-gray-600 text-xl hover:text-gray-700 transition"
                   >
                     <FaMapMarkerAlt />
+
                   </button>
 
 
@@ -255,6 +259,13 @@ function User() {
         </table>
       </div>
 
+      {openAddressModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
+            <h2 className="text-xl font-bold">Add Address</h2>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

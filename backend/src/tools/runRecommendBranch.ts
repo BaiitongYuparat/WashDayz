@@ -77,22 +77,25 @@ export async function runRecommendBranch(input: RecommendInput) {
 
     const avgCycleMin = AVG_CYCLE_MIN[machineType] ?? 45;
 
-    // ดึง Branch  Machine  Queue ที่ยังไม่เสร็จ
+    // ดึง branchMachine  Machine  Queue ที่ยังไม่เสร็จ
     const branches = await prisma.branch.findMany({
         where: {
-            lat_branch: { not: null },
-            lng_branch: { not: null },
-            machine: { some: { type: machineType, capacity } },
+            branchMachines: {
+                some: {
+                    machine: { type: machineType, capacity }
+                }
+            }
         },
         include: {
-            machine: {
-                where: { type: machineType, capacity },
+            branchMachines: {
+                where: { machine: { type: machineType, capacity } },
                 include: {
+                    machine: true,
                     queues: { where: { finished_at: null } },
                 },
             },
         },
-    });
+    })
 
     // แปลงข้อมูลเป็น payload ส่งให้ Gemini
     const branchData = branches.map((b) => {
@@ -100,16 +103,19 @@ export async function runRecommendBranch(input: RecommendInput) {
             userLat, userLng,
             b.lat_branch!, b.lng_branch!
         );
-
+        const machines = b.branchMachines;
         return {
             branch_id: b.branch_id,
             branch_name: b.branch_name,
             distanceKm: Math.round(distanceKm * 100) / 100,
             travelMinutes: Math.round(distanceKm * 3),
             machines: {
-                total: b.machine.length,
-                available: b.machine.filter((m) => m.status === "AVAILABLE").length,
-                queueAhead: b.machine.reduce((sum, m) => sum + m.queues.length, 0),
+                total: machines.length,
+                available: machines.filter((bm) => bm.queues.length === 0).length,
+                queueAhead: machines.reduce(
+                    (sum, bm) => sum + bm.queues.length,
+                    0
+                ),
                 avgCycleMin,
             },
         };

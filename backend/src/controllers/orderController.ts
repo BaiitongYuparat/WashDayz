@@ -3,7 +3,7 @@ import { prisma } from '../../lib/prisma';
 
 
 export const createOrder = async (req: Request, res: Response) => {
-    const { user_id, rider_id, branch_id, pieces, price, items } = req.body
+    const { user_id,  branch_id, pieces, price, items } = req.body
 
     try {
         if (!user_id || !branch_id || !pieces || !price) {
