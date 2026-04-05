@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma"
 import { AuthRequest } from "../types/authRequest"
 
 export const createAddresses = async (req: AuthRequest, res: Response) => {
-    const {label, houseNo , receiver_name, district, postal_code, subDistrict, province, phone } = req.body
+    const {label, houseNo , receiver_name, district, postal_code, subDistrict, province, phone , lng , lat } = req.body
     try {
         const userId = req.user?.user_id
         if (!userId ||!receiver_name || !district || !province || !postal_code) {
@@ -19,7 +19,9 @@ export const createAddresses = async (req: AuthRequest, res: Response) => {
                 subDistrict,
                 province,
                 postal_code,
-                phone
+                phone,
+                lng,
+                lat
             }
         })
         res.json(address)
@@ -42,7 +44,7 @@ export const getAddress = async (req: AuthRequest, res: Response) => {
         console.log("ADDRESS RESULT:", users);
         res.json(users);
     } catch (error) {
-        console.log("❌ REAL ERROR:", error)
+        console.log(" REAL ERROR:", error)
         res.status(500).json({ error: "Failed to fetch users" });
     }
 }
@@ -74,7 +76,7 @@ export const getAddressId = async (req: AuthRequest, res: Response) => {
 
 export const putAddress = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
-     const {label,houseNo, receiver_name, district, subDistrict, province, postal_code, phone } = req.body;
+     const {label,houseNo, receiver_name, district, subDistrict, province, postal_code, phone , lat , lng } = req.body;
     try {
         const userId = req.user?.user_id;
         if (!userId) {
@@ -100,7 +102,9 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
                 subDistrict,
                 province,
                 postal_code,
-                phone
+                phone,
+                lat, 
+                lng  
             }
         })
         res.json(address)
