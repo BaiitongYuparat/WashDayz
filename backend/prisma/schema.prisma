@@ -38,13 +38,13 @@ model UserAddress {
 }
 
 model Branch {
-  branch_name String
-  branch_id   String    @id @default(uuid())
-  lat_branch  Float?
-  lng_branch  Float?
-  orders      Order[]
-  queue       Queue[]
-  machine     Machine[]
+  branch_name    String
+  branch_id      String          @id @default(uuid())
+  lat_branch     Float?
+  lng_branch     Float?
+  orders         Order[]
+  queue          Queue[]
+  branchMachines BranchMachine[]
 }
 
 model MainService {
@@ -53,12 +53,14 @@ model MainService {
   main_service_id String      @id @default(uuid())
   orderItems      OrderItem[]
   service         Service[]
+  mainServices     MainServiceMachine[] 
 }
 
 model AddonService {
   name             String
   description      String?
   price            Float
+  type             AddonType 
   addon_service_id String           @id @default(uuid())
   orderItemAddons  OrderItemAddon[]
   service          Service[]
@@ -119,32 +121,57 @@ model Service {
 }
 
 model Queue {
-  queue_id     String    @id @default(uuid())
-  order_id     String    @unique
-  branch_id    String
-  queue_number Int
-  created_at   DateTime  @default(now())
-  called_at    DateTime?
-  finished_at  DateTime?
-  branch       Branch    @relation(fields: [branch_id], references: [branch_id])
-  order        Order     @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
-  machine      Machine?  @relation(fields: [machine_id], references: [machine_id])
-  machine_id   String?   
+  queue_id      String        @id @default(uuid())
+  order_id      String        @unique
+  branch_id     String
+  queue_number  Int
+  created_at    DateTime      @default(now())
+  called_at     DateTime?
+  finished_at   DateTime?
+  branch        Branch        @relation(fields: [branch_id], references: [branch_id])
+  order         Order         @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  branch_machine_id String? 
+  branchMachine BranchMachine? @relation(fields: [branch_machine_id], references: [branch_machine_id])
+  
 
   @@unique([branch_id, queue_number])
   @@index([branch_id])
 }
 
 model Machine {
-  machine_id String        @id @default(uuid())
-  branch_id  String
-  status     MachineStatus @default(AVAILABLE)
-  type       MachineType //ซักอบ
-  capacity   Int  // 10kg 20kg
-  branch     Branch        @relation(fields: [branch_id], references: [branch_id])
-  queues     Queue[]       
+  machine_id       String          @id @default(uuid())
+  type             MachineType //ซักอบ
+  capacity         Int // 10kg 20kg
+  duration_minutes Int? // ใช้เวลากี่นาที
+  price            Float? //ราคา
+  branchMachines   BranchMachine[]
+  mainServices     MainServiceMachine[] 
 }
 
+//เชื่อมเครื่องซักกับสาขา
+model BranchMachine { 
+  branch_machine_id String              @id @default(uuid())
+  branch_id         String
+  machine_id        String
+  status            BranchMachineStatus @default(AVAILABLE)
+
+  branch  Branch  @relation(fields: [branch_id], references: [branch_id])
+  machine Machine @relation(fields: [machine_id], references: [machine_id])
+
+  queues Queue[]
+}
+
+//เชื่อมMainกับเครื่องซัก
+model MainServiceMachine { 
+  id              String @id @default(uuid())
+  main_service_id String
+  machine_id      String
+
+  mainService MainService @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
+  machine     Machine     @relation(fields: [machine_id], references: [machine_id], onDelete: Cascade)
+
+  @@unique([main_service_id, machine_id])
+}
 enum OrderStatus {
   WASHING
   WAITING
@@ -156,12 +183,18 @@ enum RoleStatus {
   ADMIN
 }
 
-enum MachineStatus {
-  AVAILABLE
-  UNAVAILABLE
-}
-
 enum MachineType {
   WASHER
   DRYER
 }
+
+enum BranchMachineStatus {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+enum AddonType {
+  ADDON
+  EXTRA
+}
+

@@ -1,81 +1,55 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
 
+
 export const createMachine = async (req: Request, res: Response) => {
+    const { type, capacity, duration_minutes, price } = req.body
+    if (!type || !capacity || !duration_minutes || !price) {
+        return res.status(400).json({
+            message: "type, capacity, duration_minutes, price are required"
+        })
+    }
     try {
-        const { branch_id, machines } = req.body
-
-        if (!branch_id || !machines || !Array.isArray(machines)) {
-            return res.status(400).json({
-                message: "branch_id and machines[] are required"
-            })
-        }
-
-        const branch = await prisma.branch.findUnique({
-            where: { branch_id }
-        })
-
-        if (!branch) {
-            return res.status(404).json({
-                message: "Branch not found"
-            })
-        }
-
-        // 🔥 ตรงนี้คือหัวใจ
-        const data: any[] = []
-
-        for (const m of machines) {
-            const total = m.total || 1
-
-            for (let i = 0; i < total; i++) {
-                data.push({
-                    branch_id,
-                    type: m.type,
-                    capacity: m.capacity
-                })
+        const machine = await prisma.machine.create({
+            data: {
+                type,
+                capacity,
+                duration_minutes,
+                price
             }
-        }
-
-        const result = await prisma.machine.createMany({
-            data
         })
+        res.json(machine)
+    }
+    catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: "Internal server error" })
+    }
 
-        return res.status(201).json({
-            message: "Machines created successfully",
-            total_created: result.count
+}
+
+export const deleteMachineId = async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    if (!id) {
+        return res.status(400).json({ message: "Machine ID is required" })
+    }
+
+    try {
+        const existing =  await prisma.machine.delete({
+            where: { machine_id: id }
         })
-
+        res.json(existing)
     } catch (error) {
         console.error(error)
-        return res.status(500).json({
-            message: "Internal server error"
-        })
+        return res.status(500).json({ message: "Internal server error" })
     }
 }
 
-export const countMachines = async (req: Request, res: Response) => {
-    const { branch_id } = req.query
+export const getMachine = async (req: Request, res: Response) => {
     try {
-        if (!branch_id) {
-            return res.status(400).json({
-                message: "branch_id is required"
-            })
-        }
-
-        const total = await prisma.machine.count({
-            where: {
-                branch_id: String(branch_id)
-            }
-        })
-
-        return res.json({
-            branch_id,
-            total_machines: total
-        })
-
+        const machines = await prisma.machine.findMany()
+        return res.json(machines) 
     } catch (error) {
-        res.status(500).json({
-            message: "Internal server error"
-        })
+        console.error(error)
+        return res.status(500).json({ message: "Internal server error" })
     }
 }

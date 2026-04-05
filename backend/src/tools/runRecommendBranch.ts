@@ -6,10 +6,7 @@ import "dotenv/config";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
-const AVG_CYCLE_MIN: Record<MachineType, number> = {
-    [MachineType.WASHER]: 45, // ซัก 45 นาที
-    [MachineType.DRYER]: 60,  // อบ 60 นาที
-};
+
 
 function getDistanceKm(
     lat1: number, lng1: number,
@@ -75,31 +72,33 @@ export async function runRecommendBranch(input: RecommendInput) {
         capacity = 10,
     } = input;
 
-    const avgCycleMin = AVG_CYCLE_MIN[machineType] ?? 45;
-
-    // ดึง Branch  Machine  Queue ที่ยังไม่เสร็จ
+    // ดึง branchMachine  Machine  Queue ที่ยังไม่เสร็จ
     const branches = await prisma.branch.findMany({
         where: {
-            lat_branch: { not: null },
-            lng_branch: { not: null },
-            machine: { some: { type: machineType, capacity } },
+            branchMachines: {
+                some: {
+                    machine: { type: machineType, capacity }
+                }
+            }
         },
         include: {
-            machine: {
-                where: { type: machineType, capacity },
+            branchMachines: {
+                where: { machine: { type: machineType, capacity } },
                 include: {
+                    machine: true,
                     queues: { where: { finished_at: null } },
                 },
             },
         },
-    });
+    })
 
     // แปลงข้อมูลเป็น payload ส่งให้ Gemini
     const branchData = branches.map((b) => {
-        const distanceKm = getDistanceKm(
-            userLat, userLng,
-            b.lat_branch!, b.lng_branch!
-        );
+        const distanceKm = getDistanceKm(userLat, userLng, b.lat_branch!, b.lng_branch!);
+        const machines = b.branchMachines;
+
+        // ดึง duration_minutes จาก machine จริง (fallback 45 ถ้าไม่มี)
+        const avgCycleMin = machines[0]?.machine.duration_minutes ?? 45;
 
         return {
             branch_id: b.branch_id,
@@ -107,10 +106,10 @@ export async function runRecommendBranch(input: RecommendInput) {
             distanceKm: Math.round(distanceKm * 100) / 100,
             travelMinutes: Math.round(distanceKm * 3),
             machines: {
-                total: b.machine.length,
-                available: b.machine.filter((m) => m.status === "AVAILABLE").length,
-                queueAhead: b.machine.reduce((sum, m) => sum + m.queues.length, 0),
-                avgCycleMin,
+                total: machines.length,
+                available: machines.filter((bm) => bm.queues.length === 0).length,
+                queueAhead: machines.reduce((sum, bm) => sum + bm.queues.length, 0),
+                avgCycleMin, // ← มาจาก DB แล้ว
             },
         };
     });
