@@ -64,3 +64,24 @@ export const deleteService = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to delete service" });
   }
 };
+
+// controllers/serviceController.ts
+export const getServiceByMainServiceId = async (req: Request, res: Response) => {
+  const { main_service_id } = req.query;
+
+  if (!main_service_id) return res.status(400).json({ error: "mainServiceId required" });
+
+  try {
+    const services = await prisma.service.findMany({
+      where: { main_service_id: String(main_service_id) },
+      include: { addonService: true },
+    });
+
+    const addons = services.map(s => s.addonService);
+
+    res.json(addons);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch addons" });
+  }
+};

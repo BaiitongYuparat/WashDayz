@@ -37,7 +37,7 @@ export default function Index() {
 
   const onPress = (services: MainService) => {
     router.push({
-      pathname: '/screens/order',
+      pathname: '/screens/home/branch',
       params: {
         serviceId: services.main_service_id,
       }

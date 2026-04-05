@@ -9,7 +9,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { email, password, name, phone, role } = req.body;
+  const { email, password, name, phone} = req.body;
 
   try {
      if (!email || !email.endsWith("@gmail.com")) {
@@ -45,7 +45,6 @@ export const registerUser = async (req: Request, res: Response) => {
         name,
         password: hashedPassword,
         phone: phone || "",
-        role: role === "ADMIN" ? "ADMIN" : "USER"
       }
     });
 

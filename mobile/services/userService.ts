@@ -24,12 +24,19 @@ export type User = {
   name: string;
   phone: string;
   role: string;
-  addresses: UserAddresses[];
+  addresses?: UserAddresses[];
+};
+
+export type UserFormData = {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
 };
 
 
-export const createUser = async (data: User) => {
-  const res = await axios.post(API_URL, data);
+export const createUser = async (data: UserFormData) => {
+  const res = await axios.post(`${API_URL}/register`, data);
   return res.data;
 };
 

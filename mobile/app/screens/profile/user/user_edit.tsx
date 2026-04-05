@@ -5,6 +5,8 @@ import { CustomButton } from "@/components/ui/CustomButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { updateUser } from "@/services/userService";
 import CustomInput from "@/components/ui/CustomInput";
+import UserForm from "@/components/UserForm";
+
 export default function EditProfileScreen() {
   const { user, setUser } = useUser();
 
@@ -45,25 +47,14 @@ export default function EditProfileScreen() {
 
   return (
     <View className="flex-1 p-4 bg-white">
-        <View>
-            <CustomInput
-                value={name}
-                onChangeText={setName}
-                placeholder="ชื่อผู้รับ"
-                label="ชื่อ"
-              />
-              <CustomInput
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="บ้านเลขที่"
-                label="เบอร์โทร"
-              />
-        </View>
-
-      <CustomButton
-        title={loading ? "กำลังบันทึก..." : "บันทึก"}
-        onPress={handleUpdate}
-      />
+        <UserForm 
+        defaultValues={{
+          name: user?.name,
+          phone: user?.phone,
+        }}
+        onSubmit={handleUpdate}
+        submitText="บันทึก"
+        />
     </View>
   );
 }

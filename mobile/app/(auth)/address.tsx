@@ -38,6 +38,8 @@ export default function AddressForm() {
   (state: any) => state.address.selectedLocation
 );
 
+
+
   useEffect(() => {
     const getToken = async () => {
       try {
@@ -68,6 +70,10 @@ export default function AddressForm() {
       Alert.alert("User not found");
       return;
     }
+    if (!selectedLocation) {
+      Alert.alert("กรุณาเลือกตำแหน่งบนแผนที่");
+      return;
+    }
     const data = {
       user_id: user?.user_id,
       label,
@@ -81,7 +87,7 @@ export default function AddressForm() {
       phone,
       
       lat: selectedLocation.latitude,
-      lng: selectedLocation.longtitude,
+      lng: selectedLocation.longitude,
     };
     try {
       const token = await AsyncStorage.getItem("token");

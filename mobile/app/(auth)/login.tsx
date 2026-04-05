@@ -156,6 +156,13 @@ export default function Login() {
             <Ionicons name="logo-google" size={18} />
             <Text className="text-gray-500">Continue With Google</Text>
           </Pressable>
+
+          <View className="flex-row gap-2 justify-center mt-6">
+             <Text className="text-gray-400">No account?</Text>
+             <Pressable onPress={() => router.push('/register')}>
+              <Text  className="font-bold text-blue-main" >Sign up</Text>
+             </Pressable>
+          </View>
         </View>
       </KeyboardAwareScrollView>
     </LinearGradient>
