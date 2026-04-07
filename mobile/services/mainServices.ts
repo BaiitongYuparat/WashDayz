@@ -5,6 +5,7 @@ export type MainService  = {
     main_service_id: string;
     name: string;
     description?: string;
+    img?:string;
 }
 
 

@@ -51,6 +51,7 @@ export default function EditProfileScreen() {
         defaultValues={{
           name: user?.name,
           phone: user?.phone,
+          email: user?.email,
         }}
         onSubmit={handleUpdate}
         submitText="บันทึก"

@@ -14,11 +14,6 @@ import { getMainServices } from "@/services/mainServices";
 import { MainService } from "@/services/mainServices";
 
 
-const userInfo = {
-  name: "Yuparat",
-  surname: "love numtee",
-  address : "ถนนประชาชื่น ทุ่งสองห้อง เขตหลักสี่ กรุงเทพฯ 10210"
-}
 export default function Index() {
   const [services, setServices] = useState<MainService[]>([]);
 
@@ -47,9 +42,11 @@ export default function Index() {
   return (
     <View className="flex-1 justify-between">
      
-      <UserHeader />
+      <View className="p-6">
+        <UserHeader />
+      </View>
 
-      <View className="flex-1 mt-3 p-2 rounded-xl">
+      <View className="flex-1 p-2 rounded-xl">
         <Text className="font-bold text-xl px-4">All Service</Text>
       <FlatList
         data={services}
@@ -66,10 +63,7 @@ export default function Index() {
       />
       </View>
 
-       <Button
-        title="Go to Order"
-        onPress={() => router.push('./screens/order')}
-      />
+  
       
     </View>
   );

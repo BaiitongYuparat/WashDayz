@@ -19,7 +19,7 @@ export default function CustomInput({
     <View className="w-full mb-4">
       {/* Label */}
       {label && (
-        <Text className="text-gray-700 font-semibold mb-2 text-base">
+        <Text className="text-sm text-blue-main font-semibold mb-1">
           {label}
         </Text>
       )}

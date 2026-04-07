@@ -11,32 +11,43 @@ export const UserHeader = () => {
   const selectedAddress = useSelector(
     (state: RootState) => state.address.selectedAddress,
   );
-  console.log("UserHeader user:", user);
-  console.log("User addresses:", user?.addresses);
+
   return (
     <Pressable onPress={() => router.push("/screens/AddressListScreen")}>
-      <View className=" p-4 flex-row items-center bg-white shadow-md shadow-gray-300">
-        <View className=" p-2 rounded-full border-2 border-blue-main">
-          <Ionicons name="person" size={24} className="text-blue-main" />
+      <View className="rounded-full px-4 py-3 flex-row items-center bg-white border-b border-gray-100">
+
+        {/* Avatar */}
+        <View className="w-11 h-11 rounded-full bg-blue-light items-center justify-center border-2 border-blue-main">
+          <Ionicons name="person" size={20} color="#00ACC3" />
         </View>
-        <View className="flex-1 ml-4">
-          <Text className="font-bold text-blue-main text-xl">{user?.name}</Text>
-          {selectedAddress && (
-            <View>
-              <View className="flex-row">
-                <Text className="text-gray-300">
-                  {selectedAddress.houseNo} {selectedAddress.subDistrict}
-                </Text>
-                <Text className="text-gray-300">
-                  {selectedAddress.district} {selectedAddress.province}{" "}
-                  {selectedAddress.postal_code}
+
+        {/* Info */}
+        <View className="flex-1 ml-3 gap-0.5">
+          <Text className="font-bold text-blue-main text-base">{user?.name}</Text>
+
+          {selectedAddress ? (
+            <View className="gap-0.5">
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="location-outline" size={11} color="#9CA3AF" />
+                <Text className="text-gray-400 text-xs flex-1" numberOfLines={1}>
+                  {selectedAddress.houseNo} {selectedAddress.subDistrict} {selectedAddress.district} {selectedAddress.province} {selectedAddress.postal_code}
                 </Text>
               </View>
-               <Text className="text-gray-300">{selectedAddress.phone}</Text>
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="call-outline" size={11} color="#9CA3AF" />
+                <Text className="text-gray-400 text-xs">
+                  {selectedAddress.receiver_name} · {selectedAddress.phone}
+                </Text>
+              </View>
             </View>
+          ) : (
+            <Text className="text-gray-400 text-xs">เพิ่มที่อยู่จัดส่ง</Text>
           )}
         </View>
-        <Ionicons name="chevron-forward-outline" size={24} className="ml-auto text-gray-400" />
+
+        {/* Chevron */}
+        <Ionicons name="chevron-forward-outline" size={18} color="#D1D5DB" />
+
       </View>
     </Pressable>
   );

@@ -1,21 +1,18 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { getMainServicesById, MainService } from "@/services/mainServices";
-import { QuantityButton } from "@/features/order/QuantityButton";
-import { PriceShown } from "@/features/order/PriceShown";
 import { AddonType, getAddonByMainServiceId } from "@/services/addonService";
 import AddonCard from "@/components/AddonCard";
+import { CustomButton } from "@/components/ui/CustomButton";
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size),
+  );
+}
 
 export default function OrderScreen() {
   const router = useRouter();
@@ -29,15 +26,21 @@ export default function OrderScreen() {
   useEffect(() => {
     const fetchServices = async () => {
       if (!serviceId) return;
-      const service = await getMainServicesById(serviceId as string);
-      setService(service);
+      const s = await getMainServicesById(serviceId as string);
+      setService(s);
       const addonData = await getAddonByMainServiceId(serviceId as string);
       setAddon(addonData);
-      setSelectedAddons(addonData.map((a) => a.addon_service_id));
     };
     fetchServices();
-    console.log("Service", service);
   }, [serviceId]);
+
+  useEffect(() => {
+    if (!service) return;
+    const selectedAddonPrice = addon
+      .filter((a) => selectedAddons.includes(a.addon_service_id))
+      .reduce((sum, a) => sum + a.price, 0);
+    setPrice(selectedAddonPrice);
+  }, [quantity, selectedAddons, service, addon]);
 
   const toggleAddon = (id: string) => {
     setSelectedAddons((prev) =>
@@ -45,44 +48,104 @@ export default function OrderScreen() {
     );
   };
 
+  const renderGrid = (items: AddonType[]) =>
+    chunkArray(items, 2).map((row, i) => (
+      <View key={i} className="flex-row gap-3 mb-3">
+        {row.map((item) => (
+          <AddonCard
+            key={item.addon_service_id}
+            addon={item}
+            isSelected={selectedAddons.includes(item.addon_service_id)}
+            onPress={() => toggleAddon(item.addon_service_id)}
+          />
+        ))}
+        {row.length === 1 && <View className="flex-1" />}
+      </View>
+    ));
+
+  const addonList = addon.filter((a) => a.type === "ADDON");
+  const extraList = addon.filter((a) => a.type === "EXTRA");
+
   return (
     <View className="flex-1 bg-white">
-      {/* ขื่อ service กับ รูป */}
-      <View className="items-center gap-4 m-3 ">
-        <Text className="font-bold text-2xl text-blue-main">
-          {service?.name}
-        </Text>
-        <Ionicons name="shirt" className="text-blue-main" size={54} />
-      </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* Header Section */}
+        <View className="items-center pt-6 pb-4 px-4 gap-3">
+          {/* Icon with glow background */}
+          <View
+            className="w-20 h-20 rounded-3xl bg-blue-50 items-center justify-center shadow-sm"
+            style={{
+              shadowColor: "#00ACC3",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 12,
+              elevation: 6,
+            }}
+          >
+            <Ionicons name="shirt" size={44} color="#00ACC3" />
+          </View>
 
-      <LinearGradient
-        colors={["#86F0FF", "#C7ECF7", "#FFFFFF"]}
-        className="bg-blue-light justify-between overflow-hidden p-4"
-      >
-        <View className="items-center gap-2 mb-2">
-          <Text className="font-bold text-xl">เลือกจำนวนชิ้น</Text>
-          <Text className="text-gray-500 px-4 text-center">
-            {service?.description}
+          <Text
+            className="font-bold text-3xl text-blue-main tracking-tight"
+            style={{ letterSpacing: -0.5 }}
+          >
+            {service?.name}
           </Text>
         </View>
 
-      </LinearGradient>
+        {/* Gradient Card */}
+        <LinearGradient
+          colors={["#E0F9FF", "#EEF8FC", "#F8FEFF"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          className="mx-4 rounded-3xl p-5 mb-4"
+          style={{
+            shadowColor: "#00ACC3",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 10,
+            elevation: 3,
+            borderWidth: 1,
+            borderColor: "rgba(0, 172, 195, 0.15)",
+          }}
+        >
+          {/* Divider accent */}
+          <View className="w-10 h-1 rounded-full bg-blue-main mb-3 self-center opacity-60" />
 
-      <View className="flex-1 mb-4 p-2">
-        <Text className="font-bold text-xl mb-2">Addon Services</Text>
-        <FlatList
-          data={addon}
-          keyExtractor={(item) => item.addon_service_id}
-          horizontal={false} 
-          numColumns={2}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <AddonCard
-              addon={item}
-              isSelected={selectedAddons.includes(item.addon_service_id)}
-              onPress={() => toggleAddon(item.addon_service_id)}
-            />
-          )}
+          <View className="items-center gap-2">
+            <Text className="font-bold text-xl text-gray-800 tracking-tight">
+              เลือกจํานวนชิ้น
+            </Text>
+            <Text className="text-gray-400 text-sm text-center leading-relaxed px-6">
+              {service?.description}
+            </Text>
+          </View>
+        </LinearGradient>
+
+        {addonList.length > 0 && (
+          <View className="px-4 pt-4">
+            <Text className="font-bold text-xl mb-3">บริการเสริม</Text>
+            {renderGrid(addonList)}
+          </View>
+        )}
+
+        {extraList.length > 0 && (
+          <View className="px-4 pt-2">
+            <Text className="font-bold text-xl mb-3">เลือกเพิ่มเติม</Text>
+            {renderGrid(extraList)}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* ราคา + ปุ่ม */}
+      <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <Text className="text-xl font-bold text-right mb-3">
+          รวม: {price.toLocaleString()} ฿
+        </Text>
+        <CustomButton
+          title="สั่งซื้อ"
+          onPress={() => console.log("push")}
+          className="p-4 rounded-lg"
         />
       </View>
     </View>

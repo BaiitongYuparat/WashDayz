@@ -104,7 +104,10 @@ const confirmDelete = async (id: string) => {
       <View className="bg-white p-2">
         <CustomButton
           title="เพิ่มที่อยู่"
-          onPress={() => router.push("/(auth)/address")}
+          onPress={() =>     router.push({
+      pathname: "/(auth)/address",
+      params: { from: "address_list" }, 
+    })}
           size="md"
         />
       </View>

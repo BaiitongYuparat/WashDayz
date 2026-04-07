@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ProfileMenuButton from "@/components/ProfileMenuButton";
+import { CustomButton } from "@/components/ui/CustomButton";
 
 export default function ProfileScreen() {
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -35,16 +36,19 @@ export default function ProfileScreen() {
       <View className="flex-1 p-4">
         <ProfileMenuButton 
         title="ที่อยู่"
-        icon = {<Ionicons name="home" size={20} className="text-blue-main" />}
+        icon = {<Ionicons name="home" size={20} color="#00ACC3" />}
         onPress={() => router.push('/screens/AddressListScreen')}
         />
          <ProfileMenuButton 
         title="ข้อมูลส่วนตัว"
-        icon = {<Ionicons name="person" size={20} className="text-blue-main" />}
+        icon = {<Ionicons name="person" size={20}  color="#00ACC3"/>}
         onPress={() => router.push('/screens/profile/user/user_edit')}
         />
       </View>
-      <Button title="LogOut" onPress={handleLogout} />
+      <View className="p-2">
+          <CustomButton title="Log Out" onPress={handleLogout} variant="danger"/>
+      </View>
+      
     </View>
   );
 }

@@ -18,7 +18,7 @@ import { useUser } from "@/provider/UserProvider";
 import { createAddress } from "@/services/address";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedAddress , setSelectedLocation} from "../redux/addressSlice";
+import { setSelectedAddress, setSelectedLocation } from "../redux/addressSlice";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function AddressForm() {
@@ -35,10 +35,9 @@ export default function AddressForm() {
   const { user } = useUser();
   const dispatch = useDispatch();
   const selectedLocation = useSelector(
-  (state: any) => state.address.selectedLocation
-);
-
-
+    (state: any) => state.address.selectedLocation,
+  );
+  const { from } = useLocalSearchParams();
 
   useEffect(() => {
     const getToken = async () => {
@@ -74,6 +73,11 @@ export default function AddressForm() {
       Alert.alert("กรุณาเลือกตำแหน่งบนแผนที่");
       return;
     }
+    if (from === "address_list") {
+      router.back();
+    } else {
+      router.replace("/");
+    }
     const data = {
       user_id: user?.user_id,
       label,
@@ -85,7 +89,7 @@ export default function AddressForm() {
       postal_code: postCode,
       details,
       phone,
-      
+
       lat: selectedLocation.latitude,
       lng: selectedLocation.longitude,
     };
@@ -108,8 +112,10 @@ export default function AddressForm() {
       colors={["#00ACC3", "#C7ECF7"]}
       className="flex-1 bg-blue-light justify-between"
     >
-      <View style={{ flexShrink: 0, width: '100%' }}
-      className="flex-1 mt-14 p-8 rounded-t-3xl bg-white shadow-xl shadow-blue-main justify-between">
+      <View
+        style={{ flexShrink: 0, width: "100%" }}
+        className="flex-1 mt-14 p-8 rounded-t-3xl bg-white shadow-xl shadow-blue-main justify-between"
+      >
         <View className="items-center gap-2 mb-4">
           <Text className="text-lg font-semibold">กรอกที่อยู่จัดส่ง</Text>
           <Text className="text-gray-400">
@@ -118,10 +124,10 @@ export default function AddressForm() {
         </View>
 
         <KeyboardAwareScrollView
-        enableOnAndroid
-        extraScrollHeight={100}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+          enableOnAndroid
+          extraScrollHeight={100}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View className="flex-1 justify-start">
             {/* adddress field */}
@@ -164,7 +170,7 @@ export default function AddressForm() {
             />
             {/* map */}
             <CustomButton
-            className="mb-4"
+              className="mb-4"
               title="📍 ปักหมุดบนแผนที่"
               onPress={() => router.push("/map-picker")}
             />
@@ -180,11 +186,12 @@ export default function AddressForm() {
               onChangeText={setLabel}
               placeholder="บันทึกชื่อที่อยู่ เช่น บ้าน หอพัก"
             />
-              {selectedLocation && (
-                <Text>
-                  📍 เลือกแล้ว: {selectedLocation.latitude}, {selectedLocation.longitude}
-                </Text>
-              )}
+            {selectedLocation && (
+              <Text>
+                📍 เลือกแล้ว: {selectedLocation.latitude},{" "}
+                {selectedLocation.longitude}
+              </Text>
+            )}
           </View>
         </KeyboardAwareScrollView>
         <CustomButton onPress={handleSubmit} title="บันทึกที่อยู่่" size="md" />

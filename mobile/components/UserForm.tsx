@@ -3,7 +3,7 @@ import { Controller, useForm } from "react-hook-form";
 import CustomInput from "@/components/ui/CustomInput";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { UserFormData } from "@/services/userService";
-
+import { useEffect } from "react";
 
 type UserFormProps = {
   defaultValues?: {
@@ -23,6 +23,7 @@ export default function UserForm({
 }: UserFormProps) {
   const {
     control,
+    reset,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<UserFormData>({
@@ -34,8 +35,19 @@ export default function UserForm({
     },
   });
 
+  useEffect(() => {
+  if (defaultValues) {
+    reset({
+      name: defaultValues.name || "",
+      phone: defaultValues.phone || "",
+      email: defaultValues.email || "",
+      password: defaultValues.password || "",
+    });
+  }
+}, [defaultValues]);
+
   return (
-    <View>
+    <View className="gap-4">
       {/* NAME */}
       <Controller
         control={control}
