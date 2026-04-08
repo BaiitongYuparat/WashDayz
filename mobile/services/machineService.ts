@@ -2,10 +2,12 @@ import axios from "axios";
 const API_URL = "http://172.20.10.2:8080/machines";
 
 export interface Machine {
-  id: string;
+  machine_id: string;
   type: string;
-  time: string;
-  isDefault?: boolean; // backend ส่งว่าเลือกไว้ก่อนหรือไม่
+  capacity: number;
+  duration_minutes: number;
+  price: number;
+  isDefault?: boolean; 
 }
 
 export const getMachines = async (): Promise<Machine[]> => {
@@ -13,3 +15,11 @@ export const getMachines = async (): Promise<Machine[]> => {
   return res.data;
 };
 
+export const getMachinesByMainService = async (
+  main_service_id: string
+): Promise<Machine[]> => {
+  const res = await axios.get<Machine[]>(
+    `http://172.20.10.2:8080/main-machine/by-main-service/${main_service_id}`
+  );
+  return res.data;
+};

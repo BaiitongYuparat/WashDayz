@@ -100,3 +100,18 @@ export const deleteMainServiceFromMachine = async (req: Request, res: Response) 
         res.status(500).json({ message: "Internal server error", error })
     }
 }
+
+export const getMachinesByMainService = async (req: Request, res: Response) => {
+  try {
+    const id  = req.params.id as string
+
+    const data = await prisma.mainServiceMachine.findMany({
+  where: { main_service_id: id },
+  include: { machine: true },
+});
+
+res.json(data.map((d) => d.machine));
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

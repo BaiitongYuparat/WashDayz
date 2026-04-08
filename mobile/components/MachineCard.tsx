@@ -3,12 +3,13 @@ import { View, Text, Pressable } from "react-native";
 interface MachineCardProps {
   img?: React.ReactNode;
   type: string;
-  time: string;
+  duration_minutes: number;
+  capacity: number;
   onPress: () => void;
   isSelected?: boolean;
 }
 
-export default function MachineCard({ img, type, time, isSelected, onPress }: MachineCardProps) {
+export default function MachineCard({ img, type, duration_minutes, isSelected, onPress , capacity }: MachineCardProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -43,10 +44,23 @@ export default function MachineCard({ img, type, time, isSelected, onPress }: Ma
             <Text className={`text-xs font-medium ${
               isSelected ? "text-blue-main" : "text-gray-400"
             }`}>
-              {time}
+              {duration_minutes}
             </Text>
+            
           </View>
         </View>
+
+        {/* capacity */}
+            <View className={`flex-row items-center gap-1 px-2 py-0.5 rounded-full ${
+              isSelected ? "bg-blue-main/10" : "bg-gray-100"
+            }`}>
+              <Text className="text-xs">👕</Text>
+              <Text className={`text-xs font-medium ${
+                isSelected ? "text-blue-main" : "text-gray-400"
+              }`}>
+                {capacity} กก.
+              </Text>
+            </View>
 
         {/* Checkmark */}
         <View className={`w-6 h-6 rounded-full items-center justify-center ${
