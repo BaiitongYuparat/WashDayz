@@ -17,6 +17,7 @@ import machineRoutes from './routes/machine'
 import mcpRouter from "./mcpRouter";
 import chatRouter from './chatRouter'
 import branchMachine from "./routes/branchMachine"
+import mainmachine from './routes/serviceMachine'
 import cors from "cors";
 
 const app = express();
@@ -43,6 +44,7 @@ app.use('/machines', machineRoutes)
 app.use("/mcp", mcpRouter);
 app.use('/chat', chatRouter);
 app.use('/branch-machines',branchMachine)
+app.use('/main-machine' ,mainmachine)
 
 
 app.listen(port, () => {

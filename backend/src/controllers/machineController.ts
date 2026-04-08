@@ -34,9 +34,14 @@ export const deleteMachineId = async (req: Request, res: Response) => {
     }
 
     try {
-        const existing =  await prisma.machine.delete({
-            where: { machine_id: id }
-        })
+        await prisma.branchMachine.deleteMany({
+            where: { machine_id: id },
+        });
+
+        // แล้วค่อยลบ Machine
+        const existing = await prisma.machine.delete({
+            where: { machine_id: id },
+        });
         res.json(existing)
     } catch (error) {
         console.error(error)
@@ -47,7 +52,7 @@ export const deleteMachineId = async (req: Request, res: Response) => {
 export const getMachine = async (req: Request, res: Response) => {
     try {
         const machines = await prisma.machine.findMany()
-        return res.json(machines) 
+        return res.json(machines)
     } catch (error) {
         console.error(error)
         return res.status(500).json({ message: "Internal server error" })
