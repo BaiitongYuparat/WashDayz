@@ -45,6 +45,7 @@ app.use("/mcp", mcpRouter);
 app.use('/chat', chatRouter);
 app.use('/branch-machines',branchMachine)
 app.use('/main-machine' ,mainmachine)
+app.use('/profile',profileRoutes)
 
 
 app.listen(port, () => {

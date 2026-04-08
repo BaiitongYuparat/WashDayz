@@ -27,7 +27,7 @@ function User() {
   })
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  
+
 
 
 
@@ -99,7 +99,6 @@ function User() {
       user_id: userId,
     });
   };
-
 
 
 
@@ -201,7 +200,6 @@ function User() {
         <table className="w-full bg-white border-collapse">
           <thead>
             <tr className="bg-blue-50">
-              <th className="p-5 text-left">User ID</th>
               <th className="p-5 text-left">Name</th>
               <th className="p-5 text-left">Phone</th>
               <th className="p-5 text-left">Email</th>
@@ -214,7 +212,6 @@ function User() {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.user_id} className="border-b border-gray-200 hover:bg-gray-50">
-                <td className="p-5">{user.user_id}</td>
                 <td className="p-5">{user.name}</td>
                 <td className="p-5">{user.phone}</td>
                 <td className="p-5">{user.email}</td>
@@ -225,7 +222,16 @@ function User() {
                     </div>
                   ))}
                 </td>
-                <td className="p-5">{user.role}</td>
+                <td className="p-5 ">
+                  <select
+                    value={user.role}
+                    
+                  >
+                    <option value="USER">USER</option>
+                    <option value="ADMIN">ADMIN</option>
+
+                  </select>
+                </td>
 
                 <td className="p-5">
                   <button
