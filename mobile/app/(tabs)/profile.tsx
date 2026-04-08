@@ -31,8 +31,6 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1">
-      <Text className="text-red-400"></Text>
-      <Text>{user?.email}</Text>
       <View className="flex-1 p-4">
         <ProfileMenuButton 
         title="ที่อยู่"
