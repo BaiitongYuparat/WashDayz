@@ -2,11 +2,13 @@ import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
 
 export const createBranch = async (req: Request, res: Response) => {
-    const { branch_name } = req.body
+    const { branch_name, lat_branch, lng_branch } = req.body
     try {
         const branch = await prisma.branch.create({
             data: {
-                branch_name
+                branch_name,
+                lat_branch,
+                lng_branch
             }
         })
         res.json(branch)
@@ -46,12 +48,12 @@ export const getBranchId = async (req: Request, res: Response) => {
 
 export const putBranchId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { branch_name } = req.body
+    const { branch_name , lat_branch, lng_branch } = req.body
 
     try {
         const branch = await prisma.branch.update({
             where: { branch_id: id },
-            data: { branch_name }
+            data: { branch_name , lat_branch, lng_branch  }
         })
         res.json(branch);
     } catch (error) {
@@ -60,8 +62,8 @@ export const putBranchId = async (req: Request, res: Response) => {
 }
 
 
-export const deleteBranch = async (req: Request , res : Response) => {
-     const id = req.params.id as string
+export const deleteBranch = async (req: Request, res: Response) => {
+    const id = req.params.id as string
     try {
         const branch = await prisma.branch.delete({
             where: {

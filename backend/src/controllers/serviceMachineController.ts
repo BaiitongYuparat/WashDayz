@@ -104,7 +104,6 @@ export const deleteMainServiceFromMachine = async (req: Request, res: Response) 
 export const getMachinesByMainService = async (req: Request, res: Response) => {
   try {
     const id  = req.params.id as string
-
     const data = await prisma.mainServiceMachine.findMany({
   where: { main_service_id: id },
   include: { machine: true },

@@ -3,10 +3,10 @@ import {getAllMainServiceMachines , getMainServicesByMachine , createMainService
 
 const router = express.Router();
 
-router.get("/main-service-machine", getAllMainServiceMachines)
+router.get("/", getAllMainServiceMachines)
 router.get("/:id", getMainServicesByMachine)
 router.post("/", createMainServiceToMachine)
 router.delete("/:id", deleteMainServiceFromMachine)
-router.get("/by-main-service/:id", getMachinesByMainService)
+router.get("/by-main-service/:id", getMachinesByMainService) //ดึงว่าmachine มี mainservice อะไรบ้าง
 
 export default router;
