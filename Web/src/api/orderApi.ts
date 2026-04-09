@@ -23,9 +23,6 @@ export type Order = {
     user: {
         name: string;
     };
-    rider?: {
-        name: string;
-    };
    items: OrderItem[];
    status: string;
 };

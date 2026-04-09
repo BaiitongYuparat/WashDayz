@@ -27,7 +27,7 @@ function User() {
   })
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
+  
 
 
 
@@ -68,9 +68,7 @@ function User() {
 
   //คัดกรองข้อมูลผู้ใช้
   const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase()) || //เช็คว่า name ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
-    user.email.toLowerCase().includes(search.toLowerCase()) || //เช็คว่า email ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
-    user.phone.includes(search) //เช็คว่าเบอร์โทรของ userมีตัวเลขที่ค้นหาหรือไม่
+    user.name.toLowerCase().includes(search.toLowerCase())  //เช็คว่า name ของ user มีคำที่เราพิมพ์ค้นหาอยู่หรือไม่
   );
 
   const navigate = useNavigate();
@@ -99,6 +97,7 @@ function User() {
       user_id: userId,
     });
   };
+
 
 
 
@@ -222,16 +221,7 @@ function User() {
                     </div>
                   ))}
                 </td>
-                <td className="p-5 ">
-                  <select
-                    value={user.role}
-                    
-                  >
-                    <option value="USER">USER</option>
-                    <option value="ADMIN">ADMIN</option>
-
-                  </select>
-                </td>
+                <td className="p-5">{user.role}</td>
 
                 <td className="p-5">
                   <button

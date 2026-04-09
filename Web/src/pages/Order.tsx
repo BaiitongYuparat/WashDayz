@@ -22,8 +22,7 @@ function Orders() {
     const keyword = search.toLowerCase();
 
     return (
-        order.user?.name?.toLowerCase()?.includes(keyword) ||
-        order.rider?.name?.toLowerCase()?.includes(keyword)
+        order.user?.name?.toLowerCase()?.includes(keyword) 
     );
 });
 

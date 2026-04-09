@@ -62,6 +62,7 @@ interface RecommendInput {
     userLng: number;
     machineType?: MachineType;
     capacity?: number;
+    mainServiceId?: string;
 }
 
 export async function runRecommendBranch(input: RecommendInput) {
@@ -70,6 +71,7 @@ export async function runRecommendBranch(input: RecommendInput) {
         userLng,
         machineType = MachineType.WASHER,
         capacity = 10,
+        mainServiceId,
     } = input;
 
     // ดึง branchMachine  Machine  Queue ที่ยังไม่เสร็จ
@@ -77,16 +79,35 @@ export async function runRecommendBranch(input: RecommendInput) {
         where: {
             branchMachines: {
                 some: {
-                    machine: { type: machineType, capacity }
-                }
-            }
+                    machine: {
+                        type: machineType,
+                        capacity,
+                        mainServices: mainServiceId
+                            ? {
+                                some: {
+                                    main_service_id: mainServiceId,
+                                },
+                            }
+                            : undefined,
+                    }
+                },
+            },
         },
         include: {
             branchMachines: {
-                where: { machine: { type: machineType, capacity } },
+                where: {
+                    machine: {
+                        type: machineType,
+                        capacity,
+                    },
+                },
                 include: {
                     machine: true,
-                    queues: { where: { finished_at: null } },
+                    queues: {
+                        where: {
+                            finished_at: null,
+                        },
+                    },
                 },
             },
         },
