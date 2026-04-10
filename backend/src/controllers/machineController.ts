@@ -58,3 +58,28 @@ export const getMachine = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export const getMachineByIds = async (req: Request, res: Response) => {
+  try {
+    const idsParam = req.query.ids as string;
+
+    if (!idsParam) {
+      return res.status(400).json({ message: "ids is required" });
+    }
+
+    const ids = idsParam.split(",").map((id) => id.trim());
+
+    const machines = await prisma.machine.findMany({
+      where: {
+        machine_id: {
+          in: ids,
+        },
+      },
+    });
+
+    return res.json(machines);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

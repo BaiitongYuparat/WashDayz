@@ -7,21 +7,37 @@ import { getMainServicesById, MainService } from "@/services/mainServices";
 import { AddonType, getAddonByMainServiceId } from "@/services/addonService";
 import AddonCard from "@/components/AddonCard";
 import { CustomButton } from "@/components/ui/CustomButton";
+import { getMachinesByIds, Machine } from "@/services/machineService";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ComponentProps } from "react";
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
     arr.slice(i * size, i * size + size),
   );
 }
+type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"]
+
+const MACHINE_TYPE_LABELS: Record<string, string> = {
+  WASHER: "เครื่องซัก",
+  DRYER: "เครื่องอบ",
+}
+
+const MACHINE_ICONS: Record<string, IconName> = {
+  WASHER: "washing-machine",
+  DRYER: "tumble-dryer",
+}
 
 export default function OrderScreen() {
   const router = useRouter();
-  const { serviceId } = useLocalSearchParams();
+  const { serviceId,branchId, machineIds  } = useLocalSearchParams();
   const [service, setService] = useState<MainService | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState<number>(0);
   const [addon, setAddon] = useState<AddonType[]>([]);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [machinePrice, setMachinePrice] = useState<number>(0);
+  const [selectedMachines, setSelectedMachines] = useState<Machine[]>([]);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -30,6 +46,14 @@ export default function OrderScreen() {
       setService(s);
       const addonData = await getAddonByMainServiceId(serviceId as string);
       setAddon(addonData);
+
+       const ids = (machineIds as string)?.split(",").filter(Boolean)
+      if (ids?.length) {
+        const machineData = await getMachinesByIds(ids)
+        setSelectedMachines(machineData)
+        const total = machineData.reduce((sum, m) => sum + m.price, 0)
+        setMachinePrice(total)
+      }
     };
     fetchServices();
   }, [serviceId]);
@@ -39,7 +63,7 @@ export default function OrderScreen() {
     const selectedAddonPrice = addon
       .filter((a) => selectedAddons.includes(a.addon_service_id))
       .reduce((sum, a) => sum + a.price, 0);
-    setPrice(selectedAddonPrice);
+    setPrice(machinePrice + selectedAddonPrice);
   }, [quantity, selectedAddons, service, addon]);
 
   const toggleAddon = (id: string) => {
@@ -93,33 +117,48 @@ export default function OrderScreen() {
           </Text>
         </View>
 
-        {/* Gradient Card */}
+        {/* Machine summary card */}
         <LinearGradient
           colors={["#E0F9FF", "#EEF8FC", "#F8FEFF"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           className="mx-4 rounded-3xl p-5 mb-4"
-          style={{
-            shadowColor: "#00ACC3",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 10,
-            elevation: 3,
-            borderWidth: 1,
-            borderColor: "rgba(0, 172, 195, 0.15)",
-          }}
+          style={{ borderWidth: 1, borderColor: "rgba(0, 172, 195, 0.15)", elevation: 3 }}
         >
-          {/* Divider accent */}
-          <View className="w-10 h-1 rounded-full bg-blue-main mb-3 self-center opacity-60" />
+          <View className="w-10 h-1 rounded-full bg-blue-main mb-4 self-center opacity-60" />
 
-          <View className="items-center gap-2">
-            <Text className="font-bold text-xl text-gray-800 tracking-tight">
-              เลือกจํานวนชิ้น
-            </Text>
-            <Text className="text-gray-400 text-sm text-center leading-relaxed px-6">
-              {service?.description}
-            </Text>
-          </View>
+          {selectedMachines.length > 0 ? (
+            <View className="gap-3">
+              {selectedMachines.map((m) => (
+                <View key={m.machine_id} className="flex-row items-center gap-3">
+                  {/* icon */}
+                  <View className="w-12 h-12 rounded-2xl bg-blue-main/10 items-center justify-center">
+                    <MaterialCommunityIcons
+                      name={MACHINE_ICONS[m.type] ?? "washing-machine"}
+                      size={26}
+                      color="#00ACC3"
+                    />
+                  </View>
+                  {/* info */}
+                  <View className="flex-1">
+                    <Text className="font-bold text-gray-800 text-sm">
+                      {MACHINE_TYPE_LABELS[m.type] ?? m.type}
+                    </Text>
+                    <Text className="text-gray-400 text-xs">
+                      ความจุ {m.capacity} กก. · {m.duration_minutes} นาที
+                    </Text>
+                  </View>
+                  {/* ราคา */}
+                  <Text className="font-bold text-blue-main">{m.price} ฿</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View className="items-center gap-1">
+              <Text className="font-bold text-xl text-gray-800">เครื่องที่เลือก</Text>
+              <Text className="text-gray-400 text-sm">ไม่พบข้อมูลเครื่อง</Text>
+            </View>
+          )}
         </LinearGradient>
 
         {addonList.length > 0 && (

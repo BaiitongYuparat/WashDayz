@@ -6,6 +6,7 @@ type CustomButtonProp = {
   variant?: "primary" | "secondary" | "danger";
   size?: "sm" | "md" | "lg";
   className?: string;
+  disabled?: boolean;
 };
 
 export const CustomButton = ({
@@ -14,6 +15,7 @@ export const CustomButton = ({
   variant = "primary",
   size = "md",
   className = "",
+  disabled = false,
 }: CustomButtonProp) => {
   const variantClasses = {
     primary: "bg-blue-second border-2 border-blue-main active:bg-blue-700",
@@ -37,7 +39,8 @@ export const CustomButton = ({
         variantClasses[variant],
         sizeClasses[size],
         "rounded-3xl active:bg-opacity-70 w-full items-center shadow-blue-main",
-        className
+        className,
+        disabled ? "opacity-50" : "active:bg-opacity-70",
       ].join(" ")}
       onPress={onPress}
     >

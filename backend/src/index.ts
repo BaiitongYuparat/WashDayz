@@ -17,6 +17,7 @@ import mcpRouter from "./mcpRouter";
 import chatRouter from './chatRouter'
 import branchMachine from "./routes/branchMachine"
 import mainmachine from './routes/serviceMachine'
+import recommedBranchRouter from './routes/recommedBranch'
 import cors from "cors";
 
 const app = express();
@@ -44,7 +45,7 @@ app.use('/chat', chatRouter);
 app.use('/branch-machines',branchMachine)
 app.use('/main-machine' ,mainmachine)
 app.use('/profile',profileRoutes)
-
+app.use('/recommend-branch', recommedBranchRouter)
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

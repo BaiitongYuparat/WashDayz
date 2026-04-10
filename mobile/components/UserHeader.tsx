@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { View, Text, Pressable, Image } from "react-native";
 import { useUser } from "@/provider/UserProvider";
 import { useSelector } from "react-redux";
-import { RootState } from "@/app/redux/store";
+import { RootState } from "@/redux/store";
 import { useRouter } from "expo-router";
 
 export const UserHeader = () => {

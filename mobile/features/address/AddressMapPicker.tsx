@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useDispatch } from 'react-redux';
-import { setSelectedLocation } from '@/app/redux/addressSlice';
+import { setSelectedLocation } from '@/redux/addressSlice';
 
 const { width, height } = Dimensions.get('window');
 
