@@ -3,11 +3,11 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/orders";
 
 export type OrderItem = {
-  quantity: number;
-  subtotal: number;
-  mainService?: {
-    name: string;
-  };
+    quantity: number;
+    subtotal: number;
+    mainService?: {
+        name: string;
+    };
 };
 
 export type OrderStatus = "WAITING" | "PROCESSING" | "DONE";
@@ -15,7 +15,6 @@ export type OrderStatus = "WAITING" | "PROCESSING" | "DONE";
 export type Order = {
     order_id: string
     user_id: string
-    rider_id: string
     branch_id: string
     service: string
     pieces: number
@@ -23,8 +22,8 @@ export type Order = {
     user: {
         name: string;
     };
-   items: OrderItem[];
-   status: string;
+    items: OrderItem[];
+    status: string;
 };
 
 
@@ -51,7 +50,12 @@ export const deleteOrder = async (id: string): Promise<void> => {
 };
 
 
-export const putOrder = async (id: string, data: { user_id: string, rider_id?: string, branch_id: string, service: string, pieces: number, price: number }): Promise<Order> => {
+export const putOrder = async (id: string, data: { user_id: string, branch_id: string, service?: string, pieces: number, price: number, status: string }): Promise<Order> => {
     const res = await axios.put(`${API_URL}/${id}`, data);
     return res.data;
 }
+
+export const putOrderStatus = async (id: string, data: { status: string }): Promise<Order> => {
+    const res = await axios.put(`${API_URL}/${id}/status`, data);
+    return res.data;
+};

@@ -46,7 +46,7 @@ function MapPicker({ value, onChange }: {
 
             <div className="p-3 flex items-center gap-2 text-sm">
                 {value ? (
-                    <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2 ">
                         <FaMapMarkerAlt className="text-blue-500" />
                         <span className="font-medium">
                             Lat: {value.lat.toFixed(6)},  Lng: {value.lng.toFixed(6)}

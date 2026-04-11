@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { deleteOrder, getOrders } from "../api/orderApi"
+import { deleteOrder, getOrders, putOrder, putOrderStatus } from "../api/orderApi"
 import type { Order, OrderItem } from "../api/orderApi";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import SearchInput from "../components/SearchInput";
 
 function Orders() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [search, setSearch] = useState("");
+    const [openeditorder, setOpenEditorder] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+
+    //ดึง
     useEffect(() => {
         const fetchRiders = async () => {
             const data = await getOrders();
@@ -18,19 +22,51 @@ function Orders() {
         fetchRiders();
     }, []);
 
+    //ค้นหา
     const filteredOrders = orders.filter((order) => {
-    const keyword = search.toLowerCase();
+        const keyword = search.toLowerCase();
+        return (
+            order.user?.name?.toLowerCase()?.includes(keyword)
+        );
+    });
 
-    return (
-        order.user?.name?.toLowerCase()?.includes(keyword) 
-    );
-});
-
+    //ลบออเดอร์
     const handleDelete = async (id: string) => {
         if (!confirm("Delete this order?")) return;
         await deleteOrder(id);
         setOrders(orders.filter((order) => order.order_id !== id));
     };
+
+    //แก้ไขสถานะ
+    const handleStatusChange = async (id: string, status: string) => {
+        const order = orders.find((o) => o.order_id === id);
+        if (!order) return;
+        await putOrderStatus(id, {
+            status,
+        });
+        setOrders(orders.map((o) =>
+            o.order_id === id ? { ...o, status } : o
+        ));
+    };
+
+    const handleAddorder = async (id: string, status: string) => {
+        const order = orders.find((o) => o.order_id === id);
+        if (!order) return;
+        await putOrder(id, {
+            user_id: order.user_id,
+            branch_id: order.branch_id,
+            pieces: order.pieces,
+            price: order.price,
+            status
+        });
+
+        setOrders(orders.map((o) =>
+            o.order_id === id ? { ...o, status } : o
+        ));
+    };
+
+
+
 
     return (
         <div className="p-8">
@@ -76,30 +112,37 @@ function Orders() {
                                 </td>
                                 <td className="p-5">{order.price}</td>
                                 <td className="p-5">
-                                    <span
+                                    <select
+                                        value={order.status}
+                                        onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
                                         className={`px-3 py-1 rounded-full text-sm font-semibold
-                        ${order.status === "WAITING" &&
-                                            "bg-yellow-100 text-yellow-700"
-                                            }
-                        ${order.status === "PROCESSING" &&
-                                            "bg-blue-100 text-blue-700"
-                                            }
-                        ${order.status === "DONE" &&
-                                            "bg-green-100 text-green-700"
-                                            }
-                      `}
+        ${order.status === "WAITING" && "bg-yellow-100 text-yellow-700"}
+        ${order.status === "WASHING" && "bg-blue-100 text-blue-700"}
+        ${order.status === "FINISHED" && "bg-green-100 text-green-700"}
+    `}
                                     >
-                                        {order.status}
-                                    </span>
+                                        <option value="WAITING">WAITING</option>
+                                        <option value="WASHING">WASHING</option>
+                                        <option value="FINISHED">FINISHED</option>
+                                    </select>
                                 </td>
-
                                 <td className="p-5">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedOrder(order);
+                                            setOpenEditorder(true);
+                                        }}
+                                        className="text-yellow-400 text-xl hover:text-yellow-500 transition"
+                                    >
+                                        <FaEdit />
+                                    </button>
                                     <button
                                         onClick={() => handleDelete(order.order_id)}
                                         className="text-red-500 text-xl hover:text-red-700 transition"
                                     >
                                         <FaTrash />
                                     </button>
+
                                 </td>
                             </tr>
                         ))}
@@ -107,6 +150,31 @@ function Orders() {
                     </tbody>
                 </table>
             </div>
+            {openeditorder && selectedOrder && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
+                        <h2 className="text-xl font-bold">Edit Order</h2>
+
+                        <p>Order ID: {selectedOrder.order_id}</p>
+                        <p>Customer: {selectedOrder.user?.name}</p>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button
+                                onClick={() => setOpenEditorder(false)}
+                                className="px-4 py-2 rounded-lg border text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleAddorder(selectedOrder.order_id, selectedOrder.status)}
+                                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

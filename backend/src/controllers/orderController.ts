@@ -15,7 +15,6 @@ export const createOrder = async (req: Request, res: Response) => {
                 branch_id,
                 pieces,
                 price,
-
                 items: {
                     create: items.map((item: any) => ({
                         main_service_id: item.main_service_id,
@@ -81,7 +80,7 @@ export const getOrderId = async (req: Request, res: Response) => {
 
 export const putOrderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { user_id, rider_id, branch_id, pieces, price } = req.body
+    const { user_id, branch_id, pieces, price , status} = req.body
     try {
         const order = await prisma.order.update({
             where: {
@@ -91,7 +90,8 @@ export const putOrderId = async (req: Request, res: Response) => {
                 user_id,
                 branch_id,
                 pieces,
-                price
+                price,
+                status
             }
         });
         res.json(order);
@@ -138,3 +138,18 @@ export const deleteOrderId = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Delete failed' });
     }
 };
+
+export const putOrderStatus = async (req: Request, res: Response) => {
+    const id = req.params.id as string
+    const { status } = req.body  
+
+    try {
+        const order = await prisma.order.update({
+            where: { order_id: id },
+            data: { status }  
+        });
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update Order' })
+    }
+}

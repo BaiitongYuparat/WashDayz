@@ -35,7 +35,7 @@ model UserAddress {
   province      String
   subDistrict   String
   houseNo       String?
-  user          User    @relation(fields: [user_id], references: [user_id])
+  user          User    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }
 
 model Branch {
@@ -76,7 +76,7 @@ model Order {
   branch_id String
   service   String?
   branch    Branch      @relation(fields: [branch_id], references: [branch_id])
-  user      User        @relation(fields: [user_id], references: [user_id])
+  user      User        @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   items     OrderItem[]
   payment   Payment?
   queue     Queue?
@@ -109,7 +109,7 @@ model Payment {
   payment_id     String    @id @default(uuid())
   order_id       String    @unique
   updated_at     DateTime  @default(now()) @updatedAt
-  order          Order     @relation(fields: [order_id], references: [order_id])
+  order          Order     @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
 }
 
 model Service {
