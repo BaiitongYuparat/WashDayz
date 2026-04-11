@@ -3,84 +3,125 @@ import { prisma } from '../../lib/prisma';
 
 
 export const createOrder = async (req: Request, res: Response) => {
-    const { user_id,  branch_id, pieces, price, items } = req.body
+    const { user_id, branch_id, pieces, price, items, address_id, addon_id, machine_id } = req.body
 
     try {
         if (!user_id || !branch_id || !pieces || !price) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
+
+        // ดึงราคา machine
+        const machines = await prisma.machine.findMany({
+            where: { machine_id: { in: machine_id } }
+        })
+
+        // ดึงราคา addon
+        const addons = addon_id?.length
+            ? await prisma.addonService.findMany({
+                where: { addon_service_id: { in: addon_id } }
+            })
+            : []
+
+        // คำนวณราคารวม
+        const machineTotal = machines.reduce((sum, m) => sum + (m.price ?? 0), 0)
+        const addonTotal = addons.reduce((sum, a) => sum + a.price, 0)
+        const total_price = machineTotal + addonTotal
+
+
         const order = await prisma.order.create({
             data: {
                 user_id,
                 branch_id,
                 pieces,
                 price,
+                address_id,
                 items: {
-                    create: items.map((item: any) => ({
-                        main_service_id: item.main_service_id,
-                        quantity: item.quantity,
-                        subtotal: item.subtotal
+                    create: machine_id.map((machine_id: string) => ({
+                        machine_id,
+                        orderItemAddons: addon_id?.length
+                            ? {
+                                create: addon_id.map((addon_service_id: string) => ({
+                                    addon_service_id,
+                                }))
+                            }
+                            : undefined,
                     }))
                 }
             },
             include: {
+                branch: true,
                 items: {
                     include: {
-                        mainService: true
-                    }
-                },
-                user: true,
-            }
-        })
-
-        res.json(order)
-    } catch (error) {
-        console.error("CREATE USER ERROR:", error)
-        res.status(500).json(error)
-    }
-}
-
-export const getOrder = async (req: Request, res: Response) => {
-    try {
-        const order = await prisma.order.findMany({
-            include: {
-                user: true,       
-                items: {
-                    include: {
-                        mainService: true
+                        machine: true,
+                        orderItemAddons: {
+                            include: { addonService: true }
+                        }
                     }
                 }
             }
-        });
-
-        res.json(order);
+        })
+        res.status(201).json(order)
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch branch' })
+        console.error("CREATE ORDER ERROR:", error)
+        res.status(500).json({ error: "Failed to create order" })
     }
 }
 
-export const getOrderId = async (req: Request, res: Response) => {
-    const id = req.params.id as string
-    try {
-        const order = await prisma.order.findUnique({
-            where: {
-                order_id: id
+// ดึง order ทั้งหมดของ user
+export const getOrder = async (req: Request, res: Response) => {
+  const userId  = req.params.id as string
+  try {
+    const orders = await prisma.order.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: "desc" },
+      include: {
+        branch: true,
+        items: {
+          include: {
+            machine: true,
+            orderItemAddons: {
+              include: { addonService: true }
             }
-        });
-
-        if (!order) {
-            return res.status(404).json({ error: 'Order not found' });
+          }
         }
+      }
+    })
+    res.json(orders)
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders" })
+  }
+}
 
-        res.json(order);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch Order' })
-    }
+
+export const getOrdersById = async (req: Request, res: Response) => {
+  const  id = req.params.id as string
+  try {
+    const order = await prisma.order.findUnique({
+      where: { order_id: id },
+      include: {
+        branch: true,
+        address: true,
+        items: {
+          include: {
+            machine: true,
+            orderItemAddons: {
+              include: { addonService: true }
+            }
+          }
+        }
+      }
+    })
+
+    if (!order) return res.status(404).json({ error: "Order not found" })
+    res.json(order)
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch order" })
+  }
 }
 
 export const putOrderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { user_id, branch_id, pieces, price , status} = req.body
+    const { user_id, branch_id, pieces, price, status } = req.body
     try {
         const order = await prisma.order.update({
             where: {
@@ -100,53 +141,64 @@ export const putOrderId = async (req: Request, res: Response) => {
     }
 }
 
-export const deleteOrderId = async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+// export const deleteOrderId = async (req: Request, res: Response) => {
+//     const id = req.params.id as string;
 
-    try {
-        const items = await prisma.orderItem.findMany({
-            where: { order_id: id },
-            select: { order_item_id: true }
-        });
+//     try {
+//         const items = await prisma.orderItem.findMany({
+//             where: { order_id: id },
+//             select: { order_item_id: true }
+//         });
 
-        const itemIds = items.map(i => i.order_item_id);
+//         const itemIds = items.map(i => i.order_item_id);
 
-        //  เช็คก่อนลบ
-        if (itemIds.length > 0) {
-            await prisma.orderItemAddon.deleteMany({
-                where: {
-                    order_item_id: { in: itemIds }
-                }
-            });
-        }
+//         //  เช็คก่อนลบ
+//         if (itemIds.length > 0) {
+//             await prisma.orderItemAddon.deleteMany({
+//                 where: {
+//                     order_item_id: { in: itemIds }
+//                 }
+//             });
+//         }
 
-        await prisma.orderItem.deleteMany({
-            where: { order_id: id }
-        });
+//         await prisma.orderItem.deleteMany({
+//             where: { order_id: id }
+//         });
 
-        const order = await prisma.order.delete({
-            where: { order_id: id }
-        });
+//         const order = await prisma.order.delete({
+//             where: { order_id: id }
+//         });
 
-        res.json({
-            message: 'Order deleted successfully',
-            order
-        });
+//         res.json({
+//             message: 'Order deleted successfully',
+//             order
+//         });
 
-    } catch (error) {
-        console.error("DELETE ERROR:", error);
-        res.status(500).json({ error: 'Delete failed' });
-    }
-};
+//     } catch (error) {
+//         console.error("DELETE ERROR:", error);
+//         res.status(500).json({ error: 'Delete failed' });
+//     }
+// };
+
+// ลบ order
+export const deleteOrder = async (req: Request, res: Response) => {
+  const  id  = req.params.id as string
+  try {
+    await prisma.order.delete({ where: { order_id: id } })
+    res.json({ message: "Order deleted successfully" })
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete order" })
+  }
+}
 
 export const putOrderStatus = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { status } = req.body  
+    const { status } = req.body
 
     try {
         const order = await prisma.order.update({
             where: { order_id: id },
-            data: { status }  
+            data: { status }
         });
         res.json(order);
     } catch (error) {

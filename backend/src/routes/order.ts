@@ -1,14 +1,14 @@
 import express from 'express'
-import {createOrder , getOrder ,getOrderId ,putOrderId ,deleteOrderId , putOrderStatus} from '../controllers/orderController';
+import {createOrder , getOrder ,getOrdersById ,putOrderId ,deleteOrder , putOrderStatus} from '../controllers/orderController';
 
 
 const router = express.Router()
 
 router.post('/', createOrder)
 router.get('/' ,getOrder)
-router.get('/:id' ,getOrderId)
+router.get('/:id' ,getOrdersById)
 router.put('/:id' , putOrderId)
-router.delete('/:id' , deleteOrderId)
+router.delete('/:id' , deleteOrder)
 router.put('/status/:id', putOrderStatus)
 
 
