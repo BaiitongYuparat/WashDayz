@@ -3,10 +3,10 @@ import { prisma } from '../../lib/prisma';
 
 
 export const createOrder = async (req: Request, res: Response) => {
-    const { user_id, branch_id, address_id,  addon_id, machine_id } = req.body
+    const { user_id, branch_id, address_id, addon_id, machine_id } = req.body
 
     try {
-          if (!user_id || !branch_id || !machine_id?.length) {
+        if (!user_id || !branch_id || !machine_id?.length) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -25,41 +25,42 @@ export const createOrder = async (req: Request, res: Response) => {
         // คำนวณราคารวม
         const machineTotal = machines.reduce((sum, m) => sum + (m.price ?? 0), 0)
         const addonTotal = addons.reduce((sum, a) => sum + a.price, 0)
-        const  total_price = machineTotal + addonTotal
+        const total_price = machineTotal + addonTotal
 
 
         // สร้าง order พร้อม items
-    const order = await prisma.order.create({
-      data: {
-        user_id,
-        branch_id,
-        address_id,
-         total_price,
-        items: {
-          create: machine_id.map((machine_id: string) => ({
-            machine_id,
-            orderItemAddons: addon_id?.length
-              ? {
-                  create: addon_id.map((addon_service_id: string) => ({
-                    addon_service_id,
-                  }))
+        const order = await prisma.order.create({
+            data: {
+                user_id,
+                branch_id,
+                address_id,
+                total_price,
+                items: {
+                    create: machine_id.map((machine_id: string) => ({
+                        machine_id,
+                        orderItemAddons: addon_id?.length
+                            ? {
+                                create: addon_id.map((addon_service_id: string) => ({
+                                    addon_service_id,
+                                }))
+                            }
+                            : undefined,
+                    }))
                 }
-              : undefined,
-          }))
-        }
-      },
-      include: {
-        branch: true,
-        items: {
-          include: {
-            machine: true,
-            orderItemAddons: {
-              include: { addonService: true }
+            },
+            include: {
+                user: true,
+                branch: true,
+                items: {
+                    include: {
+                        machine: true,
+                        orderItemAddons: {
+                            include: { addonService: true }
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    })
+        })
         res.status(201).json(order)
     } catch (error) {
         console.error("CREATE ORDER ERROR:", error)
@@ -69,59 +70,56 @@ export const createOrder = async (req: Request, res: Response) => {
 
 // ดึง order ทั้งหมดของ user
 export const getOrder = async (req: Request, res: Response) => {
-  const userId  = req.params.id as string
-  try {
-    const orders = await prisma.order.findMany({
-      where: { user_id: userId },
-      orderBy: { created_at: "desc" },
-      include: {
-        branch: true,
-        items: {
-          include: {
-            machine: true,
-            orderItemAddons: {
-              include: { addonService: true }
+    try {
+        const orders = await prisma.order.findMany({
+            orderBy: { created_at: "desc" },
+            include: {
+                user: true,
+                branch: true,
+                items: {
+                    include: {
+                        machine: true,
+                        orderItemAddons: { include: { addonService: true } }
+                    }
+                }
             }
-          }
-        }
-      }
-    })
-    res.json(orders)
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch orders" })
-  }
+        });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch orders" })
+    }
 }
 
 
 export const getOrdersById = async (req: Request, res: Response) => {
-  const  id = req.params.id as string
-  try {
-    const order = await prisma.order.findUnique({
-      where: { order_id: id },
-      include: {
-        branch: true,
-        address: true,
-        items: {
-          include: {
-            machine: true,
-            orderItemAddons: {
-              include: { addonService: true }
+    const id = req.params.id as string
+    try {
+        const order = await prisma.order.findUnique({
+            where: { order_id: id },
+            include: {
+                branch: true,
+                address: true,
+                items: {
+                    include: {
+                        machine: true,
+                        orderItemAddons: {
+                            include: { addonService: true }
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
-    })
+        })
 
-    if (!order) return res.status(404).json({ error: "Order not found" })
-    res.json(order)
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch order" })
-  }
+        if (!order) return res.status(404).json({ error: "Order not found" })
+        res.json(order)
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch order" })
+    }
 }
 
 export const putOrderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { user_id, branch_id,  total_price , status } = req.body
+    const { user_id, branch_id, total_price, status } = req.body
     try {
         const order = await prisma.order.update({
             where: {
