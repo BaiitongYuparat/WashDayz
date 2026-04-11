@@ -32,16 +32,11 @@ export type Order = {
   user_id: string;
   branch_id: string;
   address_id?: string;
-  pieces: number;
-  price: number;
+  total_price?: number;   
   status: string;
   created_at?: string;
-  user: {
-    name: string;
-  };
-  branch?: {
-    branch_name: string;
-  };
+  user: { name: string };
+  branch?: { branch_name: string };
   items: OrderItem[];
 };
 
@@ -69,7 +64,7 @@ export const deleteOrder = async (id: string): Promise<void> => {
 };
 
 
-export const putOrder = async (id: string, data: { user_id: string, branch_id: string, service?: string, pieces: number, price: number, status: string }): Promise<Order> => {
+export const putOrder = async (id: string, data: {  user_id: string,  branch_id: string, total_price?: number, status: string }): Promise<Order> => {
     const res = await axios.put(`${API_URL}/${id}`, data);
     return res.data;
 }

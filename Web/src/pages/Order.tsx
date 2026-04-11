@@ -55,8 +55,7 @@ function Orders() {
         await putOrder(id, {
             user_id: order.user_id,
             branch_id: order.branch_id,
-            pieces: order.pieces,
-            price: order.price,
+            total_price: order.total_price,
             status
         });
 
@@ -110,7 +109,7 @@ function Orders() {
                                         </div>
                                     ))}
                                 </td>
-                                <td className="p-5">{order.price}</td>
+                                <td className="p-5">{order.total_price ?? "-"}</td>
                                 <td className="p-5">
                                     <select
                                         value={order.status}
