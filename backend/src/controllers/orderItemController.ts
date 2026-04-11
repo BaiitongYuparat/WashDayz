@@ -11,9 +11,6 @@ export const createOrderItem = async (req: Request, res: Response) => {
     const orderItem = await prisma.orderItem.create({
       data: {
         order_id: order_id,
-        main_service_id: main_service_id,
-        quantity: Number(quantity),
-        subtotal: Number(subtotal)
       }
     })
 
