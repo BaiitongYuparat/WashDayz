@@ -15,11 +15,12 @@ export const getMachines = async (): Promise<Machine[]> => {
   return res.data;
 };
 
-export const getMachinesByIds = async (id: string[]): Promise<Machine[]> => {
-    const res = await axios.get<Machine[]>(`${API_URL}/${id}`);
-    return res.data;
+export const getMachinesByIds = async (ids: string[]): Promise<Machine[]> => {
+  const res = await axios.get<Machine[]>(`${API_URL}/by-ids`, {
+    params: { ids: ids.join(",") }
+  });
+  return res.data;
 }
-
 export const getMachinesByMainService = async (
   main_service_id: string
 ): Promise<Machine[]> => {

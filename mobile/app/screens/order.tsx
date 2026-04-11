@@ -48,9 +48,11 @@ export default function OrderScreen() {
       setAddon(addonData);
 
        const ids = (machineIds as string)?.split(",").filter(Boolean)
+       
       if (ids?.length) {
         const machineData = await getMachinesByIds(ids)
         setSelectedMachines(machineData)
+        console.log(selectedMachines)
         const total = machineData.reduce((sum, m) => sum + m.price, 0)
         setMachinePrice(total)
       }
@@ -129,6 +131,7 @@ export default function OrderScreen() {
 
           {selectedMachines.length > 0 ? (
             <View className="gap-3">
+              <Text className="font-bold text-center text-xl">เครื่องที่เลือก</Text>
               {selectedMachines.map((m) => (
                 <View key={m.machine_id} className="flex-row items-center gap-3">
                   {/* icon */}

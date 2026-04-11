@@ -28,6 +28,13 @@ export type RecommendInput = {
   mainServiceId?: string
 }
 
+export type Branch = {
+  branch_id: string
+  branch_name: string
+  address?: string
+}
+
+
 export const recommendBranch = async (
   input: RecommendInput,
   token: string
@@ -41,11 +48,16 @@ export const recommendBranch = async (
     body: JSON.stringify(input),
   })
 
-  // ← เพิ่ม log ตรงนี้
   const data = await res.json()
   console.log("recommend status:", res.status)
   console.log("recommend response:", JSON.stringify(data, null, 2))
 
   if (!res.ok) throw new Error("โหลดข้อมูลสาขาไม่สำเร็จ")
   return data
+}
+
+export const getBranchById = async (id: string): Promise<Branch> => {
+  const res = await fetch(`${API_URL}/branches/${id}`)
+  if (!res.ok) throw new Error("โหลดข้อมูลสาขาไม่สำเร็จ")
+  return res.json()
 }

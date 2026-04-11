@@ -16,3 +16,14 @@ export const getAddonByMainServiceId = async (main_service_id:string): Promise<A
   });
   return res.data;
 };
+
+export const getAddonByIds = async (ids: string[]): Promise<AddonType[]> => {
+  const results = await Promise.all(
+    ids.map(async (id) => {
+      const res = await fetch(`${API_URL}/addonservice/${id}`)
+      if (!res.ok) throw new Error(`โหลด addon ${id} ไม่สำเร็จ`)
+      return res.json()
+    })
+  )
+  return results
+}

@@ -1,4 +1,4 @@
-import { View, Text } from "react-native"
+import { View, Text , Pressable} from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { ComponentProps } from "react"
 
@@ -27,6 +27,7 @@ type RecommendResult = {
 type Props = {
   result: RecommendResult
   onSelect?: (branchId: string) => void
+  selectedBranchId?: string
 }
 
 function StatBadge({ icon, label, value, isSelected }: {
@@ -44,16 +45,17 @@ function StatBadge({ icon, label, value, isSelected }: {
   )
 }
 
-function BranchRow({ branch, isRecommended }: { branch: BranchScore; isRecommended: boolean }) {
+function BranchRow({ branch, isRecommended ,isSelected, onPress }: { branch: BranchScore; isRecommended: boolean;  isSelected: boolean
+  onPress: () => void  }) {
   return (
-    <View className={`flex-row items-center p-3 rounded-2xl mb-2 ${
-      isRecommended ? "bg-blue-main" : "bg-white border border-gray-100"
+    <Pressable onPress={onPress} className={`flex-row items-center p-3 rounded-2xl mb-2 ${
+      isSelected? "bg-blue-main" : "bg-white border border-gray-100"
     }`}>
       {/* rank indicator */}
       <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${
-        isRecommended ? "bg-white/20" : "bg-blue-light"
+        isSelected ? "bg-white/20" : "bg-blue-light"
       }`}>
-        {isRecommended
+        {isSelected
           ? <MaterialCommunityIcons name="star" size={16} color="white" />
           : <MaterialCommunityIcons name="map-marker" size={16} color="#00ACC3" />
         }
@@ -61,12 +63,12 @@ function BranchRow({ branch, isRecommended }: { branch: BranchScore; isRecommend
 
       {/* name + status */}
       <View className="flex-1">
-        <Text className={`text-sm font-bold ${isRecommended ? "text-white" : "text-gray-800"}`}>
+        <Text className={`text-sm font-bold ${isSelected ? "text-white" : "text-gray-800"}`}>
           {branch.branch_name}
         </Text>
         <View className="flex-row items-center gap-1 mt-0.5">
           <View className={`w-2 h-2 rounded-full ${branch.machineAvailable ? "bg-green-400" : "bg-amber-400"}`} />
-          <Text className={`text-xs ${isRecommended ? "text-white/70" : "text-gray-400"}`}>
+          <Text className={`text-xs ${isSelected ? "text-white/70" : "text-gray-400"}`}>
             {branch.machineAvailable ? "เครื่องว่าง" : `รอ ${branch.waitMinutes} นาที`}
           </Text>
         </View>
@@ -74,18 +76,18 @@ function BranchRow({ branch, isRecommended }: { branch: BranchScore; isRecommend
 
       {/* total time */}
       <View className={`items-end`}>
-        <Text className={`text-sm font-bold ${isRecommended ? "text-white" : "text-blue-main"}`}>
+        <Text className={`text-sm font-bold ${isSelected ? "text-white" : "text-blue-main"}`}>
           {branch.totalExpectedMinutes} นาที
         </Text>
-        <Text className={`text-xs ${isRecommended ? "text-white/60" : "text-gray-400"}`}>
+        <Text className={`text-xs ${isSelected ? "text-white/60" : "text-gray-400"}`}>
           รวมเดินทาง
         </Text>
       </View>
-    </View>
+    </Pressable>
   )
 }
 
-export default function RecommendedBranchCard({ result, onSelect }: Props) {
+export default function RecommendedBranchCard({ result, onSelect, selectedBranchId }: Props) {
   return (
     <View className="gap-4">
 
@@ -145,11 +147,13 @@ export default function RecommendedBranchCard({ result, onSelect }: Props) {
         {result.allBranchesScored
           .sort((a, b) => a.totalExpectedMinutes - b.totalExpectedMinutes)
           .map((branch) => (
-            <BranchRow
-              key={branch.branch_id}
-              branch={branch}
-              isRecommended={branch.branch_id === result.recommendedBranchId}
-            />
+                <BranchRow
+                key={branch.branch_id}
+                branch={branch}
+                isRecommended={branch.branch_id === result.recommendedBranchId}
+                isSelected={branch.branch_id === selectedBranchId}
+                onPress={() => onSelect?.(branch.branch_id)}
+                />
           ))}
       </View>
 

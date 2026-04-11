@@ -119,13 +119,12 @@ export default function BranchSelectScreen() {
           ) : (
             machines.map((item) => (
               <MachineCard
-                key={item.machine_id}
-                type={MACHINE_TYPE_LABELS[item.type] ?? item.type}  // ← แปลชื่อ
-                capacity={item.capacity}
-                duration_minutes={item.duration_minutes}
-                isSelected={selectedMachines.includes(item.machine_id)}
-                onPress={() => toggleMachine(item.machine_id)}
-              />
+        type={item.type}
+        capacity={item.capacity}
+        duration_minutes={item.duration_minutes}
+        isSelected={selectedMachines.includes(item.machine_id)}
+        onPress={() => toggleMachine(item.machine_id)}
+      />
             ))
           )}
         </View>
@@ -143,6 +142,7 @@ export default function BranchSelectScreen() {
             <RecommendedBranchCard
               result={recommendResult}
               onSelect={(id) => setSelectedBranchId(id)}
+              selectedBranchId={selectedBranchId ?? undefined}
             />
           </View>
         )}
@@ -159,3 +159,4 @@ export default function BranchSelectScreen() {
     </View>
   )
 }
+
