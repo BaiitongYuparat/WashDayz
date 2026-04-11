@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import { useUser } from "@/provider/UserProvider";
 import { useSelector } from "react-redux";
-import { RootState } from "@/app/redux/store";
+import { RootState } from "@/redux/store";
 import { useRouter } from "expo-router";
 
 export const UserHeader = () => {
@@ -16,9 +16,19 @@ export const UserHeader = () => {
     <Pressable onPress={() => router.push("/screens/AddressListScreen")}>
       <View className="rounded-full px-4 py-3 flex-row items-center bg-white border-b border-gray-100">
 
-        {/* Avatar */}
-        <View className="w-11 h-11 rounded-full bg-blue-light items-center justify-center border-2 border-blue-main">
-          <Ionicons name="person" size={20} color="#00ACC3" />
+        {/* Profile */}
+        <View className="w-11 h-11 rounded-full overflow-hidden border-2 border-blue-main">
+          {user?.profile_image ? (
+            <Image
+              source={{ uri: user.profile_image }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-full h-full bg-blue-light items-center justify-center">
+              <Ionicons name="person" size={20} color="#00ACC3" />
+            </View>
+          )}
         </View>
 
         {/* Info */}

@@ -6,8 +6,8 @@ import AddressCard from "@/features/address/AddressCard";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedAddress } from "../redux/addressSlice";
-import { RootState } from "../redux/store";
+import { setSelectedAddress } from "../../redux/addressSlice";
+import { RootState } from "../../redux/store";
 
 export default function AddressListScreen() {
   const router = useRouter();

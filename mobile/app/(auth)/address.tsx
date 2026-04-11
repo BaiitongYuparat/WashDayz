@@ -18,7 +18,7 @@ import { useUser } from "@/provider/UserProvider";
 import { createAddress } from "@/services/address";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedAddress, setSelectedLocation } from "../redux/addressSlice";
+import { setSelectedAddress, setSelectedLocation } from "../../redux/addressSlice";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function AddressForm() {

@@ -1,4 +1,6 @@
 import { View, Text, Pressable } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { ComponentProps } from "react";
 
 interface MachineCardProps {
   img?: React.ReactNode;
@@ -7,6 +9,12 @@ interface MachineCardProps {
   capacity: number;
   onPress: () => void;
   isSelected?: boolean;
+}
+type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"]
+
+const SERVICE_ICONS: Record<string, IconName> = {
+  "WASHER": "washing-machine",
+  "DRYER": "tumble-dryer",
 }
 
 export default function MachineCard({ img, type, duration_minutes, isSelected, onPress , capacity }: MachineCardProps) {
@@ -23,9 +31,15 @@ export default function MachineCard({ img, type, duration_minutes, isSelected, o
 
         {/* Icon */}
         <View className={`w-16 h-16 rounded-2xl items-center justify-center ${
-          isSelected ? "bg-blue-light border border-blue-main/20" : "bg-gray-50 border border-gray-100"
+          isSelected ? "bg-blue-light border border-blue-main/20" : "bg-gray-200 border border-gray-100"
         }`}>
-          {img}
+          <MaterialCommunityIcons
+                        name={
+                          (SERVICE_ICONS[type] ?? "washing-machine") as IconName
+                        }
+                        size={66}
+                        color="white"
+                      />
         </View>
 
         {/* Text */}

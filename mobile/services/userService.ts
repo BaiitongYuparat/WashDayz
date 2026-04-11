@@ -2,6 +2,7 @@ import axios from "axios";
 import { UserAddresses } from "./address";
 
 const API_URL = "http://172.20.10.2:8080/auth";
+const BASE_URL = "http://172.20.10.2:8080/users";
 
 export type Address = {
   address_id: string;
@@ -25,6 +26,8 @@ export type User = {
   phone: string;
   role: string;
   addresses?: UserAddresses[];
+  profile_image: string;
+  password: string;
 };
 
 export type UserFormData = {
@@ -41,7 +44,7 @@ export const createUser = async (data: UserFormData) => {
 };
 
 export const updateUser = async(id: string,data:User,token:string ): Promise<User> => {
-  const res = await axios.put(`${API_URL}/${id}`, data, {
+  const res = await axios.put(`${BASE_URL}/${id}`, data, {
     headers: {
       Authorization: `Bearer ${token}`
     }
