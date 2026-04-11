@@ -208,7 +208,7 @@ function Services() {
 
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        Addonservice
+                        Service
                     </label>
 
                     <CustomButton

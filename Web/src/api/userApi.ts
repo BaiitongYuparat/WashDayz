@@ -7,14 +7,15 @@ export type User = {
     user_id: string
     name: string
     email: string
-    password: string
     phone: string
     addresses?: Address[]
+    password: string
     role: string
 };
 
 export type Address = {
   address_id?: string;
+   user_id?: string;  
   label: string;
   receiver_name: string;
   district: string;
@@ -29,9 +30,10 @@ export type CreateUser = {
   name: string;
   email: string;
   phone: string;
-  password: string;
   role?: string; 
+  password: string
 };
+
 
 export const getUsers = async () => {
     const res = await axios.get(`${API_URL}`);
@@ -59,25 +61,37 @@ export const putUser = async (id: string, data: User) => {
 };
 
 //ทั้อยู่
-export const createAddress = async (data: any) => {
-  const res = await axios.post(ADDRESS_URL, data);
-  return res.data;
-};
-
-
-export const updateAddress = async (id: string, data: any) => {
-  const res = await axios.put(`${ADDRESS_URL}/${id}`, data);
-  return res.data;
-};
-
-
-export const deleteAddress = async (id: string) => {
-  const res = await axios.delete(`${ADDRESS_URL}/${id}`);
-  return res.data;
-};
-
-export const getAddress = async () => {
-    const res = await axios.get(`${ADDRESS_URL}`);
+export const createAddress = async(data:Address,token:string) => {
+    const res = await axios.post(ADDRESS_URL, data , {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  }, })
     return res.data;
-    
-};
+}
+
+export const getAddress = async(token:string): Promise<Address[]> => {
+  const res = await axios.get(ADDRESS_URL, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return res.data
+}
+
+export const updateAddress = async(id: string,data:Address,token:string ): Promise<Address> => {
+  const res = await axios.put(`${ADDRESS_URL}/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return res.data
+}
+
+export const deleteAddress = async(id: string,token:string ): Promise<Address> => {
+  const res = await axios.put(`${ADDRESS_URL}/${id}`,{
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  return res.data
+}

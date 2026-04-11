@@ -35,7 +35,8 @@ model UserAddress {
   province      String
   subDistrict   String
   houseNo       String?
-  user          User    @relation(fields: [user_id], references: [user_id])
+  user          User    @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  orders        Order[]
 }
 
 model Branch {
@@ -68,18 +69,20 @@ model AddonService {
 }
 
 model Order {
-  pieces    Int
-  price     Float
-  status    OrderStatus @default(WAITING)
-  order_id  String      @id @default(uuid())
-  user_id   String
-  branch_id String
-  service   String?
-  branch    Branch      @relation(fields: [branch_id], references: [branch_id])
-  user      User        @relation(fields: [user_id], references: [user_id])
-  items     OrderItem[]
-  payment   Payment?
-  queue     Queue?
+  order_id   String       @id @default(uuid())
+  total_price Float?
+  status     OrderStatus  @default(WAITING)
+  user_id    String
+  branch_id  String
+  service    String?
+  branch     Branch       @relation(fields: [branch_id], references: [branch_id])
+  user       User         @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  items      OrderItem[]
+  payment    Payment?
+  queue      Queue?
+  address_id String?
+  address    UserAddress? @relation(fields: [address_id], references: [address_id], onDelete: Cascade)
+  created_at DateTime     @default(now())
 }
 
 model OrderItem {
@@ -91,6 +94,8 @@ model OrderItem {
   mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
   order           Order            @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
   orderItemAddons OrderItemAddon[]
+  machine_id String?
+  machine    Machine? @relation(fields: [machine_id], references: [machine_id])
 }
 
 model OrderItemAddon {
@@ -109,7 +114,7 @@ model Payment {
   payment_id     String    @id @default(uuid())
   order_id       String    @unique
   updated_at     DateTime  @default(now()) @updatedAt
-  order          Order     @relation(fields: [order_id], references: [order_id])
+  order          Order     @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
 }
 
 model Service {
@@ -146,6 +151,7 @@ model Machine {
   price            Float? //ราคา
   branchMachines   BranchMachine[]
   mainServices     MainServiceMachine[]
+  items OrderItem[]
 }
 
 //เชื่อมเครื่องซักกับสาขา

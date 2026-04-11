@@ -24,3 +24,19 @@ export const createOrderItem = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create OrderItem" })
   }
 }
+
+export const deleteOrderItem = async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    try {
+        const user = await prisma.orderItem.delete({
+            where: { order_item_id: id }
+        });
+        res.json({
+            message: " deleted successfully",
+            user
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to delete orderitem" });
+    }
+};

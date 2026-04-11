@@ -3,15 +3,17 @@ import { prisma } from "../../lib/prisma"
 import { AuthRequest } from "../types/authRequest"
 
 export const createAddresses = async (req: AuthRequest, res: Response) => {
-    const {label, houseNo , receiver_name, district, postal_code, subDistrict, province, phone , lng , lat } = req.body
+    const { label, houseNo, receiver_name, district, postal_code, subDistrict, province, phone, lng, lat, user_id } = req.body;
     try {
-        const userId = req.user?.user_id
-        if (!userId ||!receiver_name || !district || !province || !postal_code) {
+        // ถ้าส่ง user_id มาใน body (admin mode) ให้ใช้อันนั้น ถ้าไม่มีใช้จาก token
+        const userId = user_id ?? req.user?.user_id;
+        
+        if (!userId || !receiver_name || !district || !province || !postal_code) {
             return res.status(400).json({ error: "Missing required fields" });
         }
         const address = await prisma.userAddress.create({
             data: {
-                user_id: userId,
+                user_id: userId, // ใช้ userId ที่ได้มา
                 label,
                 houseNo,
                 receiver_name,
@@ -79,6 +81,7 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
      const {label,houseNo, receiver_name, district, subDistrict, province, postal_code, phone , lat , lng } = req.body;
     try {
         const userId = req.user?.user_id;
+         const userRole = req.user?.role; 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
@@ -86,9 +89,10 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
             where: { address_id: id },
         });
 
-        if (!existing || existing.user_id !== userId) {
+          if (!existing || (existing.user_id !== userId && userRole !== "ADMIN")) {
             return res.status(403).json({ error: "Forbidden" });
         }
+
 
         const address = await prisma.userAddress.update({
             where: {
@@ -144,3 +148,4 @@ export const deleteAddress = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ error: 'Failed to delete address' });
     }
 }
+

@@ -1,11 +1,11 @@
 import { Request, Response } from "express"
 import { prisma } from '../../lib/prisma';
-import {hashPassword } from '../utils/bcryptjs'
+import { hashPassword } from '../utils/bcryptjs'
 
 export const createUser = async (req: Request, res: Response) => {
     const { name, email, password, phone, role } = req.body
     try {
-        if (!name || !email || !password) {
+        if (!name || !email || !phone || !password) {
             return res.status(400).json({ error: "Missing required fields" });
         }
         const hashedPassword = await hashPassword(password);
@@ -14,13 +14,11 @@ export const createUser = async (req: Request, res: Response) => {
             data: {
                 name,
                 email,
-                password: hashedPassword,
                 phone,
-                role
+                role: role || "USER",
+                password: hashedPassword
             }
-            
         })
-
         res.json(user)
     } catch (error) {
         console.error("CREATE USER ERROR:", error)
@@ -65,34 +63,38 @@ export const getUserId = async (req: Request, res: Response) => {
 
 export const putUserId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { name, email , phone } = req.body;
+    const { name, email, phone, role, password } = req.body;
+
     try {
+        let updateData: any = { name, email, phone, role };
+        if (password) {
+            const hashedPassword = await hashPassword(password);
+            updateData.password = hashedPassword;
+        }
         const user = await prisma.user.update({
             where: { user_id: id },
-            data: { name, email , phone }
+            data: updateData
         });
         res.json(user);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create user' })
+        res.status(500).json({ error: 'Failed to update user' })
     }
 }
 
 export const deleteUserId = async (req: Request, res: Response) => {
-    const id = req.params.id as string
+    const id = req.params.id as string;
     try {
         const user = await prisma.user.delete({
-            where: {
-                user_id: id
-            }
+            where: { user_id: id }
         });
         res.json({
-            message: 'User deleted successfully',
-            user: user
+            message: "User deleted successfully",
+            user
         });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete user' });
+        console.error(error);
+        res.status(500).json({ error: "Failed to delete user" });
     }
-}
-
+};
 
 

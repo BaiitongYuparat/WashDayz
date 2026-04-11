@@ -1,14 +1,15 @@
 import express from 'express'
-import {createOrder , getOrder ,getOrderId ,putOrderId ,deleteOrderId} from '../controllers/orderController';
-import { verifyToken } from '../middlewares/authMiddleware';
+import {createOrder , getOrder ,getOrdersById ,putOrderId ,deleteOrder , putOrderStatus} from '../controllers/orderController';
+
 
 const router = express.Router()
-router.use(verifyToken);
+
 router.post('/', createOrder)
 router.get('/' ,getOrder)
-router.get('/:id' ,getOrderId)
+router.get('/:id' ,getOrdersById)
 router.put('/:id' , putOrderId)
-router.delete('/:id' , deleteOrderId)
+router.delete('/:id' , deleteOrder)
+router.put('/status/:id', putOrderStatus)
 
 
 export default router
