@@ -70,8 +70,7 @@ model AddonService {
 
 model Order {
   order_id   String       @id @default(uuid())
-  pieces     Int
-  price      Float
+  total_price Float?
   status     OrderStatus  @default(WAITING)
   user_id    String
   branch_id  String

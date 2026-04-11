@@ -3,27 +3,46 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/orders";
 
 export type OrderItem = {
-    quantity: number;
-    subtotal: number;
-    mainService?: {
-        name: string;
+  order_item_id: string;
+  quantity: number;
+  subtotal: number;
+  machine_id?: string;
+  machine?: {
+    machine_id: string;
+    type: string;
+    capacity: number;
+    price?: number;
+  };
+  mainService?: {
+    name: string;
+  };
+  orderItemAddons?: {
+    addon_service_id: string;
+    addonService?: {
+      name: string;
+      price: number;
     };
+  }[];
 };
 
 export type OrderStatus = "WAITING" | "PROCESSING" | "DONE";
 
 export type Order = {
-    order_id: string
-    user_id: string
-    branch_id: string
-    service: string
-    pieces: number
-    price: number
-    user: {
-        name: string;
-    };
-    items: OrderItem[];
-    status: string;
+  order_id: string;
+  user_id: string;
+  branch_id: string;
+  address_id?: string;
+  pieces: number;
+  price: number;
+  status: string;
+  created_at?: string;
+  user: {
+    name: string;
+  };
+  branch?: {
+    branch_name: string;
+  };
+  items: OrderItem[];
 };
 
 

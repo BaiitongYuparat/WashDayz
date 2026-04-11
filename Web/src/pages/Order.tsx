@@ -106,7 +106,7 @@ function Orders() {
                                 <td className="p-5">
                                     {order.items?.map((item: OrderItem, index: number) => (
                                         <div key={index}>
-                                            {item.mainService?.name} x {item.quantity}
+                                            {item.machine?.type} {item.machine?.capacity}kg
                                         </div>
                                     ))}
                                 </td>
