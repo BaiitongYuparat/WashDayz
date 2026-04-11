@@ -69,10 +69,6 @@ export const putMainServiceId = async (req: Request, res: Response) => {
 export const deleteMainServiceId = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
-         await prisma.orderItem.deleteMany({
-            where: { main_service_id: id },
-        });
-
         await prisma.service.deleteMany({
             where: { main_service_id: id },
         });

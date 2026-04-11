@@ -53,7 +53,6 @@ model MainService {
   name            String
   description     String?
   main_service_id String               @id @default(uuid())
-  orderItems      OrderItem[]
   service         Service[]
   mainServices    MainServiceMachine[]
 }
@@ -86,12 +85,8 @@ model Order {
 }
 
 model OrderItem {
-  quantity        Int
-  subtotal        Float
   order_item_id   String           @id @default(uuid())
   order_id        String
-  main_service_id String
-  mainService     MainService      @relation(fields: [main_service_id], references: [main_service_id], onDelete: Cascade)
   order           Order            @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
   orderItemAddons OrderItemAddon[]
   machine_id String?
