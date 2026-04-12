@@ -78,10 +78,10 @@ model Order {
   user       User         @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   items      OrderItem[]
   payment    Payment?
-  queue      Queue?
   address_id String?
   address    UserAddress? @relation(fields: [address_id], references: [address_id], onDelete: Cascade)
   created_at DateTime     @default(now())
+   queues Queue[]
 }
 
 model OrderItem {
@@ -123,30 +123,21 @@ model Service {
 
 model Queue {
   queue_id          String         @id @default(uuid())
-  order_id          String         @unique
+  order_id          String         // ← เอา @unique ออก
   branch_id         String
   queue_number      Int
+  machine_type      MachineType?   // ← เพิ่ม
+  branch_machine_id String?        // ← เก็บไว้เหมือนเดิม
   created_at        DateTime       @default(now())
   called_at         DateTime?
   finished_at       DateTime?
-  branch            Branch         @relation(fields: [branch_id], references: [branch_id])
-  order             Order          @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
-  machines     QueueMachine[]
 
-  @@unique([branch_id, queue_number])
+  branch        Branch         @relation(fields: [branch_id], references: [branch_id])
+  order         Order          @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
+  branchMachine BranchMachine? @relation(fields: [branch_machine_id], references: [branch_machine_id])
+
+  @@unique([branch_id, queue_number, machine_type]) // ← แก้ unique
   @@index([branch_id])
-}
-
-// ตารางใหม่ เชื่อม Queue กับเครื่องหลายตัว
-model QueueMachine {
-  id                String        @id @default(uuid())
-  queue_id          String
-  branch_machine_id String
-  machine_type      MachineType   // WASHER / DRYER
-  assigned_at       DateTime      @default(now())
-
-  queue         Queue         @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade)
-  branchMachine BranchMachine @relation(fields: [branch_machine_id], references: [branch_machine_id])
 }
 
 model Machine {
@@ -170,7 +161,7 @@ model BranchMachine {
   branch  Branch  @relation(fields: [branch_id], references: [branch_id])
   machine Machine @relation(fields: [machine_id], references: [machine_id])
 
-  queues QueueMachine[]
+  queues Queue[]
 }
 
 //เชื่อมMainกับเครื่องซัก
