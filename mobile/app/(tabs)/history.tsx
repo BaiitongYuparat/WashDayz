@@ -12,6 +12,7 @@ export default function OrderHistoryScreen() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!user?.user_id) return
     const fetchOrders = async () => {
       try {
         if (!user?.user_id) return
@@ -24,7 +25,7 @@ export default function OrderHistoryScreen() {
       }
     }
     fetchOrders()
-  }, [])
+  }, [user?.user_id])
 
   if (loading) {
     return (

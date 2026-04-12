@@ -73,7 +73,7 @@ export default function OrderSummaryScreen() {
       if (selectedPayment === "QR") {
         router.replace({
           pathname: "/screens/paymentQR",
-          params: { orderId: result.order_id, totalPrice },
+          params: { orderId: result.order_id, totalPrice ,  paymentId: payment.payment_id,  },
         });
       } else {
         await confirmPayment(payment.payment_id)

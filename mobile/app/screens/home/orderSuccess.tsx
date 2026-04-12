@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 export default function OrderSuccessScreen() {
   const router = useRouter();
   const { orderId } = useLocalSearchParams();
+  console.log("orderId:", orderId)
 
   return (
     <View className="flex-1 bg-white items-center justify-center p-6 gap-6">

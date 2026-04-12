@@ -68,8 +68,9 @@ export const createOrder = async (
       addon_id: payload.addon_id,     
     }),
   })
+  const data = await res.json()
   if (!res.ok) throw new Error("สร้าง order ไม่สำเร็จ")
-  return res.json()
+  return data
 }
 
 export const getOrderById = async (orderId: string): Promise<OrderDetail> => {
@@ -77,8 +78,9 @@ export const getOrderById = async (orderId: string): Promise<OrderDetail> => {
   const res = await fetch(`${API_URL}/orders/${orderId}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) throw new Error("โหลด order ไม่สำเร็จ")
-  return res.json()
+  const data = await res.json()  // ← อ่านครั้งเดียวตรงนี้
+  if (!res.ok) throw new Error(data?.error ?? "โหลด order ไม่สำเร็จ")
+  return data
 }
 
 export const getOrdersByUser = async (userId: string): Promise<OrderDetail[]> => {
@@ -86,8 +88,9 @@ export const getOrdersByUser = async (userId: string): Promise<OrderDetail[]> =>
   const res = await fetch(`${API_URL}/orders/user/${userId}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
+  const data = await res.json()
   if (!res.ok) throw new Error("โหลดประวัติไม่สำเร็จ")
-  return res.json()
+  return data
 }
 
 export const putOrderStatus = async (orderId: string, status: string): Promise<void> => {

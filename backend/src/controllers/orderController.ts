@@ -194,7 +194,7 @@ export const putOrderStatus = async (req: Request, res: Response) => {
     }
 }
 export const getOrdersByUser = async (req: Request, res: Response) => {
-  const userId = req.params.userId as string
+   const userId = req.params.userId as string
   try {
     const orders = await prisma.order.findMany({
       where: { user_id: userId },

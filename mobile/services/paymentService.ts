@@ -17,7 +17,6 @@ const getToken = async () => {
   return token
 }
 
-// สร้าง payment หลัง createOrder
 export const createPayment = async (
   order_id: string,
   payment_method: string
@@ -31,11 +30,11 @@ export const createPayment = async (
     },
     body: JSON.stringify({ order_id, payment_method }),
   })
-  if (!res.ok) throw new Error("สร้าง payment ไม่สำเร็จ")
-  return res.json()
+  const data = await res.json() 
+  if (!res.ok) throw new Error(data?.error ?? "สร้าง payment ไม่สำเร็จ")
+  return data
 }
 
-// ยืนยันการชำระเงิน → เปลี่ยน status เป็น PAID
 export const confirmPayment = async (payment_id: string): Promise<Payment> => {
   const token = await getToken()
   const res = await fetch(`${API_URL}/payments/${payment_id}`, {
@@ -49,6 +48,7 @@ export const confirmPayment = async (payment_id: string): Promise<Payment> => {
       paid_at: new Date().toISOString(),
     }),
   })
-  if (!res.ok) throw new Error("ยืนยันการชำระเงินไม่สำเร็จ")
-  return res.json()
+  const data = await res.json() 
+  if (!res.ok) throw new Error(data?.error ?? "ยืนยันการชำระเงินไม่สำเร็จ")
+  return data
 }
