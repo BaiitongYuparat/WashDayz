@@ -75,65 +75,55 @@ export async function runRecommendBranch(input: RecommendInput) {
     } = input;
 
     // ดึง branchMachine  Machine  Queue ที่ยังไม่เสร็จ
-    const branches = await prisma.branch.findMany({
-        where: {
-            branchMachines: {
-                some: {
-                    machine: {
-                        type: machineType,
-                        capacity,
-                        mainServices: mainServiceId
-                            ? {
-                                some: {
-                                    main_service_id: mainServiceId,
-                                },
-                            }
-                            : undefined,
-                    }
+   const branches = await prisma.branch.findMany({
+    where: {
+        branchMachines: {
+            some: {
+                machine: {
+                    type: machineType,
+                    capacity,
+                    mainServices: mainServiceId
+                        ? { some: { main_service_id: mainServiceId } }
+                        : undefined,
                 },
             },
         },
-        include: {
-            branchMachines: {
-                where: {
-                    machine: {
-                        type: machineType,
-                        capacity,
-                    },
-                },
-                include: {
-                    machine: true,
-                    queues: {
-                        where: {
-                            finished_at: null,
-                        },
+    },
+    include: {
+        branchMachines: {
+            where: {
+                machine: { type: machineType, capacity },
+            },
+            include: {
+                machine: true,
+                queues: {                       
+                    where: {
+                        queue: { finished_at: null }
                     },
                 },
             },
         },
-    })
+    },
+})
 
-    // แปลงข้อมูลเป็น payload ส่งให้ Gemini
-    const branchData = branches.map((b) => {
-        const distanceKm = getDistanceKm(userLat, userLng, b.lat_branch!, b.lng_branch!);
-        const machines = b.branchMachines;
+const branchData = branches.map((b) => {
+    const distanceKm = getDistanceKm(userLat, userLng, b.lat_branch!, b.lng_branch!)
+    const machines = b.branchMachines
+    const avgCycleMin = machines[0]?.machine.duration_minutes ?? 45
 
-        // ดึง duration_minutes จาก machine จริง (fallback 45 ถ้าไม่มี)
-        const avgCycleMin = machines[0]?.machine.duration_minutes ?? 45;
-
-        return {
-            branch_id: b.branch_id,
-            branch_name: b.branch_name,
-            distanceKm: Math.round(distanceKm * 100) / 100,
-            travelMinutes: Math.round(distanceKm * 3),
-            machines: {
-                total: machines.length,
-                available: machines.filter((bm) => bm.queues.length === 0).length,
-                queueAhead: machines.reduce((sum, bm) => sum + bm.queues.length, 0),
-                avgCycleMin, // ← มาจาก DB แล้ว
-            },
-        };
-    });
+    return {
+        branch_id: b.branch_id,
+        branch_name: b.branch_name,
+        distanceKm: Math.round(distanceKm * 100) / 100,
+        travelMinutes: Math.round(distanceKm * 3),
+        machines: {
+            total: machines.length,
+            available: machines.filter((bm) => bm.queues.length === 0).length,  // ← type อนุมานได้แล้ว
+            queueAhead: machines.reduce((sum: number, bm) => sum + bm.queues.length, 0), // ← ใส่ type ให้ sum
+            avgCycleMin,
+        },
+    }
+})
 
     // ส่งให้ Gemini คำนวณและแนะนำ
     const prompt = `

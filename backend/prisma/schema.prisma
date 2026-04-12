@@ -131,11 +131,22 @@ model Queue {
   finished_at       DateTime?
   branch            Branch         @relation(fields: [branch_id], references: [branch_id])
   order             Order          @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
-  branch_machine_id String?
-  branchMachine     BranchMachine? @relation(fields: [branch_machine_id], references: [branch_machine_id])
+  machines     QueueMachine[]
 
   @@unique([branch_id, queue_number])
   @@index([branch_id])
+}
+
+// ตารางใหม่ เชื่อม Queue กับเครื่องหลายตัว
+model QueueMachine {
+  id                String        @id @default(uuid())
+  queue_id          String
+  branch_machine_id String
+  machine_type      MachineType   // WASHER / DRYER
+  assigned_at       DateTime      @default(now())
+
+  queue         Queue         @relation(fields: [queue_id], references: [queue_id], onDelete: Cascade)
+  branchMachine BranchMachine @relation(fields: [branch_machine_id], references: [branch_machine_id])
 }
 
 model Machine {
@@ -159,7 +170,7 @@ model BranchMachine {
   branch  Branch  @relation(fields: [branch_id], references: [branch_id])
   machine Machine @relation(fields: [machine_id], references: [machine_id])
 
-  queues Queue[]
+  queues QueueMachine[]
 }
 
 //เชื่อมMainกับเครื่องซัก
@@ -178,6 +189,7 @@ enum OrderStatus {
   WASHING
   WAITING
   FINISHED
+  CANCELLED
 }
 
 enum RoleStatus {
