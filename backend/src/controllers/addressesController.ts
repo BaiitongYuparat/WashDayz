@@ -7,7 +7,7 @@ export const createAddresses = async (req: AuthRequest, res: Response) => {
     try {
         // ถ้าส่ง user_id มาใน body (admin mode) ให้ใช้อันนั้น ถ้าไม่มีใช้จาก token
         const userId = user_id ?? req.user?.user_id;
-        
+
         if (!userId || !receiver_name || !district || !province || !postal_code) {
             return res.status(400).json({ error: "Missing required fields" });
         }
@@ -40,7 +40,7 @@ export const getAddress = async (req: AuthRequest, res: Response) => {
             return res.status(401).json({ error: "Unauthorized" });
         }
         const users = await prisma.userAddress.findMany({
-            where: {user_id: userId}
+            where: { user_id: userId }
         });
         console.log("USER ID:", userId);
         console.log("ADDRESS RESULT:", users);
@@ -72,16 +72,16 @@ export const getAddressId = async (req: AuthRequest, res: Response) => {
         console.log("USER ID:", userId);
         res.json(address)
     } catch (error: any) {
-  console.log("ERROR DATA:", error.response?.data);
-}
+        console.log("ERROR DATA:", error.response?.data);
+    }
 }
 
 export const putAddress = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
-     const {label,houseNo, receiver_name, district, subDistrict, province, postal_code, phone , lat , lng } = req.body;
+    const { label, houseNo, receiver_name, district, subDistrict, province, postal_code, phone, lat, lng } = req.body;
     try {
         const userId = req.user?.user_id;
-         const userRole = req.user?.role; 
+        const userRole = req.user?.role;
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
@@ -89,7 +89,7 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
             where: { address_id: id },
         });
 
-          if (!existing || (existing.user_id !== userId && userRole !== "ADMIN")) {
+        if (!existing || (existing.user_id !== userId && userRole !== "ADMIN")) {
             return res.status(403).json({ error: "Forbidden" });
         }
 
@@ -107,8 +107,8 @@ export const putAddress = async (req: AuthRequest, res: Response) => {
                 province,
                 postal_code,
                 phone,
-                lat, 
-                lng  
+                lat,
+                lng
             }
         })
         res.json(address)
@@ -123,26 +123,26 @@ export const deleteAddress = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string
     try {
         const userId = req.user?.user_id;
+        const userRole = req.user?.role; //admin ลบได้
 
         if (!userId) {
             return res.status(401).json({ error: "Unauthorized" });
         }
+        const existing = await prisma.userAddress.findUnique({
+            where: { address_id: id }
+        });
 
-        
-        const address = await prisma.userAddress.deleteMany({
-            where: {
-                address_id: id,
-                user_id: userId,
-            },
-            });
-
-        if (address.count === 0) {
-        return res.status(403).json({ error: "Forbidden" });
+        if (!existing || (existing.user_id !== userId && userRole !== "ADMIN")) {
+            return res.status(403).json({ error: "Forbidden" });
         }
-            
+
+          await prisma.userAddress.delete({
+            where: { address_id: id }
+        });
+        
         res.json({
             message: 'address deleted successfully',
-            address: address
+            address: existing
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete address' });

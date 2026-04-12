@@ -26,6 +26,7 @@ function User() {
     province: "",
     postal_code: "",
     phone: "",
+    houseNo: "",
   })
   const [openAddressModal, setOpenAddressModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -108,14 +109,14 @@ function User() {
   //ที่อยู่
   const handleAddAddress = async () => {
     if (!selectedUserId) return;
-
-    const token = localStorage.getItem("token"); // ดึง token
+    const token = localStorage.getItem("token");
     if (!token) return;
+    if (!address.receiver_name || !address.district || !address.province || !address.postal_code) {
+      alert("กรุณากรอกข้อมูลให้ครบ (ชื่อผู้รับ, อำเภอ, จังหวัด, รหัสไปรษณีย์)");
+      return;
+    }
 
-    await createAddress({
-      ...address,
-      user_id: selectedUserId
-    }, token); // ส่ง token ไปด้วย
+    await createAddress({ ...address, user_id: selectedUserId }, token); // ส่ง token ไปด้วย
 
     const data = await getUsers();
     setUsers(data);
@@ -127,7 +128,8 @@ function User() {
       subDistrict: "",
       province: "",
       postal_code: "",
-      phone: ""
+      phone: "",
+      houseNo: "",
     });
 
     setOpenAddressModal(false);
@@ -161,6 +163,7 @@ function User() {
   const handleSaveEditAddress = async () => {
     if (!editAddressForm?.address_id) return;
     const token = localStorage.getItem("token");
+    console.log("token:", token);
     if (!token) return;
 
     await updateAddress(editAddressForm.address_id, editAddressForm, token);
@@ -170,14 +173,18 @@ function User() {
   };
 
   //
-  const handleDeleteAddress = async (addressId: string) => {
+  const handleDeleteaddress = async (id: string) => {
     if (!confirm("Delete this address?")) return;
+
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    await deleteAddress(addressId, token);
-    const data = await getUsers();
-    setUsers(data);
+    await deleteAddress(id, token);
+
+    setUsers(users.map((user) => ({
+      ...user,
+      addresses: user.addresses?.filter((addr) => addr.address_id !== id),
+    })));
   };
 
 
@@ -305,7 +312,7 @@ function User() {
                 <td className="p-5">
                   {user.addresses?.map((address) => (
                     <div key={address.address_id}>
-                      {address.label} - {address.district} {address.postal_code}
+                      {address.label} - {address.houseNo} {address.district}  {address.province} {address.postal_code}
                     </div>
                   ))}
                 </td>
@@ -316,7 +323,9 @@ function User() {
                       await putUser(user.user_id, { ...user, role: e.target.value });
                       setUsers(await getUsers());
                     }}
-                    className="border rounded-lg p-1 text-sm"
+                    className={`px-3 py-1 rounded-full text-sm font-semibold
+                      ${user.role === "ADMIN" ? "bg-red-100 text-red-700 border-red-200" : "bg-blue-100 text-blue-700 border-blue-200"}
+                      `}
                   >
                     <option value="ADMIN">ADMIN</option>
                     <option value="USER">USER</option>
@@ -363,19 +372,23 @@ function User() {
 
             {users.find(u => u.user_id === selectedUserId)?.addresses?.map((addr) => (
               <div key={addr.address_id} className="text-sm text-gray-600 flex items-center justify-between gap-2">
-                <span><FaMapMarkerAlt /> {addr.label} - {addr.district} {addr.postal_code}</span>
-                <button
-                  onClick={() => setEditAddressForm(addr)}
-                  className="text-yellow-400 hover:text-yellow-500"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => handleDeleteAddress(addr.address_id!)}
-                  className="text-red-500 text-xl hover:text-red-700 transition"
-                >
-                  <FaTrash />
-                </button>
+                <span className="flex items-center gap-1">
+                  <FaMapMarkerAlt /> {addr.label} - {addr.houseNo} {addr.district} {addr.province} {addr.postal_code}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditAddressForm(addr)}
+                    className="text-yellow-400 hover:text-yellow-500"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteaddress(addr.address_id!)}
+                    className="text-red-500  hover:text-red-700"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
               </div>
             ))}
 
@@ -396,6 +409,15 @@ function User() {
                 className="w-full border rounded-lg p-2 text-sm"
                 value={address.receiver_name}
                 onChange={(e) => setAddress({ ...address, receiver_name: e.target.value })}
+              />
+            </div>
+
+             <div className="space-y-1">
+              <label className="text-sm text-gray-500">บ้านเลขที่</label>
+              <input
+                className="w-full border rounded-lg p-2 text-sm"
+                value={address.houseNo}
+                onChange={(e) => setAddress({ ...address, houseNo: e.target.value })}
               />
             </div>
 
@@ -558,72 +580,81 @@ function User() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">อำเภอ</label>
+                <label className="text-sm text-gray-500">บ้านเลขที่</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
-                  value={editAddressForm.district}
-                  onChange={(e) => setEditAddressForm({ ...editAddressForm, district: e.target.value })}
+                  value={editAddressForm.houseNo}
+                  onChange={(e) => setEditAddressForm({ ...editAddressForm, houseNo: e.target.value })}
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-sm text-gray-500">ตำบล</label>
-                <input
-                  className="w-full border rounded-lg p-2 text-sm"
-                  value={editAddressForm.subDistrict ?? ""}
-                  onChange={(e) => setEditAddressForm({ ...editAddressForm, subDistrict: e.target.value })}
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-500">อำเภอ</label>
+                  <input
+                    className="w-full border rounded-lg p-2 text-sm"
+                    value={editAddressForm.district}
+                    onChange={(e) => setEditAddressForm({ ...editAddressForm, district: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-500">ตำบล</label>
+                  <input
+                    className="w-full border rounded-lg p-2 text-sm"
+                    value={editAddressForm.subDistrict ?? ""}
+                    onChange={(e) => setEditAddressForm({ ...editAddressForm, subDistrict: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-500">จังหวัด</label>
+                  <input
+                    className="w-full border rounded-lg p-2 text-sm"
+                    value={editAddressForm.province ?? ""}
+                    onChange={(e) => setEditAddressForm({ ...editAddressForm, province: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm text-gray-500">รหัสไปรษณีย์</label>
+                  <input
+                    className="w-full border rounded-lg p-2 text-sm"
+                    value={editAddressForm.postal_code}
+                    onChange={(e) => setEditAddressForm({ ...editAddressForm, postal_code: e.target.value })}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">จังหวัด</label>
+                <label className="text-sm text-gray-500">เบอร์โทร</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
-                  value={editAddressForm.province ?? ""}
-                  onChange={(e) => setEditAddressForm({ ...editAddressForm, province: e.target.value })}
+                  value={editAddressForm.phone ?? ""}
+                  onChange={(e) => setEditAddressForm({ ...editAddressForm, phone: e.target.value })}
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-sm text-gray-500">รหัสไปรษณีย์</label>
-                <input
-                  className="w-full border rounded-lg p-2 text-sm"
-                  value={editAddressForm.postal_code}
-                  onChange={(e) => setEditAddressForm({ ...editAddressForm, postal_code: e.target.value })}
-                />
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setEditAddressForm(null)}
+                  className="px-4 py-2 rounded-lg border text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEditAddress}
+                  className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
+                >
+                  Save
+                </button>
               </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm text-gray-500">เบอร์โทร</label>
-              <input
-                className="w-full border rounded-lg p-2 text-sm"
-                value={editAddressForm.phone ?? ""}
-                onChange={(e) => setEditAddressForm({ ...editAddressForm, phone: e.target.value })}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setEditAddressForm(null)}
-                className="px-4 py-2 rounded-lg border text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveEditAddress}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-              >
-                Save
-              </button>
             </div>
           </div>
-        </div>
       )}
-    </div>
-  );
+        </div>
+      );
 }
 
-export default User;
+      export default User;

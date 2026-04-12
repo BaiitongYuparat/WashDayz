@@ -6,6 +6,7 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+  
 
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -27,5 +28,6 @@ export type Auth = {
 
 export const login = async ( email: string, password: string ): Promise<Auth> => {
   const res = await api.post("/auth/login", { email, password }); 
+  
   return res.data;
 };

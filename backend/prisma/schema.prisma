@@ -103,7 +103,7 @@ model OrderItemAddon {
 
 model Payment {
   payment_method String
-  status         String
+  status          PaymentStatus @default(PENDING)
   created_at     DateTime  @default(now())
   paid_at        DateTime?
   payment_id     String    @id @default(uuid())
@@ -198,4 +198,9 @@ enum BranchMachineStatus {
 enum AddonType {
   ADDON
   EXTRA
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
 }
