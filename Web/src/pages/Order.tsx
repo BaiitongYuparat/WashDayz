@@ -57,6 +57,7 @@ function Orders() {
         if (status === "WAITING") return "bg-yellow-100 text-yellow-700";
         if (status === "WASHING") return "bg-blue-100 text-blue-700";
         if (status === "FINISHED") return "bg-green-100 text-green-700";
+        if (status === "CANCELLED") return "bg-red-100 text-red-700";
         return "";
     };
 
@@ -108,6 +109,7 @@ function Orders() {
                                                 ${order.status === "WAITING" && "bg-yellow-100 text-yellow-700"}
                                                 ${order.status === "WASHING" && "bg-blue-100 text-blue-700"}
                                                 ${order.status === "FINISHED" && "bg-green-100 text-green-700"}
+                                                ${order.status === "CANCELLED" && "bg-red-100 text-red-700"}
                                                 `}
                                     >
                                         {order.status}
@@ -158,6 +160,7 @@ function Orders() {
                                 <option value="WAITING">WAITING</option>
                                 <option value="WASHING">WASHING</option>
                                 <option value="FINISHED">FINISHED</option>
+                                <option value="CANCELLED">CANCELLED</option>
                             </select>
                         </div>
 
