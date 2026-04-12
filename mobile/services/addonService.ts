@@ -1,5 +1,6 @@
 import axios from "axios";
 const API_URL = "http://172.20.10.2:8080/services/addons";
+const ADDONS = "http://172.20.10.2:8080/addonservice"
 
 export interface AddonType {
   addon_service_id: string;
@@ -18,12 +19,10 @@ export const getAddonByMainServiceId = async (main_service_id:string): Promise<A
 };
 
 export const getAddonByIds = async (ids: string[]): Promise<AddonType[]> => {
-  const results = await Promise.all(
-    ids.map(async (id) => {
-      const res = await fetch(`${API_URL}/addonservice/${id}`)
-      if (!res.ok) throw new Error(`โหลด addon ${id} ไม่สำเร็จ`)
-      return res.json()
-    })
-  )
-  return results
+  const res = await axios.get(`${ADDONS}/by-ids`, {
+    params: {
+      ids: ids.join(","),
+    },
+  })
+  return res.data
 }

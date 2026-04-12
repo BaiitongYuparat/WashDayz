@@ -193,3 +193,26 @@ export const putOrderStatus = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to update Order' })
     }
 }
+export const getOrdersByUser = async (req: Request, res: Response) => {
+  const userId = req.params.userId as string
+  try {
+    const orders = await prisma.order.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: "desc" },
+      include: {
+        branch: true,
+        items: {
+          include: {
+            machine: true,
+            orderItemAddons: {
+              include: { addonService: true }
+            }
+          }
+        }
+      }
+    })
+    res.json(orders)
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch orders" })
+  }
+}

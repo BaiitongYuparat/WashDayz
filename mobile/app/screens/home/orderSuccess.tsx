@@ -1,15 +1,14 @@
-import { View, Text } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
-import { CustomButton } from "@/components/ui/CustomButton"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { View, Text } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { CustomButton } from "@/components/ui/CustomButton";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function OrderSuccessScreen() {
-  const router = useRouter()
-  const { orderId } = useLocalSearchParams()
+  const router = useRouter();
+  const { orderId } = useLocalSearchParams();
 
   return (
     <View className="flex-1 bg-white items-center justify-center p-6 gap-6">
-
       {/* icon */}
       <View className="w-24 h-24 rounded-full bg-blue-light items-center justify-center">
         <MaterialCommunityIcons name="check-circle" size={56} color="#00ACC3" />
@@ -28,18 +27,23 @@ export default function OrderSuccessScreen() {
       <View className="w-full gap-3 mt-4">
         <CustomButton
           title="ดูคำสั่งซื้อ"
-          onPress={() => router.push({
-            pathname: "/screens/home/orderDetail",
-            params: { orderId }
-          })}
+          onPress={() =>
+            router.push({
+              pathname: "/screens/home/orderDetail",
+              params: { orderId },
+            })
+          }
         />
         <CustomButton
-          title="กลับหน้าหลัก"
-          variant="secondary"
-          onPress={() => router.replace("/(tabs)")}
+          title="ติดตามคำสั่งซื้อ"
+          onPress={() =>
+            router.replace({
+              pathname: "/(tabs)/track",
+              params: { orderId },
+            })
+          }
         />
       </View>
-
     </View>
-  )
+  );
 }

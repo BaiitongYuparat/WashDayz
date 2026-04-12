@@ -186,7 +186,18 @@ export default function OrderScreen() {
         </Text>
         <CustomButton
           title="สั่งซื้อ"
-          onPress={() => console.log("push")}
+          onPress={() =>
+    router.push({
+      pathname: "/screens/home/orderSummary",
+      params: {
+        serviceId,
+        branchId,
+        machineIds,
+        addonIds: selectedAddons.join(","),
+        totalPrice: price,
+      },
+    })
+  }
           className="p-4 rounded-lg"
         />
       </View>

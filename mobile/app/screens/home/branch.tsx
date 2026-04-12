@@ -10,6 +10,7 @@ import { recommendBranch, RecommendResult } from "@/services/branchService"
 import { useSelector } from "react-redux"
 import { RootState } from "@/redux/store"
 import { useRef } from "react"
+import { UserHeader } from "@/components/UserHeader"
 
 const MACHINE_TYPE_LABELS: Record<string, string> = {
   WASHER: "เครื่องซัก",
@@ -112,6 +113,8 @@ export default function BranchSelectScreen() {
     <View className="flex-1 bg-gray-50">
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
 
+        <UserHeader />
+
         <Text className="font-bold text-lg text-gray-800 mb-3">เลือกประเภทเครื่อง</Text>
         <View className="gap-3">
           {machines.length === 0 ? (
@@ -159,4 +162,5 @@ export default function BranchSelectScreen() {
     </View>
   )
 }
+
 

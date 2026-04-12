@@ -39,8 +39,8 @@ export type OrderDetail = {
 export type CreateOrderPayload = {
   branch_id: string
   address_id?: string
-  machine_ids: string[]
-  addon_ids: string[]
+  machine_id: string[]
+  addon_id: string[]
 }
 
 const getToken = async () => {
@@ -60,7 +60,13 @@ export const createOrder = async (
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ user_id: userId, ...payload }),
+    body: JSON.stringify({
+      user_id: userId,
+      branch_id: payload.branch_id,
+      address_id: payload.address_id,
+      machine_id: payload.machine_id, 
+      addon_id: payload.addon_id,     
+    }),
   })
   if (!res.ok) throw new Error("สร้าง order ไม่สำเร็จ")
   return res.json()
@@ -73,4 +79,28 @@ export const getOrderById = async (orderId: string): Promise<OrderDetail> => {
   })
   if (!res.ok) throw new Error("โหลด order ไม่สำเร็จ")
   return res.json()
+}
+
+export const getOrdersByUser = async (userId: string): Promise<OrderDetail[]> => {
+  const token = await getToken()
+  const res = await fetch(`${API_URL}/orders/user/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) throw new Error("โหลดประวัติไม่สำเร็จ")
+  return res.json()
+}
+
+export const putOrderStatus = async (orderId: string, status: string): Promise<void> => {
+  const token = await getToken()
+  const res = await fetch(`${API_URL}/orders/status/${orderId}`, // ← แก้ตรงนี้
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    }
+  )
+  if (!res.ok) throw new Error("อัพเดทสถานะไม่สำเร็จ")
 }

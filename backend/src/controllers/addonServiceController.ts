@@ -100,3 +100,22 @@ export const deleteAddonServiceId = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to delete addonService' })
     }
 }
+
+export const getAddonByIds = async (req: Request, res: Response) => {
+  try {
+    const ids = (req.query.ids as string)?.split(",")
+
+    const addons = await prisma.addonService.findMany({
+      where: {
+        addon_service_id: {
+          in: ids,
+        },
+      },
+    })
+
+    return res.json(addons)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
+}
