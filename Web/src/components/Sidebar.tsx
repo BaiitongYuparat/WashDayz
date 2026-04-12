@@ -66,7 +66,26 @@ function Sidebar() {
                     </NavLink>
                 </li>
 
+
+                     <li>
+                    <NavLink
+                        to="/payment"
+                        className={({ isActive }) =>
+                            `block py-2 transition ${isActive
+                                ? "text-blue-400 font-bold text-2xl"
+                                : "text-gray-500 text-lg hover:text-blue-400"
+                            }`
+                        }
+                    >
+                        Payment
+                    </NavLink>
+                </li>
+
+                
+
             </ul>
+
+            
         </div>
     );
 }

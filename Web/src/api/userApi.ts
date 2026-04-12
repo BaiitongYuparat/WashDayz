@@ -15,14 +15,17 @@ export type User = {
 
 export type Address = {
   address_id?: string;
-   user_id?: string;  
+  user_id?: string;  
   label: string;
   receiver_name: string;
+  houseNo?: string;  
   district: string;
   subDistrict?: string;
   province?: string;
   postal_code: string;
   phone?: string;
+  lat?: number;      
+  lng?: number;      
 };
 
 
@@ -87,11 +90,11 @@ export const updateAddress = async(id: string,data:Address,token:string ): Promi
   return res.data
 }
 
-export const deleteAddress = async(id: string,token:string ): Promise<Address> => {
-  const res = await axios.put(`${ADDRESS_URL}/${id}`,{
+// userApi.ts
+export const deleteAddress = async (id: string, token: string) => {
+  await axios.delete(`${ADDRESS_URL}/${id}`, {
     headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-  return res.data
-}
+      Authorization: `Bearer ${token}`, 
+    },
+  });
+};

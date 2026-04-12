@@ -6,35 +6,36 @@ import Orders from "./pages/Order";
 import Services from "./pages/Service";
 import Branch from "./pages/Branch";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TopBar from "./components/TopBar";
+import Payments from "./pages/Payment";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-       
         <Route path="/login" element={<Login />} />
-
-        
         <Route
           path="/*"
           element={
             <ProtectedRoute role="ADMIN">
               <div className="flex">
                 <Sidebar />
-                <div className="p-5 flex-1">
-                  <Routes>
-                    <Route path="/order" element={<Orders />} />
-                    <Route path="/user" element={<User />} />
-                    <Route path="/service" element={<Services />} />
-                    <Route path="/branch" element={<Branch />} />
-                  </Routes>
+                <div className="flex-1 flex flex-col">
+                  <TopBar />
+                  <div className="p-5">
+                    <Routes>
+                      <Route path="/order" element={<Orders />} />
+                      <Route path="/user" element={<User />} />
+                      <Route path="/service" element={<Services />} />
+                      <Route path="/branch" element={<Branch />} />
+                      <Route path="/payment" element={<Payments />} />
+                    </Routes>
+                  </div>
                 </div>
               </div>
             </ProtectedRoute>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );
