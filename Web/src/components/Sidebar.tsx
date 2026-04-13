@@ -37,7 +37,7 @@ function Sidebar() {
                         Service
                     </NavLink>
                 </li>
-                
+
                 <li>
                     <NavLink
                         to="/user"
@@ -52,7 +52,7 @@ function Sidebar() {
                     </NavLink>
                 </li>
 
-                     <li>
+                <li>
                     <NavLink
                         to="/branch"
                         className={({ isActive }) =>
@@ -67,9 +67,9 @@ function Sidebar() {
                 </li>
 
 
-                     <li>
+                <li>
                     <NavLink
-                        to="/payment"
+                        to="/payments"
                         className={({ isActive }) =>
                             `block py-2 transition ${isActive
                                 ? "text-blue-400 font-bold text-2xl"
@@ -81,11 +81,11 @@ function Sidebar() {
                     </NavLink>
                 </li>
 
-                
+
 
             </ul>
 
-            
+
         </div>
     );
 }

@@ -28,7 +28,7 @@ function App() {
                       <Route path="/user" element={<User />} />
                       <Route path="/service" element={<Services />} />
                       <Route path="/branch" element={<Branch />} />
-                      <Route path="/payment" element={<Payments />} />
+                      <Route path="/payments" element={<Payments />} />
                     </Routes>
                   </div>
                 </div>

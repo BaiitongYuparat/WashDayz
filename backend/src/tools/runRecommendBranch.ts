@@ -6,6 +6,8 @@ import "dotenv/config"
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" })
 
+
+//คำนวณระยะทาง
 function getDistanceKm(
     lat1: number, lng1: number,
     lat2: number, lng2: number
@@ -23,13 +25,18 @@ function getDistanceKm(
 
 const SYSTEM_PROMPT = `
 คุณคือ AI ผู้ช่วยเลือกสาขาร้านซักผ้าหยอดเหรียญ
+
 ## สูตรคำนวณ
-totalTime = travelMinutes + waitTime
-waitTime = queueAhead × avgCycleMin (ถ้ามีเครื่องว่าง → waitTime = 0)
+- totalTime = travelMinutes + waitTime
+- waitTime = ถ้ามีเครื่องว่าง → 0, ถ้าไม่มี → min(waitTimePerMachine) ของทุกเครื่องในสาขา
+- waitTimePerMachine = จำนวนคิวที่รออยู่ในเครื่องนั้น × avgCycleMin
+
 ## กฎ
 - ถ้าไม่มีเครื่องขนาดที่ต้องการ → ตัดออก
-- ถ้าทุกสาขาไม่มีเครื่องว่าง → เลือกรอน้อยสุด
+- ถ้าทุกสาขาไม่มีเครื่องว่าง → เลือกสาขาที่ waitTime น้อยสุด
+- ดู waitTimePerMachine ของแต่ละเครื่อง แล้วเลือกเครื่องที่รอน้อยสุด
 - ตอบ JSON เท่านั้น ห้ามมี text อื่น
+
 ## FORMAT
 {
   "recommendedBranchId": "...",
@@ -90,10 +97,17 @@ export async function runRecommendBranch(input: RecommendInput) {
                 },
                 include: {
                     machine: true,
-                    queues: {                        
+                    queues: {
                         where: {
-                            finished_at: null,       
+                            finished_at: null,
                             branch_machine_id: { not: null }
+                        },
+                        // เพื่อให้รู้ว่าแต่ละเครื่องมีคิวอะไรรออยู่บ้าง
+                        select: {
+                            queue_id: true,
+                            queue_number: true,
+                            created_at: true,
+                            machine_type: true,
                         }
                     },
                 },
@@ -106,6 +120,28 @@ export async function runRecommendBranch(input: RecommendInput) {
         const machines = b.branchMachines
         const avgCycleMin = machines[0]?.machine.duration_minutes ?? 45
 
+        // machinesDetail คำนวณ waitTime ของแต่ละเครื่องแยกกัน
+        // queueCount  คิวที่รออยู่ในเครื่องนี้
+        // waitTimeMinutes queueCount × avgCycleMin (รอนานแค่ไหน)
+        const machinesDetail = machines.map((bm) => {
+            const queueCount = bm.queues.length
+            const waitTime = queueCount * avgCycleMin
+            return {
+                branch_machine_id: bm.branch_machine_id,
+                status: bm.status,
+                queueCount,
+                waitTimeMinutes: waitTime,
+                avgCycleMin,
+            }
+        })
+
+        //bestMachine หาเครื่องที่รอน้อยสุดในสาขานี้
+        const bestMachine = machinesDetail.reduce((min, bm) =>
+            bm.waitTimeMinutes < min.waitTimeMinutes ? bm : min
+        , machinesDetail[0])
+
+        const hasAvailable = machinesDetail.some(bm => bm.status === "AVAILABLE")
+
         return {
             branch_id: b.branch_id,
             branch_name: b.branch_name,
@@ -113,9 +149,14 @@ export async function runRecommendBranch(input: RecommendInput) {
             travelMinutes: Math.round(distanceKm * 3),
             machines: {
                 total: machines.length,
-                available: machines.filter((bm) => bm.queues.length === 0).length,
-                queueAhead: machines.reduce((sum: number, bm) => sum + bm.queues.length, 0),
+                available: machinesDetail.filter(bm => bm.status === "AVAILABLE").length,
                 avgCycleMin,
+                // detailส่งรายละเอียดทุกเครื่องให้ AI เห็นว่าแต่ละเครื่องรอนานแค่ไหน
+                detail: machinesDetail,
+                // ถ้ามีเครื่องว่าง = 0, ถ้าไม่มี = เครื่องที่รอน้อยสุด
+                bestWaitMinutes: hasAvailable
+                    ? 0
+                    : bestMachine?.waitTimeMinutes ?? 0
             },
         }
     })
