@@ -46,8 +46,7 @@ export const getQueueByOrderId = async (
 ): Promise<Queue[]> => {
   const token = await getToken()
 
-  const res = await axios.get(`${API_URL}`, {
-    params: { order_id },
+  const res = await axios.get(`${API_URL}/order/${order_id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
