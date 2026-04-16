@@ -64,7 +64,10 @@ export const createQueue = async (req: Request, res: Response) => {
                     where: {
                         branch_id,
                         status: "AVAILABLE",
-                        machine: { type: machineType }
+                        machine: { type: machineType },
+                        queues: {
+                            none: { finished_at: null } // ไม่มีคิวค้างอยู่
+                        }
                     }
                 })
 
