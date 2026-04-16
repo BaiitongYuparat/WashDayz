@@ -6,12 +6,7 @@ import "dotenv/config"
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" })
 
-
-//คำนวณระยะทาง
-function getDistanceKm(
-    lat1: number, lng1: number,
-    lat2: number, lng2: number
-): number {
+function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371
     const dLat = (lat2 - lat1) * Math.PI / 180
     const dLng = (lng2 - lng1) * Math.PI / 180
@@ -28,13 +23,14 @@ const SYSTEM_PROMPT = `
 
 ## สูตรคำนวณ
 - totalTime = travelMinutes + waitTime
-- waitTime = ถ้ามีเครื่องว่าง → 0, ถ้าไม่มี → min(waitTimePerMachine) ของทุกเครื่องในสาขา
-- waitTimePerMachine = จำนวนคิวที่รออยู่ในเครื่องนั้น × avgCycleMin
+- waitTime = max(bestWaitMinutes ของแต่ละ machineGroup) เพราะใช้เครื่องพร้อมกัน
+- bestWaitMinutes = ถ้ามีเครื่องว่าง → 0, ถ้าไม่มี → min(waitTimePerMachine) ของเครื่องในกลุ่มนั้น
+- waitTimePerMachine = queueCount × avgCycleMin
 
 ## กฎ
-- ถ้าไม่มีเครื่องขนาดที่ต้องการ → ตัดออก
-- ถ้าทุกสาขาไม่มีเครื่องว่าง → เลือกสาขาที่ waitTime น้อยสุด
-- ดู waitTimePerMachine ของแต่ละเครื่อง แล้วเลือกเครื่องที่รอน้อยสุด
+- สาขาต้องมีครบทุก machineGroup ที่ลูกค้าต้องการ ถ้าขาดแม้แต่กลุ่มเดียว → ตัดออก
+- เลือกสาขาที่ totalTime น้อยสุด
+- ถ้า totalTime เท่ากัน → distanceKm น้อยสุด
 - ตอบ JSON เท่านั้น ห้ามมี text อื่น
 
 ## FORMAT
@@ -59,111 +55,104 @@ const SYSTEM_PROMPT = `
 }
 `.trim()
 
+interface MachineTypeInput {
+    type: MachineType
+    capacity: number
+}
+
 interface RecommendInput {
     userLat: number
     userLng: number
-    machineType?: MachineType
-    capacity?: number
+    machineTypes: MachineTypeInput[]
     mainServiceId?: string
 }
 
 export async function runRecommendBranch(input: RecommendInput) {
-    const {
-        userLat,
-        userLng,
-        machineType = MachineType.WASHER,
-        capacity = 10,
-        mainServiceId,
-    } = input
+    const { userLat, userLng, machineTypes, mainServiceId } = input
 
     const branches = await prisma.branch.findMany({
         where: {
-            branchMachines: {
-                some: {
-                    machine: {
-                        type: machineType,
-                        capacity,
-                        mainServices: mainServiceId
-                            ? { some: { main_service_id: mainServiceId } }
-                            : undefined,
+            AND: machineTypes.map(({ type, capacity }) => ({
+                branchMachines: {
+                    some: {
+                        machine: {
+                            type,
+                            capacity,
+                            ...(mainServiceId ? {
+                                mainServices: { some: { main_service_id: mainServiceId } }
+                            } : {})
+                        }
                     }
-                },
-            },
+                }
+            }))
         },
         include: {
             branchMachines: {
                 where: {
-                    machine: { type: machineType, capacity },
+                    machine: {
+                        OR: machineTypes.map(({ type, capacity }) => ({ type, capacity }))
+                    }
                 },
                 include: {
                     machine: true,
                     queues: {
-                        where: {
-                            finished_at: null,
-                            branch_machine_id: { not: null }
-                        },
-                        // เพื่อให้รู้ว่าแต่ละเครื่องมีคิวอะไรรออยู่บ้าง
-                        select: {
-                            queue_id: true,
-                            queue_number: true,
-                            created_at: true,
-                            machine_type: true,
-                        }
-                    },
-                },
-            },
-        },
+                        where: { finished_at: null, branch_machine_id: { not: null } },
+                        select: { queue_id: true, queue_number: true, created_at: true }
+                    }
+                }
+            }
+        }
     })
 
     const branchData = branches.map((b) => {
         const distanceKm = getDistanceKm(userLat, userLng, b.lat_branch!, b.lng_branch!)
-        const machines = b.branchMachines
-        const avgCycleMin = machines[0]?.machine.duration_minutes ?? 45
 
-        // machinesDetail คำนวณ waitTime ของแต่ละเครื่องแยกกัน
-        // queueCount  คิวที่รออยู่ในเครื่องนี้
-        // waitTimeMinutes queueCount × avgCycleMin (รอนานแค่ไหน)
-        const machinesDetail = machines.map((bm) => {
-            const queueCount = bm.queues.length
-            const waitTime = queueCount * avgCycleMin
-            return {
+        const machineGroups = machineTypes.map(({ type, capacity }) => {
+            const machines = b.branchMachines.filter(
+                (bm) => bm.machine.type === type && bm.machine.capacity === capacity
+            )
+            const avgCycleMin = machines[0]?.machine.duration_minutes ?? 45
+
+            const machinesDetail = machines.map((bm) => ({
                 branch_machine_id: bm.branch_machine_id,
                 status: bm.status,
-                queueCount,
-                waitTimeMinutes: waitTime,
+                queueCount: bm.queues.length,
+                waitTimeMinutes: bm.queues.length * avgCycleMin,
                 avgCycleMin,
+            }))
+
+            const hasAvailable = machinesDetail.some((bm) => bm.status === "AVAILABLE")
+            const bestMachine = machinesDetail.reduce(
+                (min, bm) => bm.waitTimeMinutes < min.waitTimeMinutes ? bm : min,
+                machinesDetail[0]
+            )
+
+            return {
+                type,
+                capacity,
+                total: machines.length,
+                available: machinesDetail.filter((bm) => bm.status === "AVAILABLE").length,
+                avgCycleMin,
+                detail: machinesDetail,
+                bestWaitMinutes: hasAvailable ? 0 : (bestMachine?.waitTimeMinutes ?? 0),
             }
         })
 
-        //bestMachine หาเครื่องที่รอน้อยสุดในสาขานี้
-        const bestMachine = machinesDetail.reduce((min, bm) =>
-            bm.waitTimeMinutes < min.waitTimeMinutes ? bm : min
-        , machinesDetail[0])
-
-        const hasAvailable = machinesDetail.some(bm => bm.status === "AVAILABLE")
+        const totalWaitMinutes = Math.max(...machineGroups.map((g) => g.bestWaitMinutes))
 
         return {
             branch_id: b.branch_id,
             branch_name: b.branch_name,
             distanceKm: Math.round(distanceKm * 100) / 100,
             travelMinutes: Math.round(distanceKm * 3),
-            machines: {
-                total: machines.length,
-                available: machinesDetail.filter(bm => bm.status === "AVAILABLE").length,
-                avgCycleMin,
-                // detailส่งรายละเอียดทุกเครื่องให้ AI เห็นว่าแต่ละเครื่องรอนานแค่ไหน
-                detail: machinesDetail,
-                // ถ้ามีเครื่องว่าง = 0, ถ้าไม่มี = เครื่องที่รอน้อยสุด
-                bestWaitMinutes: hasAvailable
-                    ? 0
-                    : bestMachine?.waitTimeMinutes ?? 0
-            },
+            machineGroups,
+            totalWaitMinutes,
         }
     })
 
     const prompt = `
 ${SYSTEM_PROMPT}
-ลูกค้าต้องการ: ${machineType} ขนาด ${capacity}kg
+ลูกค้าต้องการ: ${machineTypes.map(m => `${m.type} ${m.capacity}kg`).join(" + ")}
 ข้อมูลสาขา:
 ${JSON.stringify(branchData, null, 2)}
     `.trim()
