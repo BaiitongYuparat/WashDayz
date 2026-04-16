@@ -121,7 +121,7 @@ export async function runRecommendBranch(input: RecommendInput) {
                 avgCycleMin,
             }))
 
-            const hasAvailable = machinesDetail.some((bm) => bm.status === "AVAILABLE")
+            const hasAvailable = machinesDetail.some((bm) => bm.status === "AVAILABLE" && bm.queueCount === 0)
             const bestMachine = machinesDetail.reduce(
                 (min, bm) => bm.waitTimeMinutes < min.waitTimeMinutes ? bm : min,
                 machinesDetail[0]

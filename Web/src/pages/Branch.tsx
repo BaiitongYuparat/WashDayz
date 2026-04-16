@@ -7,7 +7,7 @@ import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import SearchInput from "../components/SearchInput";
 import "leaflet/dist/leaflet.css"
-import { getMachinesByBranch, addMachineToBranch, deleteMachineFromBranch, getMachines } from '../api/BranchMachineApi'
+import {getMachinesByBranch, addMachineToBranch,deleteMachineFromBranch,getMachines } from '../api/BranchMachineApi'
 import type { BranchMachine } from '../api/BranchMachineApi'
 //fix icon bug 
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -50,7 +50,7 @@ function MapPicker({ value, onChange }: {
                     <div className="flex items-center gap-2 ">
                         <FaMapMarkerAlt className="text-blue-500" />
                         <span className="font-medium">
-                            Lat: {value.lat.toFixed(4)},  Lng: {value.lng.toFixed(4)}
+                            Lat: {value.lat.toFixed(6)},  Lng: {value.lng.toFixed(6)}
                         </span>
 
                     </div>
@@ -75,30 +75,15 @@ function Branche() {
     const [formData, setFormData] = useState({ branch_name: "" })
     const [pickedLatLng, setPickedLatLng] = useState<{ lat: number; lng: number } | null>(null)
 
-    const [branchMachines, setBranchMachines] = useState<BranchMachine[]>([])
-    const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null)
-    const [machines, setMachines] = useState<any[]>([])
-
     useEffect(() => {
         const fetchData = async () => {
-            const branchesData = await getBranches()
-            const machinesData = await getMachines()
-
-            setBranches(branchesData)
-            setMachines(machinesData)
-        }
-        const groupedMachines = Object.values(
-            branchMachines.reduce((acc: any, curr) => {
-                const key = curr.machine_id
-                if (!acc[key]) {
-                    acc[key] = { ...curr, count: 0 }
-                }
-                acc[key].count += 1
-                return acc
-            }, {})
-        )
-        fetchData()
-    }, [])
+            const [data] = await Promise.all([
+                getBranches(),
+            ]);
+            setBranches(data);
+        };
+        fetchData();
+    })
 
     // บันทึก
     const handleSave = async () => {
@@ -154,18 +139,7 @@ function Branche() {
         setOpenModal(true)
     }
 
-    const handleSelectBranch = async (branchId: string) => {
-        setSelectedBranchId(branchId)
-        const data = await getMachinesByBranch(branchId)
-        setBranchMachines(data)
-    }
 
-    const handleDeleteMachine = async (id: string) => {
-        if (!confirm("ลบเครื่องนี้?")) return
-        await deleteMachineFromBranch(id)
-
-        setBranchMachines(prev => prev.filter(m => m.branch_machine_id !== id))
-    }
     return (
         <div className="p-8">
             {/* Search */}
@@ -222,7 +196,7 @@ function Branche() {
                         title="+ เพิ่มเครื่องสาขา"
                         variant="primary"
                         size="md"
-                        onPress={handleAddMachine}
+                        onPress={handleOpenAdd}
                     />
                 </div>
                 <div className="overflow-hidden rounded-xl shadow-md">
@@ -236,27 +210,7 @@ function Branche() {
                             </tr>
                         </thead>
                         <tbody>
-                            {groupedMachines.map((bm: any) => (
-                                <tr key={bm.machine_id} className="border-b">
-                                    <td className="p-5">
-                                        {branches.find(b => b.branch_id === bm.branch_id)?.branch_name}
-                                    </td>
-                                    <td className="p-5">
-                                        {bm.machine?.capacity} kg
-                                    </td>
-                                    <td className="p-5 font-semibold text-blue-600">
-                                        {bm.count}
-                                    </td>
-                                    <td className="p-5 flex gap-2">
-                                        <button
-                                            onClick={() => handleDeleteMachine(bm.branch_machine_id)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            <FaTrash />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+
                         </tbody>
                     </table>
 
