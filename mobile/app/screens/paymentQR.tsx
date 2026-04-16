@@ -4,11 +4,12 @@ import { useEffect, useState } from "react"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { CustomButton } from "@/components/ui/CustomButton"
 import { confirmPayment } from "@/services/paymentService"
+import { createQueue } from "@/services/queueService"
 const QR_TIMEOUT_SECONDS = 300 // 5 นาที
 
 export default function PaymentQRScreen() {
   const router = useRouter()
-  const { orderId, totalPrice,paymentId } = useLocalSearchParams()
+  const { orderId, totalPrice,paymentId,branchId } = useLocalSearchParams()
   const [timeLeft, setTimeLeft] = useState(QR_TIMEOUT_SECONDS)
   const [checking, setChecking] = useState(false)
   
@@ -38,7 +39,8 @@ export default function PaymentQRScreen() {
   const handleConfirmPayment = async () => {
      try {
       setChecking(true)
-      await confirmPayment(paymentId as string)  // ← เรียก confirmPayment
+      await confirmPayment(paymentId as string) 
+       await createQueue(orderId as string, branchId as string)
       router.replace({
         pathname: "/screens/home/orderSuccess",
         params: { orderId },

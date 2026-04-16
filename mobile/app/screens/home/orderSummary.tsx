@@ -11,6 +11,7 @@ import { getBranchById, Branch } from "@/services/branchService";
 import { useUser } from "@/provider/UserProvider";
 import PaymentMethodSelector from "@/features/payment/PaymentMethodSelector";
 import { confirmPayment, createPayment } from "@/services/paymentService";
+import { createQueue } from "@/services/queueService";
 
 export default function OrderSummaryScreen() {
   const router = useRouter();
@@ -73,10 +74,11 @@ export default function OrderSummaryScreen() {
       if (selectedPayment === "QR") {
         router.replace({
           pathname: "/screens/paymentQR",
-          params: { orderId: result.order_id, totalPrice ,  paymentId: payment.payment_id,  },
+          params: { orderId: result.order_id, totalPrice ,  paymentId: payment.payment_id,  branchId: branchId,   },
         });
       } else {
         await confirmPayment(payment.payment_id)
+        await createQueue(result.order_id, branchId as string)
         router.replace({
           pathname: "/screens/home/orderSuccess",
           params: { orderId: result.order_id ,  paymentId: payment.payment_id,
