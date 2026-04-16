@@ -17,7 +17,7 @@ export default function OrderHistoryScreen() {
       try {
         if (!user?.user_id) return
         const data = await getOrdersByUser(user.user_id)
-        setOrders(data)
+        setOrders(data.filter((o) => o.status === "FINISHED" || o.status === "CANCELLED"))
       } catch (err) {
         Alert.alert("Error", "โหลดประวัติคำสั่งซื้อไม่สำเร็จ")
       } finally {
@@ -25,7 +25,7 @@ export default function OrderHistoryScreen() {
       }
     }
     fetchOrders()
-  }, [user?.user_id])
+  }, [user?.user_id, orders])
 
   if (loading) {
     return (

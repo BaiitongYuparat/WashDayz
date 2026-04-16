@@ -64,10 +64,10 @@ export default function PaymentMethodSelector({ selected, onSelect }: Props) {
             </View>
 
             <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-              isSelected ? "border-blue-main" : "border-gray-300"
+              isSelected ? "border-blue-main  bg-blue-main" : "border-gray-300"
             }`}>
               {isSelected && (
-                <View className="w-2.5 h-2.5 rounded-full bg-blue-main" />
+                 <MaterialCommunityIcons name="check" size={12} color="white" />
               )}
             </View>
           </Pressable>

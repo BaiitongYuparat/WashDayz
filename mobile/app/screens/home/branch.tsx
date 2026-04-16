@@ -122,6 +122,7 @@ export default function BranchSelectScreen() {
           ) : (
             machines.map((item) => (
               <MachineCard
+               key={item.machine_id}
         type={item.type}
         capacity={item.capacity}
         duration_minutes={item.duration_minutes}

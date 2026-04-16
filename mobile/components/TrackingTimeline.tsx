@@ -32,7 +32,7 @@ const STEPS: Step[] = [
   },
 ]
 
-const STATUS_ORDER = ["WAITING", "WASHINGG", "FINISHED"]
+const STATUS_ORDER = ["WAITING", "WASHING", "FINISHED"]
 
 type Props = {
   currentStatus: string

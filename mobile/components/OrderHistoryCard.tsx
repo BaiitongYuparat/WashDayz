@@ -24,6 +24,7 @@ export default function OrderHistoryCard({ order, onPress }: Props) {
     .map((i) => MACHINE_TYPE_LABELS[i.machine.type] ?? i.machine.type)
     .join(", ")
 
+    const isActive =["WAITING" , "WASHING"].includes(order.status)
   return (
     <Pressable
       onPress={onPress}
@@ -35,6 +36,12 @@ export default function OrderHistoryCard({ order, onPress }: Props) {
           <Text className="text-xs text-gray-400">#{order.order_id.slice(0, 8)}</Text>
         </View>
         <OrderStatusBadge status={order.status} size="sm" />
+             {isActive && (
+            <View className="flex-row items-center gap-1">
+              <Text className="text-xs text-blue-main">ติดตาม</Text>
+              <MaterialCommunityIcons name="chevron-right" size={14} color="#00ACC3" />
+            </View>
+          )}
       </View>
 
       <View className="h-px bg-gray-100 mb-3" />

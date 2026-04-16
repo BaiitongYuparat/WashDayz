@@ -66,7 +66,7 @@ export default function OrderScreen() {
       .filter((a) => selectedAddons.includes(a.addon_service_id))
       .reduce((sum, a) => sum + a.price, 0);
     setPrice(machinePrice + selectedAddonPrice);
-  }, [quantity, selectedAddons, service, addon]);
+  }, [quantity, selectedAddons, service, addon , machinePrice]);
 
   const toggleAddon = (id: string) => {
     setSelectedAddons((prev) =>

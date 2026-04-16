@@ -37,11 +37,14 @@ export default function OrderSuccessScreen() {
         />
         <CustomButton
           title="ติดตามคำสั่งซื้อ"
-          onPress={() =>
-            router.replace({
-              pathname: "/(tabs)/track",
+          onPress={() => {
+            router.dismissAll()
+            router.replace("/(tabs)/track")
+            router.push({
+              pathname: "/screens/track/orderTracking",
               params: { orderId },
             })
+          }    
           }
         />
       </View>
