@@ -61,6 +61,8 @@ function Orders() {
         return "";
     };
 
+ 
+
 
 
 
@@ -69,7 +71,7 @@ function Orders() {
 
             <div className="mb-6 flex justify-between items-center">
                 <label className="text-black text-3xl font-bold">
-                    Order
+                    ออเดอร์
                 </label>
             </div>
 
@@ -77,20 +79,20 @@ function Orders() {
             <SearchInput
                 value={search}
                 onChange={setSearch}
-                placeholder="Search user..."
+                placeholder="ค้นหา..."
             />
 
             <div className="overflow-hidden rounded-xl shadow-md">
                 <table className="w-full bg-white border-collapse">
                     <thead>
                         <tr className="bg-blue-50">
-                            <th className="p-5 text-left">Customer Name</th>
-                            <th className="p-5 text-left">Laundry </th>
-                            <th className="p-5 text-left">Size </th>
-                            <th className="p-5 text-left">Branch</th>
-                            <th className="p-5 text-left">Price</th>
-                            <th className="p-5 text-left">Status</th>
-                            <th className="p-5 text-left">Action</th>
+                            <th className="p-5 text-left">ชื่อลูกค้า</th>
+                            <th className="p-5 text-left">ประเภทเครื่อง</th>
+                            <th className="p-5 text-left">ขนาด (กก.)</th>
+                            <th className="p-5 text-left">สาขา</th>
+                            <th className="p-5 text-left">ราคา</th>
+                            <th className="p-5 text-left">สถานะ</th>
+                            <th className="p-5 text-left">การจัดการ</th>
                         </tr>
                     </thead>
 
@@ -100,19 +102,19 @@ function Orders() {
                                 key={order.order_id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="p-5">{order.user?.name || "-"}</td>
                                 <td className="p-5">{order.items?.[0]?.machine?.type || "-"}</td>
-                                <td className="p-5">{order.items?.[0]?.machine?.capacity || "-"} Kg</td>
+                                <td className="p-5">{order.items?.[0]?.machine?.capacity || "-"} กก</td>
                                 <td className="p-5">{order.branch?.branch_name || "-"}</td>
                                 <td className="p-5">{order.total_price ?? "-"}</td>
                                 <td className="p-5">
                                     <span
                                         className={`px-3 py-1 rounded-full text-sm font-semibold
-                                                ${order.status === "WAITING" && "bg-yellow-100 text-yellow-700"}
-                                                ${order.status === "WASHING" && "bg-blue-100 text-blue-700"}
-                                                ${order.status === "FINISHED" && "bg-green-100 text-green-700"}
-                                                ${order.status === "CANCELLED" && "bg-red-100 text-red-700"}
-                                                `}
+                                            ${order.status === "WAITING" && "bg-yellow-100 text-yellow-700"}
+                                            ${order.status === "WASHING" && "bg-blue-100 text-blue-700"}
+                                            ${order.status === "FINISHED" && "bg-green-100 text-green-700"}
+                                            ${order.status === "CANCELLED" && "bg-red-100 text-red-700"}
+                                            `}
                                     >
-                                        {order.status}
+                                        {order.status ?? order.status}
                                     </span>
                                 </td>
 
@@ -143,10 +145,10 @@ function Orders() {
             {openeditorder && selectedOrder && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                        <h2 className="text-xl font-bold">Edit Order</h2>
+                        <h2 className="text-xl font-bold">แก้ไขคำสั่งซื้อ</h2>
 
-                        <p>Order ID: {selectedOrder.order_id}</p>
-                        <p>Customer: {selectedOrder.user?.name}</p>
+                        <p>รหัสคำสั่งซื้อ: {selectedOrder.order_id}</p>
+                        <p>ลูกค้า: {selectedOrder.user?.name}</p>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -169,16 +171,16 @@ function Orders() {
                                 onClick={() => setOpenEditorder(false)}
                                 className="px-4 py-2 rounded-lg border text-sm"
                             >
-                                Cancel
+                                ยกเลิก
                             </button>
                             <button
                                 onClick={() => {
-                                    handleAddorder(selectedOrder.order_id, editStatus); // ✅ ส่ง editStatus
+                                    handleAddorder(selectedOrder.order_id, editStatus); //ส่ง editStatus
                                     setOpenEditorder(false);
                                 }}
                                 className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
                             >
-                                Save
+                                บันทึก
                             </button>
                         </div>
                     </div>

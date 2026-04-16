@@ -8,6 +8,7 @@ import Branch from "./pages/Branch";
 import ProtectedRoute from "./components/ProtectedRoute";
 import TopBar from "./components/TopBar";
 import Payments from "./pages/Payment";
+import Dashbords from "./pages/Dashboard"
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
                   <TopBar />
                   <div className="p-5">
                     <Routes>
+                      <Route path="/dashbord" element={<Dashbords />} />
                       <Route path="/order" element={<Orders />} />
                       <Route path="/user" element={<User />} />
                       <Route path="/service" element={<Services />} />

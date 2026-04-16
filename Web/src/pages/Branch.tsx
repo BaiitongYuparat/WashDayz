@@ -113,7 +113,7 @@ function Branche() {
         setBranches(branches.filter(b => b.branch_id !== id))
     }
 
-    
+
     const filtered = branches.filter(b =>
         b.branch_name.toLowerCase().includes(search.toLowerCase())
     )
@@ -141,25 +141,25 @@ function Branche() {
 
     return (
         <div className="p-8">
-
+            {/* Search */}
+            <SearchInput value={search} onChange={setSearch} placeholder="ค้นหา..." />
             {/* Header */}
-            <div className="mb-6 flex justify-between items-center">
-                <label className="text-black text-3xl font-bold">Branch</label>
+            <div className="mb-4 flex justify-between items-center">
+                <label className="text-black text-3xl font-bold">สาขา</label>
                 <CustomButton title="+ Add Branch" variant="primary" size="md" onPress={handleOpenAdd} />
             </div>
 
-            {/* Search */}
-            <SearchInput value={search} onChange={setSearch} placeholder="Search branch..." />
+
 
             {/* Table */}
             <div className="overflow-hidden rounded-xl shadow-md">
                 <table className="w-full bg-white border-collapse">
                     <thead>
                         <tr className="bg-blue-50">
-                            <th className="p-5 text-left">Branch Name</th>
-                            <th className="p-5 text-left">Latitude</th>
-                            <th className="p-5 text-left">Longitude</th>
-                            <th className="p-5 text-left">Action</th>
+                            <th className="p-5 text-left">ชื่อสาขา</th>
+                            <th className="p-5 text-left">ลัดติจูด</th>
+                            <th className="p-5 text-left">ลองติจูด</th>
+                            <th className="p-5 text-left">การจัดการ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -188,44 +188,71 @@ function Branche() {
                 </table>
             </div>
 
-            {/* Modal */}
-            {openModel && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl space-y-4">
-
-                        <h2 className="text-xl font-bold">
-                            {editTarget ? "Edit Branch" : "Add Branch"}
-                        </h2>
-
-                        <div className="space-y-1">
-                            <label className="text-sm text-gray-500">Branch Name</label>
-                            <input
-                                className="w-full border rounded-lg p-2 text-sm"
-                                value={formData.branch_name}
-                                onChange={e => setFormData({ ...formData, branch_name: e.target.value })}
-                            />
-                        </div>
-
-                        <MapPicker value={pickedLatLng} onChange={setPickedLatLng} />
-
-                        <div className="flex justify-end gap-2 pt-2">
-                            <button
-                                onClick={() => setOpenModal(false)}
-                                className="px-4 py-2 rounded-lg border text-sm"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-                            >
-                                {editTarget ? "Update" : "Add"}
-                            </button>
-                        </div>
-
-                    </div>
+            <div className="mt-4">
+                <div className="flex justify-between items-center mb-6">
+                    <label className="text-black text-3xl font-bold">เครื่องสาขา</label>
+                    <CustomButton
+                        title="+ เพิ่มเครื่องสาขา"
+                        variant="primary"
+                        size="md"
+                        onPress={handleOpenAdd}
+                    />
                 </div>
-            )}
+                <div className="overflow-hidden rounded-xl shadow-md">
+                    <table className="w-full bg-white border-collapse">
+                        <thead>
+                            <tr className="bg-blue-50">
+                                <th className="p-5 text-left">ชื่อสาขา</th>
+                                <th className="p-5 text-left">ขนาด (กก.)</th>
+                                <th className="p-5 text-left">จำนวนเครื่อง</th>
+                                <th className="p-5 text-left">การจัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+
+                </div>
+                {/* Modal */}
+                {openModel && (
+                    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl space-y-4">
+
+                            <h2 className="text-xl font-bold">
+                                {editTarget ? "Edit Branch" : "Add Branch"}
+                            </h2>
+
+                            <div className="space-y-1">
+                                <label className="text-sm text-gray-500">ชื่อสาขา</label>
+                                <input
+                                    className="w-full border rounded-lg p-2 text-sm"
+                                    value={formData.branch_name}
+                                    onChange={e => setFormData({ ...formData, branch_name: e.target.value })}
+                                />
+                            </div>
+
+                            <MapPicker value={pickedLatLng} onChange={setPickedLatLng} />
+
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                    onClick={() => setOpenModal(false)}
+                                    className="px-4 py-2 rounded-lg border text-sm"
+                                >
+                                    ยกเลิก
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
+                                >
+                                    {editTarget ? "แก้ไขสาขา" : "เพิ่มสาขา"}
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

@@ -1,10 +1,11 @@
 import express from 'express'
-import {addMachineToBranch , getMachinesByBranch , deleteMachineByBranchId} from '../controllers/branchMachineController'
+import {addMachineToBranch , getMachinesByBranch , deleteMachineByBranchId , getAllMachines} from '../controllers/branchMachineController'
 
 const router = express.Router()
 
-router.post("/",addMachineToBranch)
+router.get("/machines", getAllMachines)  
 router.get("/:id", getMachinesByBranch)
-router.delete("/:id" , deleteMachineByBranchId)
+router.post("/", addMachineToBranch)
+router.delete("/:id", deleteMachineByBranchId)
 
 export default router;

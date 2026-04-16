@@ -58,3 +58,14 @@ export const deleteMachineByBranchId = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 }
+
+//ดูทั้งหมด
+export const getAllMachines = async (req: Request, res: Response) => {
+  try {
+    const machines = await prisma.machine.findMany()
+    return res.json(machines)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
+}

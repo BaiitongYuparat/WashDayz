@@ -30,7 +30,7 @@ export type Payment = {
 
 export const getPayments = async (): Promise<Payment[]> => {
   const res = await axios.get(API_URL);
-  return res.data;
+  return res.data.data; 
 };
 
 export const deletePayment = async (id: string): Promise<void> => {

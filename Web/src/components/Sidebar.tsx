@@ -12,6 +12,20 @@ function Sidebar() {
 
                 <li>
                     <NavLink
+                        to="/dashbord"
+                        className={({ isActive }) =>
+                            `block py-2 transition ${isActive
+                                ? "text-blue-400 font-bold text-2xl"
+                                : "text-gray-500 text-lg hover:text-blue-400"
+                            }`
+                        }
+                    >
+                        Dashbord
+                    </NavLink>
+                </li>
+
+                <li>
+                    <NavLink
                         to="/order"
                         className={({ isActive }) =>
                             `block py-2 transition ${isActive

@@ -101,7 +101,7 @@ function Services() {
     //
     const handleSaveMain = async () => {
         if (!editMain) return;
-        await updateMainService(editMain.main_service_id, { ...formMain});
+        await updateMainService(editMain.main_service_id, { ...formMain });
         setService((prev) => ({
             ...prev,
             main: prev.main.map((m) => m.main_service_id === editMain.main_service_id ? { ...m, ...formMain } : m)
@@ -118,7 +118,7 @@ function Services() {
     //
     const handleSaveAddon = async () => {
         if (!editAddon) return;
-        await updateAddonService(editAddon.addon_service_id, { name: formAddon.name, description: formAddon.description,  price: formAddon.price, type: formAddon.type });
+        await updateAddonService(editAddon.addon_service_id, { name: formAddon.name, description: formAddon.description, price: formAddon.price, type: formAddon.type });
         setService((prev) => ({
             ...prev,
             addon: prev.addon.map((a) => a.addon_service_id === editAddon.addon_service_id ? { ...a, ...formAddon } : a)
@@ -194,6 +194,11 @@ function Services() {
         setOpenCreateAddon(false);
     };
 
+    //     const statusStyle = (status: string) => {
+    //     if (status === "ADDON") return "bg-yellow-100 text-yellow-700";
+    //     if (status === "EXTRA") return "bg-blue-100 text-blue-700";
+    //     return "";
+    // };
 
 
 
@@ -203,16 +208,16 @@ function Services() {
                 <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Search user..."
+                    placeholder="ค้นหา..."
                 />
 
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        Service
+                        บริการ
                     </label>
 
                     <CustomButton
-                        title="+ Add Service"
+                        title="+ เพิ่มบริการ"
                         variant="primary"
                         size="md"
                         onPress={() => setOpenCreateRelation(true)}
@@ -220,17 +225,17 @@ function Services() {
                     {openCreateRelation && (
                         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                                <h2 className="text-xl font-bold">Create Relation</h2>
+                                <h2 className="text-xl font-bold">สร้างบริการ</h2>
 
                                 {/* เลือก MainService */}
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">MainService</label>
+                                    <label className="text-sm text-gray-500">บริการหลัก</label>
                                     <select
                                         className="w-full border rounded-lg p-2 text-sm"
                                         value={newRelationMainId}
                                         onChange={(e) => setNewRelationMainId(e.target.value)}
                                     >
-                                        <option value="">-- เลือก MainService --</option>
+                                        <option value="">-- เลือกบริการหลัก --</option>
                                         {service.main.map((m) => (
                                             <option key={m.main_service_id} value={m.main_service_id}>
                                                 {m.name}
@@ -241,7 +246,7 @@ function Services() {
 
                                 {/* AddonService*/}
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">AddonService</label>
+                                    <label className="text-sm text-gray-500">บริการเสริม</label>
                                     <div className="max-h-48 overflow-y-auto border rounded-lg">
                                         {service.addon.map((addon) => (
                                             <label key={addon.addon_service_id} className="flex items-center gap-3 p-2 hover:bg-gray-50 cursor-pointer">
@@ -259,13 +264,13 @@ function Services() {
                                 </div>
 
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <button onClick={() => setOpenCreateRelation(false)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
+                                    <button onClick={() => setOpenCreateRelation(false)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
                                     <button
                                         onClick={handleRelation}
                                         disabled={!newRelationMainId || newRelationAddonIds.length === 0}
                                         className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600 disabled:opacity-40"
                                     >
-                                        Create
+                                        สร้าง
                                     </button>
                                 </div>
                             </div>
@@ -277,9 +282,9 @@ function Services() {
                     <table className="w-full bg-white border-collapse">
                         <thead>
                             <tr className="bg-blue-50">
-                                <th className="p-5 text-left">MainService</th>
-                                <th className="p-5 text-left">AddonService</th>
-                                <th className="p-5 text-left">Action</th>
+                                <th className="p-5 text-left">บริการหลัก</th>
+                                <th className="p-5 text-left">บริการเสริม</th>
+                                <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -312,7 +317,7 @@ function Services() {
             {editRelation && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                        <h2 className="text-xl font-bold">Edit Addons — {editRelation.name}</h2>
+                        <h2 className="text-xl font-bold">แก้ไขบริการเสริม — {editRelation.name}</h2>
                         <div className="max-h-60 overflow-y-auto space-y-1">
                             {service.addon.map((addon) => (
                                 <label key={addon.addon_service_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -328,22 +333,21 @@ function Services() {
                             ))}
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setEditRelation(null)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                            <button onClick={handleSaveRelation} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Save</button>
+                            <button onClick={() => setEditRelation(null)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
+                            <button onClick={handleSaveRelation} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">บันทึก</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* main */}
             <div>
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        Mainservice
+                        บริการหลัก
                     </label>
 
                     <CustomButton
-                        title="+ Add Mainservice"
+                        title="+ เพิ่มบริการหลัก"
                         variant="primary"
                         size="md"
                         onPress={() => setOpenCreateMain(true)}
@@ -352,9 +356,9 @@ function Services() {
                     {openCreateMain && (
                         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                                <h2 className="text-xl font-bold">Create MainService</h2>
+                                <h2 className="text-xl font-bold">สร้างบริการหลัก</h2>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">Name</label>
+                                    <label className="text-sm text-gray-500">ชื่อบริการ</label>
                                     <input
                                         className="w-full border rounded-lg p-2 text-sm"
                                         value={newMain.name}
@@ -362,7 +366,7 @@ function Services() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">Description</label>
+                                    <label className="text-sm text-gray-500">คำอธิบาย</label>
                                     <textarea
                                         className="w-full border rounded-lg p-2 text-sm"
                                         value={newMain.description}
@@ -370,8 +374,8 @@ function Services() {
                                     />
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <button onClick={() => setOpenCreateMain(false)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                                    <button onClick={handleMain} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Create</button>
+                                    <button onClick={() => setOpenCreateMain(false)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
+                                    <button onClick={handleMain} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">สร้าง</button>
                                 </div>
                             </div>
                         </div>
@@ -383,9 +387,9 @@ function Services() {
                     <table className="w-full bg-white border-collapse">
                         <thead>
                             <tr className="bg-blue-50">
-                                <th className="p-5 text-left">Name</th>
-                                <th className="p-5 text-left">Description</th>
-                                <th className="p-5 text-left">Action</th>
+                                <th className="p-5 text-left">ชื่อบริการ</th>
+                                <th className="p-5 text-left">คำอธิบาย</th>
+                                <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
 
@@ -417,18 +421,18 @@ function Services() {
             {editMain && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                        <h2 className="text-xl font-bold">Edit MainService</h2>
+                        <h2 className="text-xl font-bold">แก้ไขบริการหลัก</h2>
                         <div className="space-y-1">
-                            <label className="text-sm text-gray-500">Name</label>
+                            <label className="text-sm text-gray-500">ชื่อบริการ</label>
                             <input className="w-full border rounded-lg p-2 text-sm" value={formMain.name} onChange={(e) => setFormMain({ ...formMain, name: e.target.value })} />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm text-gray-500">Description</label>
+                            <label className="text-sm text-gray-500">คำอธิบาย</label>
                             <textarea className="w-full border rounded-lg p-2 text-sm" value={formMain.description} onChange={(e) => setFormMain({ ...formMain, description: e.target.value })} />
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setEditMain(null)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                            <button onClick={handleSaveMain} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Save</button>
+                            <button onClick={() => setEditMain(null)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
+                            <button onClick={handleSaveMain} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">บันทึก</button>
                         </div>
                     </div>
                 </div>
@@ -440,11 +444,11 @@ function Services() {
             <div>
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        Addonservice
+                        บริการเสริม
                     </label>
 
                     <CustomButton
-                        title="+ Add Addonservice"
+                        title="+ เพิ่มบริการเสริม"
                         variant="primary"
                         size="md"
                         onPress={() => setOpenCreateAddon(true)}
@@ -453,9 +457,9 @@ function Services() {
                     {openCreateAddon && (
                         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                                <h2 className="text-xl font-bold">Create AddonService</h2>
+                                <h2 className="text-xl font-bold">สร้างบริการเสริม</h2>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">Name</label>
+                                    <label className="text-sm text-gray-500">ชื่อบริการ</label>
                                     <input
                                         className="w-full border rounded-lg p-2 text-sm"
                                         value={newAddon.name}
@@ -463,7 +467,7 @@ function Services() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">Description</label>
+                                    <label className="text-sm text-gray-500">คำอธิบาย</label>
                                     <textarea
                                         className="w-full border rounded-lg p-2 text-sm"
                                         value={newAddon.description}
@@ -471,7 +475,7 @@ function Services() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-sm text-gray-500">Price</label>
+                                    <label className="text-sm text-gray-500">ราคา</label>
                                     <input
                                         type="number"
                                         className="w-full border rounded-lg p-2 text-sm"
@@ -484,13 +488,13 @@ function Services() {
                                     value={newAddon.type}
                                     onChange={(e) => setNewAddon({ ...newAddon, type: e.target.value })}
                                 >
-                                    <option value=""> -- type -- </option>
-                                    <option value="ADDON">ADDON</option>
-                                    <option value="EXTRA">EXTRA</option>
+                                    <option value=""> -- เลือกประเภทบริการ -- </option>
+                                    <option value="ADDON">บริการเสริม</option>
+                                    <option value="EXTRA">บริการพิเศษ</option>
                                 </select>
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <button onClick={() => setOpenCreateAddon(false)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                                    <button onClick={handleCreateAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Create</button>
+                                    <button onClick={() => setOpenCreateAddon(false)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
+                                    <button onClick={handleCreateAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">สร้าง</button>
                                 </div>
                             </div>
                         </div>
@@ -501,10 +505,11 @@ function Services() {
                     <table className="w-full bg-white border-collapse">
                         <thead>
                             <tr className="bg-blue-50">
-                                <th className="p-5 text-left">Name</th>
-                                <th className="p-5 text-left">Description</th>
-                                <th className="p-5 text-left">Price</th>
-                                <th className="p-5 text-left">Action</th>
+                                <th className="p-5 text-left">ชื่อบริการ</th>
+                                <th className="p-5 text-left">คำอธิบาย</th>
+                                <th className="p-5 text-left">ราคา</th>
+                                <th className="p-5 text-left">ประเภทบริการ</th>
+                                <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
 
@@ -515,6 +520,16 @@ function Services() {
                                     <td className="p-4">{item.name}</td>
                                     <td className="p-4">{item.description}</td>
                                     <td className="p-4">{item.price}</td>
+                                    <td className="p-4">
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-sm font-semibold
+                                                ${item.type === "ADDON" && "bg-red-300 text-rose-700"}
+                                                ${item.type === "EXTRA" && "bg-blue-300 text-blue-700"}
+                                            `}
+                                        >
+                                            {item.type}
+                                        </span>
+                                    </td>
                                     <td className="p-5">
                                         <button
                                             onClick={() => openEditAddon(item)}
@@ -538,30 +553,30 @@ function Services() {
             {editAddon && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-                        <h2 className="text-xl font-bold">Edit AddonService</h2>
+                        <h2 className="text-xl font-bold">แก้ไขบริการเสริม</h2>
                         <div className="space-y-1">
-                            <label className="text-sm text-gray-500">Name</label>
+                            <label className="text-sm text-gray-500">ชื่อบริการ</label>
                             <input className="w-full border rounded-lg p-2 text-sm" value={formAddon.name} onChange={(e) => setFormAddon({ ...formAddon, name: e.target.value })} />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm text-gray-500">Description</label>
+                            <label className="text-sm text-gray-500">คำอธิบาย</label>
                             <textarea className="w-full border rounded-lg p-2 text-sm" value={formAddon.description} onChange={(e) => setFormAddon({ ...formAddon, description: e.target.value })} />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm text-gray-500">Price</label>
+                            <label className="text-sm text-gray-500">ราคา</label>
                             <input type="number" className="w-full border rounded-lg p-2 text-sm" value={formAddon.price} onChange={(e) => setFormAddon({ ...formAddon, price: Number(e.target.value) })} />
                         </div>
                         <div className="space-y-1">
-                        <label className="text-sm text-gray-500"> Type </label>
-                        <select className="w-full border rounded-lg p-2 text-sm"  value={formAddon.type} onChange={(e) => setFormAddon({ ...formAddon, type: e.target.value })} >
-                            <option value="ADDON">ADDON</option>
-                            <option value="EXTRA">EXTRA</option>
-                        </select>
+                            <label className="text-sm text-gray-500">ประเภทบริการ</label>
+                            <select className="w-full border rounded-lg p-2 text-sm" value={formAddon.type} onChange={(e) => setFormAddon({ ...formAddon, type: e.target.value })} >
+                                <option value="ADDON">ADDON</option>
+                                <option value="EXTRA">EXTRA</option>
+                            </select>
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setEditAddon(null)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                            <button onClick={handleSaveAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">Save</button>
+                            <button onClick={() => setEditAddon(null)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
+                            <button onClick={handleSaveAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">บันทึก</button>
                         </div>
                     </div>
                 </div>
