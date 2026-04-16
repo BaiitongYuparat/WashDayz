@@ -5,11 +5,12 @@ import { prisma } from "../../lib/prisma"
 export const createQueue = async (req: Request, res: Response) => {
     const { order_id, branch_id } = req.body
 
+    if (!order_id || !branch_id) {
+        return res.status(400).json({
+            message: "order_id and branch_id are required"
+        })
+    }
     try {
-        if (!order_id || !branch_id) {
-            return res.status(400).json({ message: "order_id and branch_id are required" })
-        }
-
         const result = await prisma.$transaction(async (tx) => {
 
             //เช็ค order
@@ -23,26 +24,42 @@ export const createQueue = async (req: Request, res: Response) => {
             })
             if (!order) throw new Error("ORDER_NOT_FOUND")
 
-            //เช็คว่ามี queue แล้วหรือยัง
-            const existingQueue = await tx.queue.findFirst({ where: { order_id } })
-            if (existingQueue) throw new Error("QUEUE_ALREADY_EXISTS")
+            //เอา machine_type แบบไม่ซ้ำ
+            const requiredTypes = [
+                ...new Set(
+                    order.items
+                        .filter(item => item.machine?.type)
+                        .map(item => item.machine!.type)
+                )
+            ]
 
-            //หา machine_type ที่ต้องใช้จาก OrderItem
-            const requiredTypes = order.items
-                .filter(item => item.machine?.type)
-                .map(item => item.machine!.type)
+            if (requiredTypes.length === 0) {
+                throw new Error("NO_MACHINE_TYPE")
+            }
 
-            //หาเลขคิวถัดไปครั้งเดียว
+            // หา queue_number ใหม่ (กัน race แบบ retry)
+            let nextQueueNumber = 1
             const lastQueue = await tx.queue.findFirst({
                 where: { branch_id },
                 orderBy: { queue_number: "desc" }
             })
-            const nextQueueNumber = lastQueue ? lastQueue.queue_number + 1 : 1
+            if (lastQueue) nextQueueNumber = lastQueue.queue_number + 1
 
-            //สร้าง queue row ละ 1 machine_type
             const queues = []
+
             for (const machineType of requiredTypes) {
 
+                //กันสร้างซ้ำ (ต่อ type)
+                const existingQueue = await tx.queue.findFirst({
+                    where: {
+                        order_id,
+                        machine_type: machineType
+                    }
+                })
+
+                if (existingQueue) continue // ข้าม ไม่ error
+
+                //หาเครื่องว่าง
                 const availableMachine = await tx.branchMachine.findFirst({
                     where: {
                         branch_id,
@@ -51,24 +68,32 @@ export const createQueue = async (req: Request, res: Response) => {
                     }
                 })
 
+                // สร้าง queue
                 const queue = await tx.queue.create({
                     data: {
                         order_id,
                         branch_id,
-                        queue_number: nextQueueNumber, // ← เลขเดียวกันทุก type
+                        queue_number: nextQueueNumber,
                         machine_type: machineType,
                         branch_machine_id: availableMachine?.branch_machine_id ?? null
                     }
                 })
 
+                //ถ้ามีเครื่อง → lock เครื่อง
                 if (availableMachine) {
                     await tx.branchMachine.update({
-                        where: { branch_machine_id: availableMachine.branch_machine_id },
+                        where: {
+                            branch_machine_id: availableMachine.branch_machine_id
+                        },
                         data: { status: "UNAVAILABLE" }
                     })
                 }
 
                 queues.push(queue)
+            }
+
+            if (queues.length === 0) {
+                throw new Error("QUEUE_ALREADY_EXISTS")
             }
 
             return queues
@@ -80,11 +105,25 @@ export const createQueue = async (req: Request, res: Response) => {
         })
 
     } catch (error: any) {
-        if (error.message === "ORDER_NOT_FOUND")
+        console.error("CREATE QUEUE ERROR:", error)
+
+        if (error.message === "ORDER_NOT_FOUND") {
             return res.status(404).json({ message: "Order not found" })
-        if (error.message === "QUEUE_ALREADY_EXISTS")
+        }
+        if (error.message === "QUEUE_ALREADY_EXISTS") {
             return res.status(400).json({ message: "Queue already exists" })
-        return res.status(500).json({ message: "Internal server error" })
+        }
+        if (error.message === "NO_MACHINE_TYPE") {
+            return res.status(400).json({ message: "No machine type in order" })
+        }
+        if (error.code === "P2002") {
+            return res.status(400).json({
+                message: "Duplicate queue (race condition)"
+            })
+        }
+        return res.status(500).json({
+            message: error.message
+        })
     }
 }
 
