@@ -26,6 +26,10 @@ export type RecommendInput = {
   machineType?: string
   capacity?: number
   mainServiceId?: string
+  machineTypes?: {
+    type: string
+    capacity: number
+  }[]
 }
 
 export type Branch = {

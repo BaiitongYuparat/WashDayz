@@ -250,7 +250,7 @@ export const resetQueue = async (req: Request, res: Response) => {
 export const getQueueByOrderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
-        const queue = await prisma.queue.findFirst({
+        const queue = await prisma.queue.findMany({
             where: { order_id: id }
         });
         if (!queue) {

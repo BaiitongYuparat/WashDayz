@@ -52,14 +52,18 @@ export default function BranchSelectScreen() {
       const token = await AsyncStorage.getItem("token")
       if (!token) return
 
-      const selectedMachine = machines.find((m) => selected.includes(m.machine_id))
+      const selectedMachinesData = machines.filter((m) =>
+  selected.includes(m.machine_id)
+)
 
       const result = await recommendBranch(
         {
           userLat: selectedLocation?.latitude ?? 13.7563,
           userLng: selectedLocation?.longitude ?? 100.5018,
-          machineType: selectedMachine?.type,
-          capacity: selectedMachine?.capacity,
+           machineTypes: selectedMachinesData.map(m => ({
+      type: m.type,
+      capacity: m.capacity
+    })),
           mainServiceId: serviceId as string,
         },
         token
