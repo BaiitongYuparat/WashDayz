@@ -207,3 +207,19 @@ export const resetQueue = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Failed to reset queue" })
     }
 }
+
+export const getQueueByOrderId = async (req: Request, res: Response) => {
+    const id = req.params.id as string
+    try {
+        const queue = await prisma.queue.findFirst({
+            where: { order_id: id }
+        });
+        if (!queue) {
+            return res.status(404).json({ message: "Queue not found for this order" });
+        }
+
+        return res.json(queue);
+    } catch (error) {
+        return res.status(500).json({ error: "Failed to fetch queue" });
+    }
+};

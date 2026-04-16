@@ -5,11 +5,13 @@ import {
     getQueueById,
     deleteQueueById,
     finishQueue,
-    resetQueue
+    resetQueue,
+    getQueueByOrderId
 } from '../controllers/queueController'
 
 const router = express.Router()
 
+router.get('/order/:id', getQueueByOrderId)
 router.post('/', createQueue)
 router.get('/', getQueue)
 router.get('/:id', getQueueById)
