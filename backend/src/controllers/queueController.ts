@@ -13,7 +13,7 @@ export const createQueue = async (req: Request, res: Response) => {
     try {
         const result = await prisma.$transaction(async (tx) => {
 
-            //เช็ค order
+            // เช็ค order และดึง machine type ที่ต้องใช้
             const order = await tx.order.findUnique({
                 where: { order_id },
                 include: {
@@ -24,7 +24,7 @@ export const createQueue = async (req: Request, res: Response) => {
             })
             if (!order) throw new Error("ORDER_NOT_FOUND")
 
-            //เอา machine_type แบบไม่ซ้ำ
+            // เอา machine_type แบบไม่ซ้ำ
             const requiredTypes = [
                 ...new Set(
                     order.items
@@ -37,39 +37,83 @@ export const createQueue = async (req: Request, res: Response) => {
                 throw new Error("NO_MACHINE_TYPE")
             }
 
-            // หา queue_number ใหม่ (กัน race แบบ retry)
-            let nextQueueNumber = 1
-            const lastQueue = await tx.queue.findFirst({
-                where: { branch_id },
-                orderBy: { queue_number: "desc" }
-            })
-            if (lastQueue) nextQueueNumber = lastQueue.queue_number + 1
-
             const queues = []
 
             for (const machineType of requiredTypes) {
 
-                //กันสร้างซ้ำ (ต่อ type)
+                // กันสร้างซ้ำต่อ type (ไม่ error แค่ข้าม)
                 const existingQueue = await tx.queue.findFirst({
-                    where: {
-                        order_id,
-                        machine_type: machineType
-                    }
+                    where: { order_id, machine_type: machineType }
                 })
+                if (existingQueue) continue
 
-                if (existingQueue) continue // ข้าม ไม่ error
+                // นับ queue_number แยกต่อ machine_type ไม่รวมกัน
+                // เพราะ WASHER กับ DRYER คนละคิว ไม่ควรใช้เลขเดียวกัน
+                const lastQueue = await tx.queue.findFirst({
+                    where: { branch_id, machine_type: machineType },
+                    orderBy: { queue_number: "desc" }
+                })
+                const nextQueueNumber = lastQueue ? lastQueue.queue_number + 1 : 1
 
-                //หาเครื่องว่าง
+                // หาเครื่องว่างของ type นั้น ในสาขานั้น
                 const availableMachine = await tx.branchMachine.findFirst({
                     where: {
                         branch_id,
                         status: "AVAILABLE",
                         machine: { type: machineType },
-                        queues: {
-                            none: { finished_at: null } // ไม่มีคิวค้างอยู่
-                        }
                     }
                 })
+
+                //คำนวณเวลาที่คาดว่าจะได้ใช้เครื่อง สำหรับคิวที่ต้องรอ
+                let estimatedStartAt: Date | null = null
+                if (!availableMachine) {
+                    // นับจำนวนคิวที่กำลังใช้เครื่องอยู่ (assigned แต่ยังไม่เสร็จ)
+                    const busyCount = await tx.queue.count({
+                        where: {
+                            branch_id,
+                            machine_type: machineType,
+                            finished_at: null,
+                            branch_machine_id: { not: null }
+                        }
+                    })
+
+                    // นับคิวที่รออยู่ก่อนหน้า (ยังไม่ได้เครื่อง)
+                    const waitingAhead = await tx.queue.count({
+                        where: {
+                            branch_id,
+                            machine_type: machineType,
+                            finished_at: null,
+                            branch_machine_id: null
+                        }
+                    })
+
+                    // ดึง duration จาก machine type (ใช้ตัวแรกที่เจอ)
+                    const machineInfo = await tx.machine.findFirst({
+                        where: { type: machineType }
+                    })
+                    const minutesPerCycle = machineInfo?.duration_minutes ?? 30
+
+                    // ETA = รอบที่กำลังรัน + คิวที่รออยู่ก่อนหน้า
+                    // หารจำนวนเครื่องที่กำลัง busy เพื่อให้ตรงกับความเป็นจริง
+                    const totalBusyMachines = await tx.branchMachine.count({
+                        where: {
+                            branch_id,
+                            machine: { type: machineType },
+                            status: "UNAVAILABLE"
+                        }
+                    })
+                    const machinesTotal = await tx.branchMachine.count({
+                        where: {
+                            branch_id,
+                            machine: { type: machineType }
+                        }
+                    })
+
+                    // คิวที่รออยู่ก่อนหน้า / จำนวนเครื่องทั้งหมด = รอบที่ต้องรอ
+                    const cyclesAhead = Math.ceil(waitingAhead / (machinesTotal || 1))
+                    const waitMinutes = (cyclesAhead + (totalBusyMachines > 0 ? 1 : 0)) * minutesPerCycle
+                    estimatedStartAt = new Date(Date.now() + waitMinutes * 60 * 1000)
+                }
 
                 // สร้าง queue
                 const queue = await tx.queue.create({
@@ -78,16 +122,16 @@ export const createQueue = async (req: Request, res: Response) => {
                         branch_id,
                         queue_number: nextQueueNumber,
                         machine_type: machineType,
-                        branch_machine_id: availableMachine?.branch_machine_id ?? null
+                        branch_machine_id: availableMachine?.branch_machine_id ?? null,
+                        //เพิ่ม estimated_start_at (ต้องเพิ่ม field นี้ใน schema ด้วย)
+                        estimated_start_at: estimatedStartAt
                     }
                 })
 
-                //ถ้ามีเครื่อง → lock เครื่อง
+                // ถ้ามีเครื่อง → lock เครื่อง
                 if (availableMachine) {
                     await tx.branchMachine.update({
-                        where: {
-                            branch_machine_id: availableMachine.branch_machine_id
-                        },
+                        where: { branch_machine_id: availableMachine.branch_machine_id },
                         data: { status: "UNAVAILABLE" }
                     })
                 }
@@ -120,49 +164,40 @@ export const createQueue = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "No machine type in order" })
         }
         if (error.code === "P2002") {
-            return res.status(400).json({
-                message: "Duplicate queue (race condition)"
-            })
+            return res.status(400).json({ message: "Duplicate queue (race condition)" })
         }
-        return res.status(500).json({
-            message: error.message
-        })
+        return res.status(500).json({ message: error.message })
     }
 }
 
 // ปิดคิว
 export const finishQueue = async (req: Request, res: Response) => {
     const id = req.params.id as string
-
     try {
         const result = await prisma.$transaction(async (tx) => {
 
-            //ปิดคิว row นี้
+            // ปิดคิว row นี้
             const queue = await tx.queue.update({
                 where: { queue_id: id },
                 data: { finished_at: new Date() }
             })
-
             if (!queue.branch_machine_id) return queue
-
-            //ดึงเครื่องที่ใช้อยู่
+            // ดึงเครื่องที่ใช้อยู่
             const machine = await tx.branchMachine.findUnique({
                 where: { branch_machine_id: queue.branch_machine_id }
             })
             if (!machine) return queue
-
-            //คืนเครื่อง
+            // คืนสถานะเครื่องเป็น AVAILABLE
             await tx.branchMachine.update({
                 where: { branch_machine_id: machine.branch_machine_id },
                 data: { status: "AVAILABLE" }
             })
-
+            // ถอด branch_machine_id ออกจากคิวที่เพิ่งปิด
             await tx.queue.update({
                 where: { queue_id: id },
                 data: { branch_machine_id: null }
             })
-
-            //หาคิวถัดไปที่รอ type เดียวกัน
+            // หาคิวถัดไปที่รอ type เดียวกันในสาขาเดียวกัน (เรียงตาม created_at)
             const nextQueue = await tx.queue.findFirst({
                 where: {
                     branch_id: machine.branch_id,
@@ -172,22 +207,38 @@ export const finishQueue = async (req: Request, res: Response) => {
                 },
                 orderBy: { created_at: "asc" }
             })
-
-            //assign เครื่องให้คิวถัดไป
+            // assign เครื่องให้คิวถัดไป + lock เครื่องอีกครั้ง
             if (nextQueue) {
                 await tx.queue.update({
                     where: { queue_id: nextQueue.queue_id },
-                    data: { branch_machine_id: machine.branch_machine_id }
+                    data: {
+                        branch_machine_id: machine.branch_machine_id,
+                        //clear estimated_start_at เพราะได้เครื่องแล้ว
+                        estimated_start_at: null
+                    }
                 })
                 await tx.branchMachine.update({
                     where: { branch_machine_id: machine.branch_machine_id },
                     data: { status: "UNAVAILABLE" }
                 })
             }
+            // ตรวจสอบว่าทุก queue ของ order นี้เสร็จหมดแล้วหรือยัง
+            // ถ้าเสร็จหมด → update order status เป็น FINISHED อัตโนมัติ
+            const remainingQueues = await tx.queue.count({
+                where: {
+                    order_id: queue.order_id,
+                    finished_at: null
+                }
+            })
 
+            if (remainingQueues === 0) {
+                await tx.order.update({
+                    where: { order_id: queue.order_id },
+                    data: { status: "FINISHED" }
+                })
+            }
             return queue
         })
-
         res.json(result)
 
     } catch (error) {
@@ -201,7 +252,13 @@ export const getQueue = async (req: Request, res: Response) => {
     try {
         const queue = await prisma.queue.findMany({
             where: branch_id ? { branch_id: String(branch_id) } : {},
-            orderBy: { queue_number: "asc" }
+            orderBy: { queue_number: "asc" },
+            include: {
+                branch: true,
+                order: {
+                    include: { user: true }
+                }
+            }
         })
         res.json(queue)
     } catch (error) {
@@ -250,18 +307,20 @@ export const resetQueue = async (req: Request, res: Response) => {
     }
 }
 
+// ดูคิวตาม order ID
 export const getQueueByOrderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
-        const queue = await prisma.queue.findFirst({
-            where: { order_id: id }
-        });
-        if (!queue) {
-            return res.status(404).json({ message: "Queue not found for this order" });
+        //ดึงทุก queue ของ order นี้ (findMany แทน findFirst เพราะ 1 order มีหลาย queue ได้)
+        const queues = await prisma.queue.findMany({
+            where: { order_id: id },
+            orderBy: { created_at: "asc" }
+        })
+        if (!queues.length) {
+            return res.status(404).json({ message: "Queue not found for this order" })
         }
-
-        return res.json(queue);
+        return res.json(queues)
     } catch (error) {
-        return res.status(500).json({ error: "Failed to fetch queue" });
+        return res.status(500).json({ error: "Failed to fetch queue" })
     }
-};
+}

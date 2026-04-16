@@ -131,7 +131,7 @@ model Queue {
   created_at        DateTime       @default(now())
   called_at         DateTime?
   finished_at       DateTime?
-
+estimated_start_at DateTime?
   branch        Branch         @relation(fields: [branch_id], references: [branch_id])
   order         Order          @relation(fields: [order_id], references: [order_id], onDelete: Cascade)
   branchMachine BranchMachine? @relation(fields: [branch_machine_id], references: [branch_machine_id])
@@ -194,7 +194,7 @@ enum MachineType {
 }
 
 enum BranchMachineStatus {
-  AVAILABLE
+  AVAILABLE //
   UNAVAILABLE
 }
 

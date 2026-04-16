@@ -9,7 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import TopBar from "./components/TopBar";
 import Payments from "./pages/Payment";
 import Dashbords from "./pages/Dashboard"
-
+import QueueMonitor from './pages/queue'
 function App() {
   return (
     <BrowserRouter>
@@ -31,6 +31,7 @@ function App() {
                       <Route path="/service" element={<Services />} />
                       <Route path="/branch" element={<Branch />} />
                       <Route path="/payments" element={<Payments />} />
+                      <Route path="/queues" element={<QueueMonitor />} />
                     </Routes>
                   </div>
                 </div>
