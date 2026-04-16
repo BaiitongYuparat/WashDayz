@@ -193,11 +193,11 @@ function User() {
 
       <div className="mb-6 flex justify-between items-center">
         <label className="text-black text-3xl font-bold">
-          User
+          ผู้ใช้งาน
         </label>
 
         <CustomButton
-          title="+ Add User"
+          title="+ เพิ่มผู้ใช้งาน"
           variant="primary"
           size="md"
           onPress={() => setOpenModal(true)}
@@ -209,10 +209,10 @@ function User() {
 
             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
 
-              <h2 className="text-xl font-bold">Add User</h2>
+              <h2 className="text-xl font-bold">เพิ่มผู้ใช้งาน</h2>
 
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">Name</label>
+                <label className="text-sm text-gray-500">ชื่อ</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
                   value={Data.name}
@@ -221,7 +221,7 @@ function User() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">Email</label>
+                <label className="text-sm text-gray-500">อีเมล</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
                   value={Data.email}
@@ -230,7 +230,7 @@ function User() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">Phone</label>
+                <label className="text-sm text-gray-500">เบอร์โทรศัพท์</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
                   value={Data.phone}
@@ -239,7 +239,7 @@ function User() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">Password</label>
+                <label className="text-sm text-gray-500">รหัสผ่าน</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
                   value={Data.password}
@@ -248,7 +248,7 @@ function User() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">Role</label>
+                <label className="text-sm text-gray-500">สิทธิ์</label>
                 <select
                   className="w-full border rounded-lg p-2 text-sm"
                   value={Data.role}
@@ -264,7 +264,7 @@ function User() {
                   onClick={() => setOpenModal(false)}
                   className="px-4 py-2 rounded-lg border text-sm"
                 >
-                  Cancel
+                  ยกเลิก
                 </button>
 
                 <button
@@ -274,7 +274,7 @@ function User() {
                   }}
                   className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
                 >
-                  Add
+                  เพิ่ม
                 </button>
               </div>
 
@@ -287,19 +287,19 @@ function User() {
       <SearchInput
         value={search}
         onChange={setSearch}
-        placeholder="Search user..."
+        placeholder="ค้นหา..."
       />
 
       <div className="overflow-hidden rounded-xl shadow-md">
         <table className="w-full bg-white border-collapse">
           <thead>
             <tr className="bg-blue-50">
-              <th className="p-5 text-left">Name</th>
-              <th className="p-5 text-left">Phone</th>
-              <th className="p-5 text-left">Email</th>
-              <th className="p-5 text-left">Address</th>
-              <th className="p-5 text-left">Role</th>
-              <th className="p-5 text-left">Action</th>
+              <th className="p-5 text-left">ผู้ใช้งาน</th>
+              <th className="p-5 text-left">เบอร์โทรศัพท์</th>
+              <th className="p-5 text-left">อีเมล</th>
+              <th className="p-5 text-left">ที่อยู่</th>
+              <th className="p-5 text-left">สิทธิ์</th>
+              <th className="p-5 text-left">การจัดการ</th>
             </tr>
           </thead>
 
@@ -367,7 +367,7 @@ function User() {
       {openAddressModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-            <h2 className="text-xl font-bold">Add Address</h2>
+            <h2 className="text-xl font-bold">เพิ่มที่อยู่</h2>
 
 
             {users.find(u => u.user_id === selectedUserId)?.addresses?.map((addr) => (
@@ -394,7 +394,7 @@ function User() {
 
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Label</label>
+              <label className="text-sm text-gray-500">ชื่อสถานที่</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
                 placeholder="เช่น บ้าน, ที่ทำงาน"
@@ -473,13 +473,13 @@ function User() {
                 onClick={() => setOpenAddressModal(false)}
                 className="px-4 py-2 rounded-lg border text-sm"
               >
-                Cancel
+                ยกเลิก
               </button>
               <button
                 onClick={handleAddAddress}
                 className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
               >
-                Add
+                เพิ่ม
               </button>
             </div>
           </div>
@@ -489,10 +489,10 @@ function User() {
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-            <h2 className="text-xl font-bold">Edit User</h2>
+            <h2 className="text-xl font-bold">แก้ไขผู้ใช้งาน</h2>
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Name</label>
+              <label className="text-sm text-gray-500">ชื่อ</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
                 value={editForm.name}
@@ -501,7 +501,7 @@ function User() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Phone</label>
+              <label className="text-sm text-gray-500">เยอร์โทรศัพท์</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
                 value={editForm.phone}
@@ -510,7 +510,7 @@ function User() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Email</label>
+              <label className="text-sm text-gray-500">อีเมล</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
                 value={editForm.email}
@@ -519,7 +519,7 @@ function User() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Password</label>
+              <label className="text-sm text-gray-500">รหัสผ่าน</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
                 value={editForm.password}
@@ -528,14 +528,14 @@ function User() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Role</label>
+              <label className="text-sm text-gray-500">สิทธิ์</label>
               <select
                 className="w-full border rounded-lg p-2 text-sm"
                 value={editForm.role}
                 onChange={(e) => setEditForm({ ...editForm, role: e.target.value as Role })}
               >
-                <option value="ADMIN">ADMIN</option>
-                <option value="USER">USER</option>
+                <option value="ADMIN">ผู้ดูแลระบบ</option>
+                <option value="USER">ผู้ใช้ทั่วไป</option>
               </select>
             </div>
 
@@ -544,13 +544,13 @@ function User() {
                 onClick={() => { setOpenEditModal(false); setEditForm(null); }}
                 className="px-4 py-2 rounded-lg border text-sm"
               >
-                Cancel
+                ยกเลิก
               </button>
               <button
                 onClick={handleSaveEdit}
                 className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
               >
-                Save
+                บันทึก
               </button>
             </div>
           </div>
@@ -560,10 +560,10 @@ function User() {
       {editAddressForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-            <h2 className="text-xl font-bold">Edit Address</h2>
+            <h2 className="text-xl font-bold">แก้ไขที่อยู่</h2>
 
             <div className="space-y-1">
-              <label className="text-sm text-gray-500">Label</label>
+              <label className="text-sm text-gray-500">ชื่อสถานที่</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
                 value={editAddressForm.label}
@@ -641,13 +641,13 @@ function User() {
                   onClick={() => setEditAddressForm(null)}
                   className="px-4 py-2 rounded-lg border text-sm"
                 >
-                  Cancel
+                  ยกเลิก
                 </button>
                 <button
                   onClick={handleSaveEditAddress}
                   className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
                 >
-                  Save
+                  บันทึก
                 </button>
               </div>
             </div>

@@ -206,4 +206,5 @@ enum AddonType {
 enum PaymentStatus {
   PENDING
   PAID
+  FAILED
 }
