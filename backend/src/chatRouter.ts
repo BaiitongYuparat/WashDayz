@@ -32,8 +32,7 @@ router.post("/", async (req: Request, res: Response) => {
     const scored = await runRecommendBranch({
       userLat: address.lat,
       userLng: address.lng,
-      machineType,
-      capacity,
+      machineTypes: [{ type: machineType, capacity }],
     });
 
     //ai สรุปเป็นภาษา
