@@ -1,6 +1,10 @@
 import cron from "node-cron"
 import { prisma } from "../../lib/prisma"
-import { syncOrderStatus } from "../../lib/syncOrderStatus"
+import {
+    syncOrderStatus,
+    isBlockedByDependency,
+    assignPendingDependentQueues
+} from "../../lib/syncOrderStatus"
 
 export function startQueueScheduler() {
     // รันทุก 10 วินาที
@@ -25,9 +29,11 @@ export function startQueueScheduler() {
                 })
 
                 for (const queue of expiredQueues) {
-                    // ถ้า started_at เป็น null (queue เก่าที่หลุดมา) → patch ให้เริ่มนับเวลาตอนนี้แล้วข้ามรอบนี้
+                    // ถ้า started_at เป็น null → patch ให้เริ่มนับเวลาตอนนี้แล้วข้ามรอบนี้
                     if (!queue.started_at) {
-                        console.log(`[Scheduler] Patching missing started_at for queue ${queue.queue_id}`)
+                        console.log(
+                            `[Scheduler] Patching missing started_at for queue ${queue.queue_id}`
+                        )
                         await tx.queue.update({
                             where: { queue_id: queue.queue_id },
                             data: { started_at: new Date() }
@@ -55,9 +61,7 @@ export function startQueueScheduler() {
 
                     // คืนเครื่อง
                     await tx.branchMachine.update({
-                        where: {
-                            branch_machine_id: queue.branch_machine_id!
-                        },
+                        where: { branch_machine_id: queue.branch_machine_id! },
                         data: { status: "AVAILABLE" }
                     })
 
@@ -67,7 +71,8 @@ export function startQueueScheduler() {
                         data: { branch_machine_id: null }
                     })
 
-                    // หาคิวถัดไปที่รออยู่ type เดียวกัน
+                    // หาคิวถัดไปที่รอ type เดียวกัน (เรียงตาม created_at)
+                    // กรองเฉพาะคิวที่ไม่ถูก block โดย dependency
                     const nextQueue = await tx.queue.findFirst({
                         where: {
                             branch_id: queue.branch_id,
@@ -79,24 +84,36 @@ export function startQueueScheduler() {
                     })
 
                     if (nextQueue) {
-                        await tx.queue.update({
-                            where: { queue_id: nextQueue.queue_id },
-                            data: {
-                                branch_machine_id: queue.branch_machine_id,
-                                estimated_start_at: null,
-                                started_at: new Date()
-                            }
-                        })
-                        await tx.branchMachine.update({
-                            where: {
-                                branch_machine_id: queue.branch_machine_id!
-                            },
-                            data: { status: "UNAVAILABLE" }
-                        })
+                        const blocked = await isBlockedByDependency(
+                            tx,
+                            nextQueue.order_id,
+                            queue.machine_type ?? ""
+                        )
+                        if (!blocked) {
+                            await tx.queue.update({
+                                where: { queue_id: nextQueue.queue_id },
+                                data: {
+                                    branch_machine_id: queue.branch_machine_id,
+                                    estimated_start_at: null,
+                                    started_at: new Date()
+                                }
+                            })
+                            await tx.branchMachine.update({
+                                where: { branch_machine_id: queue.branch_machine_id! },
+                                data: { status: "UNAVAILABLE" }
+                            })
+                        }
                     }
 
-                    // sync order status
                     await syncOrderStatus(tx, queue.order_id)
+
+                    // ✅ ตรวจ queue ที่รอ dependency ของ order นี้ว่าพร้อม assign ได้แล้วหรือยัง
+                    await assignPendingDependentQueues(
+                        tx,
+                        queue.order_id,
+                        queue.branch_id,
+                        queue.machine_type ?? ""
+                    )
                 }
             })
         } catch (error) {
