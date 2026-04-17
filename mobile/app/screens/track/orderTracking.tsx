@@ -92,6 +92,23 @@ export default function OrderTrackingScreen() {
 
   const canCancel = CANCELLABLE_STATUSES.includes(order.status);
 
+  const sortedQueues = [...queues].sort((a, b) => {
+    const order: Record<string, number> = {
+      WASHER: 0,
+      DRYER: 1,
+    };
+
+    return (
+      (order[a.machine_type ?? ""] ?? 99) - (order[b.machine_type ?? ""] ?? 99)
+    );
+  });
+
+  const washerQueues = queues.filter((q) => q.machine_type === "WASHER");
+
+  const washerDone =
+    washerQueues.length === 0
+      ? true
+      : washerQueues.every((q) => !!q.finished_at);
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -102,61 +119,75 @@ export default function OrderTrackingScreen() {
             <Text className="font-bold text-gray-800 mb-3">คิวของคุณ</Text>
 
             <View className="gap-3">
-              {queues.map((q) => (
-                <View
-                  key={q.queue_id}
-                  className="flex-row items-center justify-between p-4 rounded-2xl border border-gray-100 bg-gray-50"
-                >
-                  {/* ซ้าย */}
-                  <View className="flex-row items-center gap-3">
-                    <View className="bg-blue-100 p-2 rounded-full">
-                      <MaterialCommunityIcons
-                        name="ticket-outline"
-                        size={18}
-                        color="#00ACC3"
-                      />
-                    </View>
+              {sortedQueues.map((q) => {
+                const isDryer = q.machine_type === "DRYER";
+                const isWaiting = isDryer && !washerDone && !q.finished_at;
+                console.log("washerDone:", washerDone);
+                console.log("queues:", JSON.stringify(queues, null, 2));
 
-                    <View>
-                      <Text className="font-bold text-gray-800">
-                        {q.machine_type === "WASHER"
-                          ? "เครื่องซัก"
-                          : "เครื่องอบ"}
-                      </Text>
-                      <Text className="text-gray-400 text-xs">
-                        คิวที่ {q.queue_number}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* ขวา */}
+                return (
                   <View
-                    className={`px-3 py-1.5 rounded-full ${
-                      q.finished_at
-                        ? "bg-gray-100"
-                        : q.branch_machine_id
-                          ? "bg-green-100"
-                          : "bg-yellow-100"
+                    key={q.queue_id}
+                    className={`flex-row items-center justify-between p-4 rounded-2xl border border-gray-100 ${
+                      isWaiting ? "opacity-50 bg-gray-100" : "bg-gray-50"
                     }`}
                   >
-                    <Text
-                      className={`text-xs font-bold ${
+                    {/* ซ้าย */}
+                    <View className="flex-row items-center gap-3">
+                      <View className="bg-blue-100 p-2 rounded-full">
+                        <MaterialCommunityIcons
+                          name="ticket-outline"
+                          size={18}
+                          color="#00ACC3"
+                        />
+                      </View>
+                      <View>
+                        <Text className="font-bold text-gray-800">
+                          {q.machine_type === "WASHER"
+                            ? "เครื่องซัก"
+                            : "เครื่องอบ"}
+                        </Text>
+                        <Text className="text-gray-400 text-xs">
+                          คิวที่ {q.queue_number}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* ขวา */}
+                    <View
+                      className={`px-3 py-1.5 rounded-full ${
                         q.finished_at
-                          ? "text-gray-500"
-                          : q.branch_machine_id
-                            ? "text-green-700"
-                            : "text-yellow-700"
+                          ? "bg-gray-100"
+                          : isWaiting
+                            ? "bg-gray-200"
+                            : q.branch_machine_id
+                              ? "bg-green-100"
+                              : "bg-yellow-100"
                       }`}
                     >
-                      {q.finished_at
-                        ? "เสร็จสิ้น"
-                        : q.branch_machine_id
-                          ? "กำลังใช้งาน"
-                          : "รอเครื่องว่าง"}
-                    </Text>
+                      <Text
+                        className={`text-xs font-bold ${
+                          q.finished_at
+                            ? "text-gray-500"
+                            : isWaiting
+                              ? "text-gray-400"
+                              : q.branch_machine_id
+                                ? "text-green-700"
+                                : "text-yellow-700"
+                        }`}
+                      >
+                        {q.finished_at
+                          ? "เสร็จสิ้น"
+                          : isWaiting
+                            ? "รอซักเสร็จก่อน"
+                            : q.branch_machine_id
+                              ? "กำลังใช้งาน"
+                              : "รอเครื่องว่าง"}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
         )}
@@ -266,4 +297,3 @@ export default function OrderTrackingScreen() {
     </View>
   );
 }
-
