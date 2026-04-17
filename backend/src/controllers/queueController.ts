@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
-import { syncOrderStatus } from "../../lib/syncOrderStatus"
+import { syncOrderStatus, isBlockedByDependency, assignPendingDependentQueues } from "../../lib/syncOrderStatus"
 
 // สร้างคิว
 export const createQueue = async (req: Request, res: Response) => {
@@ -36,9 +36,21 @@ export const createQueue = async (req: Request, res: Response) => {
                 throw new Error("NO_MACHINE_TYPE")
             }
 
+            // เอา machine_type แบบไม่ซ้ำ
+            const requiredTypes = [
+                ...new Set(
+                    order.items
+                        .filter(item => item.machine?.type)
+                        .map(item => item.machine!.type)
+                )
+            ]
+            if (requiredTypes.length === 0) {
+                throw new Error("NO_MACHINE_TYPE")
+            }
+
             const typeMachineMap = new Map<string, string[]>()
             for (const item of order.items) {
-                if (!item.machine_id) continue 
+                if (!item.machine_id) continue
                 if (!item.machine?.type) continue
                 const type = item.machine.type
                 if (!typeMachineMap.has(type)) typeMachineMap.set(type, [])
@@ -54,35 +66,39 @@ export const createQueue = async (req: Request, res: Response) => {
                 if (existingQueue) continue
 
                 // นับ queue_number แยกต่อ machine_type ไม่รวมกัน
-                // เพราะ WASHER กับ DRYER คนละคิว ไม่ควรใช้เลขเดียวกัน
                 const lastQueue = await tx.queue.findFirst({
                     where: { branch_id, machine_type: machineType },
                     orderBy: { queue_number: "desc" }
                 })
-
                 const nextQueueNumber = lastQueue ? lastQueue.queue_number + 1 : 1
 
+                // ✅ เช็ค dependency ก่อน (DRYER ต้องรอ WASHER เสร็จก่อน)
+                const blocked = await isBlockedByDependency(tx, order_id, machineType)
+
                 const allowedMachineIds = typeMachineMap.get(machineType) ?? []
-                // หาเครื่องว่างของ type นั้น ในสาขานั้น
-                const availableMachine = await tx.branchMachine.findFirst({
-                    where: {
-                        branch_id,
-                        status: "AVAILABLE",
-                        machine_id: { in: allowedMachineIds },
-                        machine: { type: machineType },
-                    }
-                })
-                if (availableMachine) {
-                    await tx.branchMachine.update({
-                        where: { branch_machine_id: availableMachine.branch_machine_id },
-                        data: { status: "UNAVAILABLE" }
+
+                // ถ้า blocked → ไม่หาเครื่อง สร้าง queue รอไว้ก่อน
+                let availableMachine = null
+                if (!blocked) {
+                    availableMachine = await tx.branchMachine.findFirst({
+                        where: {
+                            branch_id,
+                            status: "AVAILABLE",
+                            machine_id: { in: allowedMachineIds },
+                            machine: { type: machineType },
+                        }
                     })
+                    if (availableMachine) {
+                        await tx.branchMachine.update({
+                            where: { branch_machine_id: availableMachine.branch_machine_id },
+                            data: { status: "UNAVAILABLE" }
+                        })
+                    }
                 }
 
-                //คำนวณเวลาที่คาดว่าจะได้ใช้เครื่อง สำหรับคิวที่ต้องรอ
+                // คำนวณเวลาที่คาดว่าจะได้ใช้เครื่อง เฉพาะกรณีไม่ blocked และไม่มีเครื่องว่าง
                 let estimatedStartAt: Date | null = null
-                if (!availableMachine) {
-                    // นับจำนวนคิวที่กำลังใช้เครื่องอยู่ (assigned แต่ยังไม่เสร็จ)
+                if (!blocked && !availableMachine) {
                     const busyCount = await tx.queue.count({
                         where: {
                             branch_id,
@@ -92,7 +108,6 @@ export const createQueue = async (req: Request, res: Response) => {
                         }
                     })
 
-                    // นับคิวที่รออยู่ก่อนหน้า (ยังไม่ได้เครื่อง)
                     const waitingAhead = await tx.queue.count({
                         where: {
                             branch_id,
@@ -102,7 +117,6 @@ export const createQueue = async (req: Request, res: Response) => {
                         }
                     })
 
-                    // ดึง duration จาก machine type (ใช้ตัวแรกที่เจอ)
                     const machineInfo = await tx.machine.findFirst({
                         where: { type: machineType }
                     })
@@ -122,7 +136,6 @@ export const createQueue = async (req: Request, res: Response) => {
                         }
                     })
 
-                    // คิวที่รออยู่ก่อนหน้า / จำนวนเครื่องทั้งหมด = รอบที่ต้องรอ
                     const cyclesAhead = Math.ceil(waitingAhead / (machinesTotal || 1))
                     const waitMinutes = (cyclesAhead + (totalBusyMachines > 0 ? 1 : 0)) * minutesPerCycle
                     estimatedStartAt = new Date(Date.now() + waitMinutes * 60 * 1000)
@@ -141,8 +154,10 @@ export const createQueue = async (req: Request, res: Response) => {
                     }
                 })
                 queues.push(queue)
-                await syncOrderStatus(tx, order_id)
             }
+
+            await syncOrderStatus(tx, order_id)
+
             if (queues.length === 0) {
                 throw new Error("QUEUE_ALREADY_EXISTS")
             }
@@ -196,7 +211,9 @@ export const finishQueue = async (req: Request, res: Response) => {
                 where: { queue_id: id },
                 data: { branch_machine_id: null }
             })
+
             // หาคิวถัดไปที่รอ type เดียวกันในสาขาเดียวกัน (เรียงตาม created_at)
+            // เฉพาะคิวที่ไม่ได้ถูก block โดย dependency
             const nextQueue = await tx.queue.findFirst({
                 where: {
                     branch_id: machine.branch_id,
@@ -206,23 +223,40 @@ export const finishQueue = async (req: Request, res: Response) => {
                 },
                 orderBy: { created_at: "asc" }
             })
+
             // assign เครื่องให้คิวถัดไป + lock เครื่องอีกครั้ง
+            // แต่ต้องเช็คก่อนว่าคิวถัดไปไม่ได้ถูก block
             if (nextQueue) {
-                await tx.queue.update({
-                    where: { queue_id: nextQueue.queue_id },
-                    data: {
-                        branch_machine_id: machine.branch_machine_id,
-                        //clear estimated_start_at เพราะได้เครื่องแล้ว
-                        estimated_start_at: null,
-                        started_at: new Date()
-                    }
-                })
-                await tx.branchMachine.update({
-                    where: { branch_machine_id: machine.branch_machine_id },
-                    data: { status: "UNAVAILABLE" }
-                })
+                const isNextBlocked = await isBlockedByDependency(
+                    tx,
+                    nextQueue.order_id,
+                    nextQueue.machine_type ?? queue.machine_type ?? ""
+                )
+                if (!isNextBlocked) {
+                    await tx.queue.update({
+                        where: { queue_id: nextQueue.queue_id },
+                        data: {
+                            branch_machine_id: machine.branch_machine_id,
+                            estimated_start_at: null,
+                            started_at: new Date()
+                        }
+                    })
+                    await tx.branchMachine.update({
+                        where: { branch_machine_id: machine.branch_machine_id },
+                        data: { status: "UNAVAILABLE" }
+                    })
+                }
             }
             await syncOrderStatus(tx, queue.order_id)
+
+            // ✅ ตรวจ queue ที่รอ dependency ของ order นี้ว่าพร้อม assign ได้แล้วหรือยัง
+            await assignPendingDependentQueues(
+                tx,
+                queue.order_id,
+                machine.branch_id,
+                 queue.machine_type ?? ""
+            )
+
             return queue
         })
         res.json(result)
@@ -297,7 +331,7 @@ export const resetQueue = async (req: Request, res: Response) => {
 export const getQueueByOrderId = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
-        //ดึงทุก queue ของ order นี้ (findMany แทน findFirst เพราะ 1 order มีหลาย queue ได้)
+        // ดึงทุก queue ของ order นี้ (findMany แทน findFirst เพราะ 1 order มีหลาย queue ได้)
         const queues = await prisma.queue.findMany({
             where: { order_id: id },
             orderBy: { created_at: "asc" }
