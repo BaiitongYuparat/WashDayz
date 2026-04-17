@@ -190,6 +190,8 @@ export default function OrderTrackingScreen() {
           </View>
         </View>
 
+        {/* Tracking Timeline */}
+
         <View className="bg-white rounded-3xl p-5 mb-4 border border-gray-100">
           <Text className="font-bold text-gray-800 mb-4">สถานะคำสั่งซื้อ</Text>
           <TrackingTimeline currentStatus={order.status} />

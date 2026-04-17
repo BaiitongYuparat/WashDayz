@@ -19,6 +19,7 @@ export default function OrderActiveTrackingScreen() {
       try {
         const data = await getOrdersByUser(user.user_id)
         setOrders(data.filter((o) => ACTIVE_STATUSES.includes(o.status)))
+        console.log("order",orders)
       } catch (err) {
         Alert.alert("Error", "โหลดข้อมูลไม่สำเร็จ")
       } finally {
