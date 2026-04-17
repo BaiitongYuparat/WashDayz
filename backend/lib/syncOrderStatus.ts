@@ -45,14 +45,19 @@ export const isBlockedByDependency = async (
     const prerequisite = MUST_WAIT_FOR[machineType]
     if (!prerequisite) return false
 
-    const unfinishedPrerequisite = await tx.queue.findFirst({
+    // เช็คว่า prerequisite queue มีอยู่และเสร็จแล้วหรือยัง
+    const prerequisiteQueue = await tx.queue.findFirst({
         where: {
             order_id,
             machine_type: prerequisite,
-            finished_at: null,
         }
     })
-    return unfinishedPrerequisite !== null
+    // ถ้าไม่มี prerequisite queue เลย → blocked (ยังไม่ได้สร้าง)
+    if (!prerequisiteQueue) return true
+    // ถ้ามีแต่ยังไม่เสร็จ → blocked
+    if (!prerequisiteQueue.finished_at) return true
+    // prerequisite เสร็จแล้ว → ไม่ blocked
+    return false
 }
 
 /**
