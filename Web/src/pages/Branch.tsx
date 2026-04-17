@@ -7,8 +7,8 @@ import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import SearchInput from "../components/SearchInput";
 import "leaflet/dist/leaflet.css"
-import { getMachinesByBranch, addMachineToBranch, deleteMachineFromBranch, getMachines } from '../api/BranchMachineApi'
-import type { BranchMachine } from '../api/BranchMachineApi'
+import { getMachinesByBranch, addMachineToBranch, deleteMachineFromBranch, getMachines } from '../api/branchmachineApi'
+import type { BranchMachine } from '../api/branchmachineApi'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
