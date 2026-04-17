@@ -15,15 +15,21 @@ export const syncOrderStatus = async (tx: any, order_id: string) => {
     if (!queues.length) return
 
     const allFinished = queues.every((q: any) => q.finished_at !== null)
+
+    // มี queue ที่ได้เครื่องแล้วและยังไม่เสร็จ = กำลังทำงานอยู่
+    const anyInProgress = queues.some(
+        (q: any) => q.branch_machine_id !== null && q.finished_at === null)
+
     const allAssigned = queues.every(
         (q: any) => q.branch_machine_id !== null || q.finished_at !== null
     )
-
     let status: "WAITING" | "WASHING" | "FINISHED"
     if (allFinished) {
         status = "FINISHED"
     } else if (allAssigned) {
         status = "WASHING"
+    } else if (anyInProgress) {
+        status = "WASHING"  // มีเครื่องทำงานอยู่แม้บางตัวยังรอ
     } else {
         status = "WAITING"
     }
