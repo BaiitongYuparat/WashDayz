@@ -1,4 +1,4 @@
-import { View, Text } from "react-native"
+import { View, Text,TouchableOpacity } from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { ComponentProps } from "react"
 import SummaryRow from "./SummaryRow"
@@ -13,6 +13,8 @@ type Props = {
   machines: Machine[]
   addons: AddonType[]
   totalPrice: number
+  handleEditAddon: () => void
+  handleEditBranch: () => void
 }
 
 const MACHINE_TYPE_LABELS: Record<string, string> = {
@@ -25,7 +27,7 @@ const MACHINE_ICONS: Record<string, IconName> = {
   DRYER: "tumble-dryer",
 }
 
-export default function SummaryCard({ serviceName, branchName, machines, addons, totalPrice }: Props) {
+export default function SummaryCard({ serviceName, branchName, machines, addons, totalPrice , handleEditAddon , handleEditBranch }: Props) {
   return (
     <View className="bg-white rounded-3xl overflow-hidden border border-gray-100">
 
@@ -39,7 +41,12 @@ export default function SummaryCard({ serviceName, branchName, machines, addons,
 
         {/* สาขา */}
         <View>
-          <Text className="text-xs text-gray-400 font-bold mb-2 uppercase tracking-wide">สาขา</Text>
+          <View className="flex-row justify-between">
+            <Text className="text-xs text-gray-400 font-bold mb-2 uppercase tracking-wide">สาขา</Text>
+           <TouchableOpacity onPress={handleEditBranch}>
+            <Text className="text-cyan-500 text-base">แก้ไข</Text>
+        </TouchableOpacity>
+          </View>
           <View className="flex-row items-center gap-2">
             <MaterialCommunityIcons name="map-marker" size={16} color="#00ACC3" />
             <Text className="text-gray-800 font-bold">{branchName}</Text>
@@ -69,7 +76,7 @@ export default function SummaryCard({ serviceName, branchName, machines, addons,
                     {m.capacity} กก. · {m.duration_minutes} นาที
                   </Text>
                 </View>
-                <Text className="text-sm font-bold text-blue-main">{m.price} ฿</Text>
+                <Text className="text-sm font-bold">{m.price} ฿</Text>
               </View>
             ))}
           </View>
@@ -80,7 +87,12 @@ export default function SummaryCard({ serviceName, branchName, machines, addons,
           <>
             <View className="h-px bg-gray-100" />
             <View>
-              <Text className="text-xs text-gray-400 font-bold mb-2 uppercase tracking-wide">บริการเสริม</Text>
+              <View className="flex-row justify-between">
+                <Text className="text-sm text-gray-400 font-bold mb-2 uppercase tracking-wide">บริการเสริม</Text>
+              <TouchableOpacity onPress={handleEditAddon}>
+                    <Text className="text-cyan-500">แก้ไข</Text>
+                </TouchableOpacity>
+              </View>
               {addons.map((a) => (
                 <SummaryRow key={a.addon_service_id} label={a.name} value={`${a.price} ฿`} />
               ))}

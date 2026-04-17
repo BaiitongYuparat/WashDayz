@@ -24,17 +24,6 @@ export const createQueue = async (req: Request, res: Response) => {
                 }
             })
             if (!order) throw new Error("ORDER_NOT_FOUND")
-            // เอา machine_type แบบไม่ซ้ำ
-            const requiredTypes = [
-                ...new Set(
-                    order.items
-                        .filter(item => item.machine?.type)
-                        .map(item => item.machine!.type)
-                )
-            ]
-            if (requiredTypes.length === 0) {
-                throw new Error("NO_MACHINE_TYPE")
-            }
 
             // เอา machine_type แบบไม่ซ้ำ
             const requiredTypes = [
@@ -196,16 +185,19 @@ export const finishQueue = async (req: Request, res: Response) => {
                 data: { finished_at: new Date() }
             })
             if (!queue.branch_machine_id) return queue
+
             // ดึงเครื่องที่ใช้อยู่
             const machine = await tx.branchMachine.findUnique({
                 where: { branch_machine_id: queue.branch_machine_id }
             })
             if (!machine) return queue
+
             // คืนสถานะเครื่องเป็น AVAILABLE
             await tx.branchMachine.update({
                 where: { branch_machine_id: machine.branch_machine_id },
                 data: { status: "AVAILABLE" }
             })
+
             // ถอด branch_machine_id ออกจากคิวที่เพิ่งปิด
             await tx.queue.update({
                 where: { queue_id: id },
@@ -247,6 +239,7 @@ export const finishQueue = async (req: Request, res: Response) => {
                     })
                 }
             }
+
             await syncOrderStatus(tx, queue.order_id)
 
             // ✅ ตรวจ queue ที่รอ dependency ของ order นี้ว่าพร้อม assign ได้แล้วหรือยัง

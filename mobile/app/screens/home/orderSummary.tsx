@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Alert, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Alert, ActivityIndicator , TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { CustomButton } from "@/components/ui/CustomButton";
@@ -95,6 +95,40 @@ export default function OrderSummaryScreen() {
     }
   };
 
+// ไปหน้า branch เพื่อแก้ไข
+const handleEdit = () => {
+  router.replace({
+    pathname: "/screens/home/branch",
+    params: {
+      serviceId,
+      machineIds: Array.isArray(machineIds)
+        ? machineIds.join(",")
+        : machineIds ?? "",
+      addonIds: Array.isArray(addonIds)    
+        ? addonIds.join(",")
+        : addonIds ?? "",
+      totalPrice: totalPrice ?? "",        
+      editMode: "true",                  
+    },
+  });
+};
+
+const handleEditAddon = () => {
+  router.push({
+    pathname: "/screens/order", 
+    params: {
+      serviceId,
+      branchId,
+      machineIds: Array.isArray(machineIds)
+        ? machineIds.join(",")
+        : machineIds ?? "",
+         addonIds: Array.isArray(addonIds)  
+        ? addonIds.join(",")
+        : addonIds ?? "",
+    },
+  });
+};
+
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center gap-2">
@@ -110,14 +144,16 @@ export default function OrderSummaryScreen() {
         <Text className="font-bold text-2xl text-gray-800 mb-4">
           สรุปคำสั่งซื้อ
         </Text>
-
         <SummaryCard
           serviceName={service?.name ?? ""}
           branchName={branch?.branch_name ?? ""}
           machines={machines}
           addons={addons}
           totalPrice={Number(totalPrice)}
+          handleEditAddon={handleEditAddon}
+          handleEditBranch={handleEdit}
         />
+        
 
         <View className="mt-4">
           <Text className="font-bold text-lg text-gray-800 mb-3">

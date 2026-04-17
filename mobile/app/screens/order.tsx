@@ -30,12 +30,14 @@ const MACHINE_ICONS: Record<string, IconName> = {
 
 export default function OrderScreen() {
   const router = useRouter();
-  const { serviceId,branchId, machineIds  } = useLocalSearchParams();
+  const { serviceId,branchId, machineIds, addonIds  } = useLocalSearchParams();
   const [service, setService] = useState<MainService | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState<number>(0);
   const [addon, setAddon] = useState<AddonType[]>([]);
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selectedAddons, setSelectedAddons] = useState<string[]>(() => {
+  return (addonIds as string)?.split(",").filter(Boolean) ?? []
+});
   const [machinePrice, setMachinePrice] = useState<number>(0);
   const [selectedMachines, setSelectedMachines] = useState<Machine[]>([]);
 

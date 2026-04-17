@@ -1,3 +1,5 @@
+import axios from "axios"
+
 const API_URL = "http://172.20.10.2:8080"
 
 export type BranchScore = {
@@ -43,25 +45,27 @@ export const recommendBranch = async (
   input: RecommendInput,
   token: string
 ): Promise<RecommendResult> => {
-  const res = await fetch(`${API_URL}/recommend-branch`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(input),
-  })
+  const res = await axios.post(
+    `${API_URL}/recommend-branch`,
+    input,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
-  const data = await res.json()
-  console.log("recommend status:", res.status)
-  console.log("recommend response:", JSON.stringify(data, null, 2))
+  return res.data;
+};
 
-  if (!res.ok) throw new Error("โหลดข้อมูลสาขาไม่สำเร็จ")
-  return data
-}
+export const getBranchById = async (
+  id: string
+): Promise<Branch> => {
+  const res = await axios.get(`${API_URL}/branches/${id}`);
+  return res.data;
+};
 
-export const getBranchById = async (id: string): Promise<Branch> => {
-  const res = await fetch(`${API_URL}/branches/${id}`)
-  if (!res.ok) throw new Error("โหลดข้อมูลสาขาไม่สำเร็จ")
-  return res.json()
-}
+export const getAllBranches = async (): Promise<Branch[]> => {
+  const res = await axios.get(`${API_URL}/branches`);
+  return res.data;
+};
