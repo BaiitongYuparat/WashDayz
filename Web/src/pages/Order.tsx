@@ -61,7 +61,7 @@ function Orders() {
         return "";
     };
 
- 
+
 
 
 
@@ -101,8 +101,13 @@ function Orders() {
                             <tr
                                 key={order.order_id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="p-5">{order.user?.name || "-"}</td>
-                                <td className="p-5">{order.items?.[0]?.machine?.type || "-"}</td>
-                                <td className="p-5">{order.items?.[0]?.machine?.capacity || "-"} กก</td>
+
+                                <td className="p-5">
+                                    {order.items?.map((item) => item.machine?.type).join(", ") ?? "-"}
+                                </td>
+                                <td className="p-5">
+                                    {order.items?.map((item) => item.machine?.capacity + " กก").join(", ") ?? "-"}
+                                </td>
                                 <td className="p-5">{order.branch?.branch_name || "-"}</td>
                                 <td className="p-5">{order.total_price ?? "-"}</td>
                                 <td className="p-5">
