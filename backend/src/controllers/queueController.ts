@@ -36,6 +36,15 @@ export const createQueue = async (req: Request, res: Response) => {
                 throw new Error("NO_MACHINE_TYPE")
             }
 
+            const typeMachineMap = new Map<string, string[]>()
+            for (const item of order.items) {
+                if (!item.machine_id) continue 
+                if (!item.machine?.type) continue
+                const type = item.machine.type
+                if (!typeMachineMap.has(type)) typeMachineMap.set(type, [])
+                typeMachineMap.get(type)!.push(item.machine_id)
+            }
+
             const queues = []
             for (const machineType of requiredTypes) {
                 // กันสร้างซ้ำต่อ type (ไม่ error แค่ข้าม)
@@ -50,16 +59,8 @@ export const createQueue = async (req: Request, res: Response) => {
                     where: { branch_id, machine_type: machineType },
                     orderBy: { queue_number: "desc" }
                 })
-                const typeMachineMap = new Map<string, string[]>()
-                for (const item of order.items) {
-                    if (!item.machine?.type) continue
-                    const type = item.machine.type
-                    if (!typeMachineMap.has(type)) typeMachineMap.set(type, [])
-                    typeMachineMap.get(type)!.push(item.machine_id)
-                }
 
                 const nextQueueNumber = lastQueue ? lastQueue.queue_number + 1 : 1
-
 
                 const allowedMachineIds = typeMachineMap.get(machineType) ?? []
                 // หาเครื่องว่างของ type นั้น ในสาขานั้น
@@ -107,8 +108,6 @@ export const createQueue = async (req: Request, res: Response) => {
                     })
                     const minutesPerCycle = machineInfo?.duration_minutes ?? 30
 
-                    // ETA = รอบที่กำลังรัน + คิวที่รออยู่ก่อนหน้า
-                    // หารจำนวนเครื่องที่กำลัง busy เพื่อให้ตรงกับความเป็นจริง
                     const totalBusyMachines = await tx.branchMachine.count({
                         where: {
                             branch_id,
