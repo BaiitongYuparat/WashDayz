@@ -66,6 +66,7 @@ type MachineGroup = {
     machine_id: string
     type: string
     capacity: number
+    availableCount: number
     count: number
     ids: string[] // branch_machine_id ทั้งหมดของ group นี้
 }
@@ -115,11 +116,14 @@ function Branche() {
                     type: bm.machine?.type ?? "-",
                     capacity: bm.machine?.capacity ?? 0,
                     count: 0,
+                    availableCount: 0,
                     ids: [],
                 }
             }
             acc[key].count++
+          if (bm.status === "AVAILABLE") acc[key].availableCount++
             acc[key].ids.push(bm.branch_machine_id)
+
             return acc
         }, {} as Record<string, MachineGroup>)
     )
@@ -226,8 +230,8 @@ function Branche() {
                                 onClick={() => setSelectedBranchId(branch.branch_id)}
                             >
                                 <td className="p-5">{branch.branch_name}</td>
-                                <td className="p-5">{branch.lat_branch ?? "-"}</td>
-                                <td className="p-5">{branch.lng_branch ?? "-"}</td>
+                                <td className="p-5">{branch.lat_branch?.toFixed(4) ?? "-"}</td>
+                                <td className="p-5">{branch.lng_branch?.toFixed(4) ?? "-"}</td>
                                 <td className="p-5 flex gap-2" onClick={e => e.stopPropagation()}>
                                     <button
                                         onClick={() => handleOpenEdit(branch)}
@@ -251,10 +255,12 @@ function Branche() {
             {/* ส่วนเครื่องสาขา */}
             <div className="mt-8">
                 <div className="flex justify-between items-center mb-4">
-                    <div>
+                    <div className="flex items-center gap-3">
                         <label className="text-black text-3xl font-bold">เครื่องสาขา</label>
                         {selectedBranchName && (
-                            <span className="ml-3 text-blue-500 text-lg font-medium">— {selectedBranchName}</span>
+                            <span className="bg-blue-100 text-blue-700 text-sm font-medium px-3 py-1 rounded-full">
+                                {selectedBranchName}
+                            </span>
                         )}
                     </div>
                     <CustomButton
@@ -269,7 +275,7 @@ function Branche() {
                 </div>
 
                 {!selectedBranchId && (
-                    <p className="text-gray-400 text-sm mb-3">👆 คลิกที่แถวสาขาด้านบนเพื่อดูเครื่องในสาขานั้น</p>
+                    <p className="text-gray-400 text-sm mb-3">คลิกที่สาขาด้านบนเพื่อดูเครื่องในสาขานั้น</p>
                 )}
 
                 <div className="overflow-hidden rounded-xl shadow-md">
@@ -279,6 +285,7 @@ function Branche() {
                                 <th className="p-5 text-left">ประเภทเครื่อง</th>
                                 <th className="p-5 text-left">ขนาด (กก.)</th>
                                 <th className="p-5 text-left">จำนวนเครื่อง</th>
+                                 <th className="p-5 text-left">ว่าง</th>
                                 <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
@@ -297,6 +304,16 @@ function Branche() {
                                         <td className="p-5">
                                             <span className="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full">
                                                 {group.count} เครื่อง
+                                            </span>
+                                        </td>
+                                        <td className="p-5">  {/* ✅ เพิ่ม */}
+                                            <span className={`font-bold px-3 py-1 rounded-full text-sm ${group.availableCount === 0
+                                                    ? "bg-red-100 text-red-600"
+                                                    : group.availableCount === group.count
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-yellow-100 text-yellow-700"
+                                                }`}>
+                                                ว่าง {group.availableCount}/{group.count}
                                             </span>
                                         </td>
                                         <td className="p-5">

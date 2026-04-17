@@ -55,3 +55,12 @@ export const resetQueue = async (queue_id: string) => {
     return res.data as Queue
 }
 
+export function subscribeToQueue(onUpdate: () => void): () => void {
+  const es = new EventSource("http://localhost:8080/queues/subscribe")
+  es.onmessage = (e) => {
+    const data = JSON.parse(e.data)
+    if (data.type === "queue_updated") onUpdate()
+  }
+  es.onerror = () => es.close()
+  return () => es.close() // cleanup function
+}

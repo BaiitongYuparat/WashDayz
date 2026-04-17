@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
+import { syncOrderStatus } from "../../lib/syncOrderStatus"
 
 // สร้างคิว
 export const createQueue = async (req: Request, res: Response) => {
@@ -23,7 +24,6 @@ export const createQueue = async (req: Request, res: Response) => {
                 }
             })
             if (!order) throw new Error("ORDER_NOT_FOUND")
-
             // เอา machine_type แบบไม่ซ้ำ
             const requiredTypes = [
                 ...new Set(
@@ -32,15 +32,11 @@ export const createQueue = async (req: Request, res: Response) => {
                         .map(item => item.machine!.type)
                 )
             ]
-
             if (requiredTypes.length === 0) {
                 throw new Error("NO_MACHINE_TYPE")
             }
-
             const queues = []
-
             for (const machineType of requiredTypes) {
-
                 // กันสร้างซ้ำต่อ type (ไม่ error แค่ข้าม)
                 const existingQueue = await tx.queue.findFirst({
                     where: { order_id, machine_type: machineType }
@@ -56,13 +52,20 @@ export const createQueue = async (req: Request, res: Response) => {
                 const nextQueueNumber = lastQueue ? lastQueue.queue_number + 1 : 1
 
                 // หาเครื่องว่างของ type นั้น ในสาขานั้น
-                const availableMachine = await tx.branchMachine.findFirst({
-                    where: {
-                        branch_id,
-                        status: "AVAILABLE",
-                        machine: { type: machineType },
-                    }
-                })
+               const availableMachine = await tx.branchMachine.findFirst({
+    where: {
+        branch_id,
+        status: "AVAILABLE",
+        machine: { type: machineType },
+    }
+})
+if (availableMachine) {
+    await tx.branchMachine.update({
+        where: { branch_machine_id: availableMachine.branch_machine_id },
+        data: { status: "UNAVAILABLE" }
+    })
+}
+
 
                 //คำนวณเวลาที่คาดว่าจะได้ใช้เครื่อง สำหรับคิวที่ต้องรอ
                 let estimatedStartAt: Date | null = null
@@ -123,37 +126,24 @@ export const createQueue = async (req: Request, res: Response) => {
                         queue_number: nextQueueNumber,
                         machine_type: machineType,
                         branch_machine_id: availableMachine?.branch_machine_id ?? null,
-                        //เพิ่ม estimated_start_at (ต้องเพิ่ม field นี้ใน schema ด้วย)
+                        started_at: availableMachine ? new Date() : null,
                         estimated_start_at: estimatedStartAt
                     }
                 })
-
-                // ถ้ามีเครื่อง → lock เครื่อง
-                if (availableMachine) {
-                    await tx.branchMachine.update({
-                        where: { branch_machine_id: availableMachine.branch_machine_id },
-                        data: { status: "UNAVAILABLE" }
-                    })
-                }
-
                 queues.push(queue)
+                await syncOrderStatus(tx, order_id)
             }
-
             if (queues.length === 0) {
                 throw new Error("QUEUE_ALREADY_EXISTS")
             }
-
             return queues
         })
-
         return res.status(201).json({
             message: "Queue created successfully",
             data: result
         })
-
     } catch (error: any) {
         console.error("CREATE QUEUE ERROR:", error)
-
         if (error.message === "ORDER_NOT_FOUND") {
             return res.status(404).json({ message: "Order not found" })
         }
@@ -175,7 +165,6 @@ export const finishQueue = async (req: Request, res: Response) => {
     const id = req.params.id as string
     try {
         const result = await prisma.$transaction(async (tx) => {
-
             // ปิดคิว row นี้
             const queue = await tx.queue.update({
                 where: { queue_id: id },
@@ -203,7 +192,7 @@ export const finishQueue = async (req: Request, res: Response) => {
                     branch_id: machine.branch_id,
                     machine_type: queue.machine_type,
                     finished_at: null,
-                    branch_machine_id: null
+                    branch_machine_id: null,
                 },
                 orderBy: { created_at: "asc" }
             })
@@ -214,7 +203,8 @@ export const finishQueue = async (req: Request, res: Response) => {
                     data: {
                         branch_machine_id: machine.branch_machine_id,
                         //clear estimated_start_at เพราะได้เครื่องแล้ว
-                        estimated_start_at: null
+                        estimated_start_at: null,
+                        started_at: new Date()
                     }
                 })
                 await tx.branchMachine.update({
@@ -222,21 +212,7 @@ export const finishQueue = async (req: Request, res: Response) => {
                     data: { status: "UNAVAILABLE" }
                 })
             }
-            // ตรวจสอบว่าทุก queue ของ order นี้เสร็จหมดแล้วหรือยัง
-            // ถ้าเสร็จหมด → update order status เป็น FINISHED อัตโนมัติ
-            const remainingQueues = await tx.queue.count({
-                where: {
-                    order_id: queue.order_id,
-                    finished_at: null
-                }
-            })
-
-            if (remainingQueues === 0) {
-                await tx.order.update({
-                    where: { order_id: queue.order_id },
-                    data: { status: "FINISHED" }
-                })
-            }
+            await syncOrderStatus(tx, queue.order_id)
             return queue
         })
         res.json(result)

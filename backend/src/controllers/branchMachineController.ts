@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
 
+
 // เพิ่มเครื่องให้สาขา สาขา A มีเครื่อง WASHER 10kg 3 เครื่อง 
 export const addMachineToBranch = async (req: Request, res: Response) => {
   const { branch_id, machine_id, quantity = 1 } = req.body
@@ -14,6 +15,7 @@ export const addMachineToBranch = async (req: Request, res: Response) => {
     const data = Array.from({ length: quantity }, () => ({
       branch_id,
       machine_id,
+      status: "AVAILABLE" as const
     }))
 
     const result = await prisma.branchMachine.createMany({ data })
@@ -31,7 +33,7 @@ export const getMachinesByBranch = async (req: Request, res: Response) => {
 
   try {
     const machines = await prisma.branchMachine.findMany({
-      where: { branch_id : id },
+      where: { branch_id: id },
       include: { machine: true },
     })
 
@@ -43,20 +45,20 @@ export const getMachinesByBranch = async (req: Request, res: Response) => {
 }
 
 export const deleteMachineByBranchId = async (req: Request, res: Response) => {
-    const id = req.params.id as string;
-    if (!id) {
-        return res.status(400).json({ message: "Machine ID is required" })
-    }
+  const id = req.params.id as string;
+  if (!id) {
+    return res.status(400).json({ message: "Machine ID is required" })
+  }
 
-    try {
-        const existing =  await prisma.branchMachine.delete({
-            where: { branch_machine_id: id }
-        })
-        res.json(existing)
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Internal server error" })
-    }
+  try {
+    const existing = await prisma.branchMachine.delete({
+      where: { branch_machine_id: id }
+    })
+    res.json(existing)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
 }
 
 //ดูทั้งหมด
