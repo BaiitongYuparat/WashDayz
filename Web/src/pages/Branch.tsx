@@ -65,6 +65,17 @@ function MapPicker({ value, onChange }: {
         </div>
     )
 }
+
+// --- grouped type ---
+type MachineGroup = {
+    machine_id: string
+    type: string
+    capacity: number
+    availableCount: number
+    count: number
+    ids: string[] // branch_machine_id ทั้งหมดของ group นี้
+}
+
 function Branche() {
 
     const [branches, setBranches] = useState<Branch[]>([])
@@ -85,7 +96,51 @@ function Branche() {
         fetchData();
     })
 
-    // บันทึก
+    useEffect(() => {
+        fetchBranchMachines(selectedBranchId)
+    }, [selectedBranchId])
+
+    // --- group เครื่องตาม machine_id ---
+    const groupedMachines: MachineGroup[] = Object.values(
+        branchMachines.reduce((acc, bm) => {
+            const key = bm.machine_id
+            if (!acc[key]) {
+                acc[key] = {
+                    machine_id: bm.machine_id,
+                    type: bm.machine?.type ?? "-",
+                    capacity: bm.machine?.capacity ?? 0,
+                    count: 0,
+                    availableCount: 0,
+                    ids: [],
+                }
+            }
+            acc[key].count++
+          if (bm.status === "AVAILABLE") acc[key].availableCount++
+            acc[key].ids.push(bm.branch_machine_id)
+
+            return acc
+        }, {} as Record<string, MachineGroup>)
+    )
+
+    // ลบเครื่อง 1 ชิ้น (ลบ branch_machine_id แรกใน group)
+    const handleDeleteMachine = async (group: MachineGroup) => {
+        if (!confirm(`ลบเครื่อง ${group.type} ${group.capacity}kg 1 เครื่อง?`)) return
+        const idToDelete = group.ids[0]
+        await deleteMachineFromBranch(idToDelete)
+        await fetchBranchMachines(selectedBranchId)
+    }
+
+    // เพิ่มเครื่อง
+    const handleAddMachine = async () => {
+        if (!selectedBranchId) return alert("กรุณาเลือกสาขา")
+        if (!machineForm.machine_id) return alert("กรุณาเลือกประเภทเครื่อง")
+        await addMachineToBranch(selectedBranchId, machineForm.machine_id, machineForm.quantity)
+        await fetchBranchMachines(selectedBranchId)
+        setOpenMachineModal(false)
+        setMachineForm({ machine_id: "", quantity: 1 })
+    }
+
+    // --- branch modal ---
     const handleSave = async () => {
         if (!formData.branch_name.trim()) return alert("กรุณากรอกชื่อสาขา")
         if (!pickedLatLng) return alert("กรุณาเลือกตำแหน่งบนแผนที่")
@@ -167,9 +222,9 @@ function Branche() {
                         {filtered.map((branch) => (
                             <tr key={branch.branch_id} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="p-5">{branch.branch_name}</td>
-                                <td className="p-5">{branch.lat_branch ?? "-"}</td>
-                                <td className="p-5">{branch.lng_branch ?? "-"}</td>
-                                <td className="p-5 flex gap-2">
+                                <td className="p-5">{branch.lat_branch?.toFixed(4) ?? "-"}</td>
+                                <td className="p-5">{branch.lng_branch?.toFixed(4) ?? "-"}</td>
+                                <td className="p-5 flex gap-2" onClick={e => e.stopPropagation()}>
                                     <button
                                         onClick={() => handleOpenEdit(branch)}
                                         className="text-yellow-400 text-xl hover:text-yellow-500 transition"
@@ -189,9 +244,17 @@ function Branche() {
                 </table>
             </div>
 
-            <div className="mt-4">
-                <div className="flex justify-between items-center mb-6">
-                    <label className="text-black text-3xl font-bold">เครื่องสาขา</label>
+            {/* ส่วนเครื่องสาขา */}
+            <div className="mt-8">
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-3">
+                        <label className="text-black text-3xl font-bold">เครื่องสาขา</label>
+                        {selectedBranchName && (
+                            <span className="bg-blue-100 text-blue-700 text-sm font-medium px-3 py-1 rounded-full">
+                                {selectedBranchName}
+                            </span>
+                        )}
+                    </div>
                     <CustomButton
                         title="+ เพิ่มเครื่องสาขา"
                         variant="primary"
@@ -199,6 +262,11 @@ function Branche() {
                         onPress={handleOpenAdd}
                     />
                 </div>
+
+                {!selectedBranchId && (
+                    <p className="text-gray-400 text-sm mb-3">คลิกที่สาขาด้านบนเพื่อดูเครื่องในสาขานั้น</p>
+                )}
+
                 <div className="overflow-hidden rounded-xl shadow-md">
                     <table className="w-full bg-white border-collapse">
                         <thead>
@@ -206,11 +274,48 @@ function Branche() {
                                 <th className="p-5 text-left">ชื่อสาขา</th>
                                 <th className="p-5 text-left">ขนาด (กก.)</th>
                                 <th className="p-5 text-left">จำนวนเครื่อง</th>
+                                 <th className="p-5 text-left">ว่าง</th>
                                 <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
                         <tbody>
-
+                            {groupedMachines.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="p-5 text-center text-gray-400">
+                                        {selectedBranchId ? "ไม่มีเครื่องในสาขานี้" : "กรุณาเลือกสาขา"}
+                                    </td>
+                                </tr>
+                            ) : (
+                                groupedMachines.map((group) => (
+                                    <tr key={group.machine_id} className="border-b border-gray-200 hover:bg-gray-50">
+                                        <td className="p-5">{group.type}</td>
+                                        <td className="p-5">{group.capacity} กก.</td>
+                                        <td className="p-5">
+                                            <span className="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full">
+                                                {group.count} เครื่อง
+                                            </span>
+                                        </td>
+                                        <td className="p-5">  {/* ✅ เพิ่ม */}
+                                            <span className={`font-bold px-3 py-1 rounded-full text-sm ${group.availableCount === 0
+                                                    ? "bg-red-100 text-red-600"
+                                                    : group.availableCount === group.count
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-yellow-100 text-yellow-700"
+                                                }`}>
+                                                ว่าง {group.availableCount}/{group.count}
+                                            </span>
+                                        </td>
+                                        <td className="p-5">
+                                            <button
+                                                onClick={() => handleDeleteMachine(group)}
+                                                className="text-red-500 text-xl hover:text-red-700 transition"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
 

@@ -19,6 +19,7 @@ import branchMachine from "./routes/branchMachine"
 import mainmachine from './routes/serviceMachine'
 import recommedBranchRouter from './routes/recommedBranch'
 import cors from "cors";
+import { startQueueScheduler } from "./jobs/queueScheduler"
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -26,6 +27,7 @@ const port = process.env.PORT || 8080;
 app.use(express.json());
 app.use(cors());
 
+// startQueueWorker()
 app.use('/users', userRoutes)
 app.use('/orders', orderRoutes)
 app.use('/branches', branchRoutes)
@@ -49,4 +51,5 @@ app.use('/recommend-branch', recommedBranchRouter)
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
+    startQueueScheduler()
 });

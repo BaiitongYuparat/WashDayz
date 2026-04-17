@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
+import { syncOrderStatus } from "../../lib/syncOrderStatus"
 
 // สร้างคิว
 export const createQueue = async (req: Request, res: Response) => {
@@ -23,8 +24,7 @@ export const createQueue = async (req: Request, res: Response) => {
                 }
             })
             if (!order) throw new Error("ORDER_NOT_FOUND")
-
-            //เอา machine_type แบบไม่ซ้ำ
+            // เอา machine_type แบบไม่ซ้ำ
             const requiredTypes = [
                 ...new Set(
                     order.items
@@ -32,24 +32,12 @@ export const createQueue = async (req: Request, res: Response) => {
                         .map(item => item.machine!.type)
                 )
             ]
-
             if (requiredTypes.length === 0) {
                 throw new Error("NO_MACHINE_TYPE")
             }
-
-            // หา queue_number ใหม่ (กัน race แบบ retry)
-            let nextQueueNumber = 1
-            const lastQueue = await tx.queue.findFirst({
-                where: { branch_id },
-                orderBy: { queue_number: "desc" }
-            })
-            if (lastQueue) nextQueueNumber = lastQueue.queue_number + 1
-
             const queues = []
-
             for (const machineType of requiredTypes) {
-
-                //กันสร้างซ้ำ (ต่อ type)
+                // กันสร้างซ้ำต่อ type (ไม่ error แค่ข้าม)
                 const existingQueue = await tx.queue.findFirst({
                     where: {
                         order_id,
@@ -59,17 +47,21 @@ export const createQueue = async (req: Request, res: Response) => {
 
                 if (existingQueue) continue // ข้าม ไม่ error
 
-                //หาเครื่องว่าง
-                const availableMachine = await tx.branchMachine.findFirst({
-                    where: {
-                        branch_id,
-                        status: "AVAILABLE",
-                        machine: { type: machineType },
-                        queues: {
-                            none: { finished_at: null } // ไม่มีคิวค้างอยู่
-                        }
-                    }
-                })
+                // หาเครื่องว่างของ type นั้น ในสาขานั้น
+               const availableMachine = await tx.branchMachine.findFirst({
+    where: {
+        branch_id,
+        status: "AVAILABLE",
+        machine: { type: machineType },
+    }
+})
+if (availableMachine) {
+    await tx.branchMachine.update({
+        where: { branch_machine_id: availableMachine.branch_machine_id },
+        data: { status: "UNAVAILABLE" }
+    })
+}
+
 
                 // สร้าง queue
                 const queue = await tx.queue.create({
@@ -78,38 +70,25 @@ export const createQueue = async (req: Request, res: Response) => {
                         branch_id,
                         queue_number: nextQueueNumber,
                         machine_type: machineType,
-                        branch_machine_id: availableMachine?.branch_machine_id ?? null
+                        branch_machine_id: availableMachine?.branch_machine_id ?? null,
+                        started_at: availableMachine ? new Date() : null,
+                        estimated_start_at: estimatedStartAt
                     }
                 })
-
-                //ถ้ามีเครื่อง → lock เครื่อง
-                if (availableMachine) {
-                    await tx.branchMachine.update({
-                        where: {
-                            branch_machine_id: availableMachine.branch_machine_id
-                        },
-                        data: { status: "UNAVAILABLE" }
-                    })
-                }
-
                 queues.push(queue)
+                await syncOrderStatus(tx, order_id)
             }
-
             if (queues.length === 0) {
                 throw new Error("QUEUE_ALREADY_EXISTS")
             }
-
             return queues
         })
-
         return res.status(201).json({
             message: "Queue created successfully",
             data: result
         })
-
     } catch (error: any) {
         console.error("CREATE QUEUE ERROR:", error)
-
         if (error.message === "ORDER_NOT_FOUND") {
             return res.status(404).json({ message: "Order not found" })
         }
@@ -136,8 +115,7 @@ export const finishQueue = async (req: Request, res: Response) => {
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-
-            //ปิดคิว row นี้
+            // ปิดคิว row นี้
             const queue = await tx.queue.update({
                 where: { queue_id: id },
                 data: { finished_at: new Date() }
@@ -168,7 +146,7 @@ export const finishQueue = async (req: Request, res: Response) => {
                     branch_id: machine.branch_id,
                     machine_type: queue.machine_type,
                     finished_at: null,
-                    branch_machine_id: null
+                    branch_machine_id: null,
                 },
                 orderBy: { created_at: "asc" }
             })
@@ -177,14 +155,19 @@ export const finishQueue = async (req: Request, res: Response) => {
             if (nextQueue) {
                 await tx.queue.update({
                     where: { queue_id: nextQueue.queue_id },
-                    data: { branch_machine_id: machine.branch_machine_id }
+                    data: {
+                        branch_machine_id: machine.branch_machine_id,
+                        //clear estimated_start_at เพราะได้เครื่องแล้ว
+                        estimated_start_at: null,
+                        started_at: new Date()
+                    }
                 })
                 await tx.branchMachine.update({
                     where: { branch_machine_id: machine.branch_machine_id },
                     data: { status: "UNAVAILABLE" }
                 })
             }
-
+            await syncOrderStatus(tx, queue.order_id)
             return queue
         })
 

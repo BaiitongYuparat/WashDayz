@@ -6,8 +6,10 @@ import {
     deleteQueueById,
     finishQueue,
     resetQueue,
-    getQueueByOrderId
+    getQueueByOrderId,
+    
 } from '../controllers/queueController'
+
 
 const router = express.Router()
 
