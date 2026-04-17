@@ -34,3 +34,28 @@ export const syncOrderStatus = async (tx: any, order_id: string) => {
         data: { status }
     })
 }
+
+export const isBlockedByDependency = async (
+    tx: any,
+    order_id: string,
+    machineType: string
+): Promise<boolean> => {
+    // กำหนด dependency chain: อะไรต้องรอก่อนอะไร
+    const MUST_WAIT_FOR: Record<string, string> = {
+        DRYER: "WASHER",
+    }
+
+    const prerequisite = MUST_WAIT_FOR[machineType]
+    if (!prerequisite) return false // ไม่มี dependency → ไม่ต้องรอ
+
+    // เช็คว่า prerequisite queue ของ order นี้เสร็จหมดแล้วหรือยัง
+    const unfinishedPrerequisite = await tx.queue.findFirst({
+        where: {
+            order_id,
+            machine_type: prerequisite,
+            finished_at: null,
+        }
+    })
+
+    return unfinishedPrerequisite !== null // ยังมีที่ยังไม่เสร็จ → blocked
+}

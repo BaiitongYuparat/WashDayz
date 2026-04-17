@@ -94,9 +94,12 @@ export function startQueueScheduler() {
                             data: { status: "UNAVAILABLE" }
                         })
                     }
+                    
 
                     // sync order status
                     await syncOrderStatus(tx, queue.order_id)
+                    
+                    
                 }
             })
         } catch (error) {
@@ -106,3 +109,4 @@ export function startQueueScheduler() {
 
     console.log("[Scheduler] Queue scheduler started")
 }
+
