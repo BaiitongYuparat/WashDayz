@@ -14,6 +14,10 @@ export const syncOrderStatus = async (tx: any, order_id: string) => {
     })
     if (!queues.length) return
 
+    //ถ้า order ถูกยกเลิก → sync เป็น CANCELLED
+    const order = await tx.order.findUnique({ where: { order_id } })
+    if (order?.status === "CANCELLED") return
+
     const allFinished = queues.every((q: any) => q.finished_at !== null)
 
     // มี queue ที่ได้เครื่องแล้วและยังไม่เสร็จ = กำลังทำงานอยู่

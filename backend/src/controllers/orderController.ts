@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { prisma } from '../../lib/prisma';
-
+import { isBlockedByDependency } from '../../lib/syncOrderStatus';
 
 export const createOrder = async (req: Request, res: Response) => {
     const { user_id, branch_id, address_id, addon_id, machine_id } = req.body
@@ -183,13 +183,95 @@ export const putOrderStatus = async (req: Request, res: Response) => {
     const id = req.params.id as string
     const { status } = req.body
 
+    if (status === "CANCELLED") {
+        try {
+            await prisma.$transaction(async (tx) => {
+                const order = await tx.order.findUnique({ where: { order_id: id } })
+                if (!order) throw new Error("ORDER_NOT_FOUND")
+                if (order.status === "CANCELLED") throw new Error("ALREADY_CANCELLED")
+                if (order.status === "FINISHED") throw new Error("ORDER_FINISHED")
+
+                const activeQueues = await tx.queue.findMany({
+                    where: { order_id: id, finished_at: null }
+                })
+
+                for (const queue of activeQueues) {
+                    if (queue.branch_machine_id) {
+                        await tx.branchMachine.update({
+                            where: { branch_machine_id: queue.branch_machine_id },
+                            data: { status: "AVAILABLE" }
+                        })
+
+                        const nextQueue = await tx.queue.findFirst({
+                            where: {
+                                branch_id: queue.branch_id,
+                                machine_type: queue.machine_type,
+                                finished_at: null,
+                                branch_machine_id: null,
+                                cancelled_at: null,
+                                order_id: { not: id },
+                            },
+                            orderBy: { created_at: "asc" }
+                        })
+
+                        if (nextQueue) {
+                            const isNextBlocked = await isBlockedByDependency(
+                                tx, nextQueue.order_id, nextQueue.machine_type ?? ""
+                            )
+                            if (!isNextBlocked) {
+                                await tx.queue.update({
+                                    where: { queue_id: nextQueue.queue_id },
+                                    data: {
+                                        branch_machine_id: queue.branch_machine_id,
+                                        estimated_start_at: null,
+                                        started_at: new Date()
+                                    }
+                                })
+                                await tx.branchMachine.update({
+                                    where: { branch_machine_id: queue.branch_machine_id },
+                                    data: { status: "UNAVAILABLE" }
+                                })
+                            }
+                        }
+                    }
+
+                    await tx.queue.update({
+                        where: { queue_id: queue.queue_id },
+                        data: {
+                            finished_at: new Date(),
+                            branch_machine_id: null,
+                            cancelled_at: new Date(),
+                        }
+                    })
+                }
+
+                await tx.order.update({
+                    where: { order_id: id },
+                    data: { status: "CANCELLED" }
+                })
+            })
+
+            return res.json({ message: "Order cancelled successfully" })
+
+        } catch (error: any) {
+            if (error.message === "ORDER_NOT_FOUND")
+                return res.status(404).json({ message: "Order not found" })
+            if (error.message === "ALREADY_CANCELLED")
+                return res.status(400).json({ message: "Order is already cancelled" })
+            if (error.message === "ORDER_FINISHED")
+                return res.status(400).json({ message: "Cannot cancel a finished order" })
+            return res.status(500).json({ message: "Failed to cancel order" })
+        }
+    }
+
+    // status อื่นๆ update ปกติ
     try {
         const order = await prisma.order.update({
             where: { order_id: id },
             data: { status }
-        });
-        res.json(order);
+        })
+        return res.json(order)
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update Order' })
+        return res.status(500).json({ error: 'Failed to update Order' })
     }
 }

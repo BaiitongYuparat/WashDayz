@@ -40,12 +40,7 @@ function Orders() {
     const handleAddorder = async (id: string, status: string) => {
         const order = orders.find((o) => o.order_id === id);
         if (!order) return;
-        await putOrder(id, {
-            user_id: order.user_id,
-            branch_id: order.branch_id,
-            total_price: order.total_price,
-            status
-        });
+        await putOrderStatus(id, { status });
 
         setOrders(orders.map((o) =>
             o.order_id === id ? { ...o, status } : o

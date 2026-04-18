@@ -344,3 +344,4 @@ export const getQueueByOrderId = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Failed to fetch queue" })
     }
 }
+

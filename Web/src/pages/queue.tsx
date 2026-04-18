@@ -3,7 +3,8 @@ import { getQueues, deleteQueue } from "../api/queueApi"
 import type { Queue } from "../api/queueApi"
 import { FaTrash, FaEdit } from "react-icons/fa";
 
-function getStatus(q: Queue): "waiting" | "processing" | "finished" {
+function getStatus(q: Queue): "waiting" | "processing" | "finished" | "cancelled"  {
+    if (q.cancelled_at) return "cancelled" 
     if (q.finished_at) return "finished"
     if (q.called_at) return "processing"
     return "waiting"
@@ -13,6 +14,7 @@ const statusLabel: Record<string, { label: string; className: string }> = {
     waiting: { label: "WAITING", className: "bg-amber-100 text-amber-700" },
     processing: { label: "WASHING", className: "bg-blue-100 text-blue-700" },
     finished: { label: "FINISHED", className: "bg-green-100 text-green-700" },
+    cancelled:  { label: "CANCELLED",  className: "bg-red-100 text-red-700" },
 }
 
 function Queues() {
@@ -45,6 +47,7 @@ function Queues() {
         waiting: queues.filter(q => getStatus(q) === "waiting").length,
         processing: queues.filter(q => getStatus(q) === "processing").length,
         finished: queues.filter(q => getStatus(q) === "finished").length,
+        
     }
 
     return (
@@ -54,12 +57,13 @@ function Queues() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-5 gap-3 mb-6">
                 {[
                     { label: "คิวทั้งหมด", value: stats.total, color: "text-gray-900" },
                     { label: "รอดำเนินการ", value: stats.waiting, color: "text-amber-700" },
                     { label: "กำลังดำเนินการ", value: stats.processing, color: "text-blue-700" },
                     { label: "เสร็จสิ้นวันนี้", value: stats.finished, color: "text-green-700" },
+                    { label: "ยกเลิก", value: queues.filter(q => getStatus(q) === "cancelled").length, color: "text-red-700" }
                 ].map(s => (
                     <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
                         <p className="text-xs text-gray-500 mb-1">{s.label}</p>
