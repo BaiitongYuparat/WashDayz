@@ -247,7 +247,7 @@ export const finishQueue = async (req: Request, res: Response) => {
                 tx,
                 queue.order_id,
                 machine.branch_id,
-                 queue.machine_type ?? ""
+                queue.machine_type ?? ""
             )
 
             return queue
@@ -269,7 +269,14 @@ export const getQueue = async (req: Request, res: Response) => {
             include: {
                 branch: true,
                 order: {
-                    include: { user: true }
+                    include: {
+                        user: true,
+                        items: {                    
+                            include: {
+                                machine: true       
+                            }
+                        }
+                    }
                 }
             }
         })
@@ -337,3 +344,4 @@ export const getQueueByOrderId = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Failed to fetch queue" })
     }
 }
+

@@ -7,9 +7,9 @@ import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import SearchInput from "../components/SearchInput";
 import "leaflet/dist/leaflet.css"
-import {getMachinesByBranch, addMachineToBranch,deleteMachineFromBranch,getMachines } from '../api/BranchMachineApi'
-import type { BranchMachine } from '../api/BranchMachineApi'
-//fix icon bug 
+import { getMachinesByBranch, addMachineToBranch, deleteMachineFromBranch, getMachines } from '../api/branchmachineApi'
+import type { BranchMachine } from '../api/branchmachineApi'
+
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
     iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -115,7 +115,7 @@ function Branche() {
                 }
             }
             acc[key].count++
-          if (bm.status === "AVAILABLE") acc[key].availableCount++
+            if (bm.status === "AVAILABLE") acc[key].availableCount++
             acc[key].ids.push(bm.branch_machine_id)
 
             return acc
@@ -197,17 +197,15 @@ function Branche() {
 
     return (
         <div className="p-8">
-            {/* Search */}
-            <SearchInput value={search} onChange={setSearch} placeholder="ค้นหา..." />
-            {/* Header */}
+
+
+            {/* Header สาขา */}
             <div className="mb-4 flex justify-between items-center">
                 <label className="text-black text-3xl font-bold">สาขา</label>
                 <CustomButton title="+ Add Branch" variant="primary" size="md" onPress={handleOpenAdd} />
             </div>
-
-
-
-            {/* Table */}
+            <SearchInput value={search} onChange={setSearch} placeholder="ค้นหา..." />
+            {/* ตารางสาขา */}
             <div className="overflow-hidden rounded-xl shadow-md">
                 <table className="w-full bg-white border-collapse">
                     <thead>
@@ -274,7 +272,7 @@ function Branche() {
                                 <th className="p-5 text-left">ชื่อสาขา</th>
                                 <th className="p-5 text-left">ขนาด (กก.)</th>
                                 <th className="p-5 text-left">จำนวนเครื่อง</th>
-                                 <th className="p-5 text-left">ว่าง</th>
+                                <th className="p-5 text-left">ว่าง</th>
                                 <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
@@ -297,10 +295,10 @@ function Branche() {
                                         </td>
                                         <td className="p-5">  {/* ✅ เพิ่ม */}
                                             <span className={`font-bold px-3 py-1 rounded-full text-sm ${group.availableCount === 0
-                                                    ? "bg-red-100 text-red-600"
-                                                    : group.availableCount === group.count
-                                                        ? "bg-green-100 text-green-700"
-                                                        : "bg-yellow-100 text-yellow-700"
+                                                ? "bg-red-100 text-red-600"
+                                                : group.availableCount === group.count
+                                                    ? "bg-green-100 text-green-700"
+                                                    : "bg-yellow-100 text-yellow-700"
                                                 }`}>
                                                 ว่าง {group.availableCount}/{group.count}
                                             </span>

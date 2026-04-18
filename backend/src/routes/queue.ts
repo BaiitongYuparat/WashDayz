@@ -7,7 +7,7 @@ import {
     finishQueue,
     resetQueue,
     getQueueByOrderId,
-    
+  
 } from '../controllers/queueController'
 
 
@@ -20,5 +20,6 @@ router.get('/:id', getQueueById)
 router.delete('/:id', deleteQueueById)
 router.patch('/:id/finish', finishQueue)
 router.patch('/:id/reset', resetQueue)
+
 
 export default router

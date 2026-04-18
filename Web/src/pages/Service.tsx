@@ -205,11 +205,7 @@ function Services() {
     return (
         <div className="p-8 space-y-12">
             <div>
-                <SearchInput
-                    value={search}
-                    onChange={setSearch}
-                    placeholder="ค้นหา..."
-                />
+              
 
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">

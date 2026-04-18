@@ -45,19 +45,39 @@ function Payments() {
     ));
   };
 
+  //
+  const stats = {
+    total: payments.length,
+    pending: payments.filter(p => p.status === "PENDING").length,
+    paid: payments.filter(p => p.status === "PAID").length,
+    failed: payments.filter(p => p.status === "FAILED").length,
+  };
+
   return (
     <div className="p-8">
       <div className="mb-6 flex justify-between items-center">
         <label className="text-black text-3xl font-bold">การชำระเงิน</label>
       </div>
 
-      <SearchInput value={search} onChange={setSearch} placeholder="ค้นหา..." />
+      <div className="grid grid-cols-4 gap-3 mb-6">
+        {[
+          { label: "ทั้งหมด", value: stats.total, color: "text-gray-900" },
+          { label: "รอชำระ", value: stats.pending, color: "text-amber-700" },
+          { label: "ชำระแล้ว", value: stats.paid, color: "text-green-700" },
+          { label: "ล้มเหลว", value: stats.failed, color: "text-red-600" },
+        ].map(s => (
+          <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
+            <p className="text-xs text-gray-500 mb-1">{s.label}</p>
+            <p className={`text-2xl font-medium ${s.color}`}>{s.value}</p>
+          </div>
+        ))}
+      </div>
 
       <div className="overflow-hidden rounded-xl shadow-md">
         <table className="w-full bg-white border-collapse">
           <thead>
             <tr className="bg-blue-50">
-              <th className="p-5 text-left">ชื่อลูกค้า</th>
+              <th className="p-5 text-left">ผู้ใช้งาน</th>
               <th className="p-5 text-left">บริการ</th>
               <th className="p-5 text-left">ขนาด (กก.)</th>
               <th className="p-5 text-left">สาขา</th>
