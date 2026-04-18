@@ -8,8 +8,8 @@ import Branch from "./pages/Branch";
 import ProtectedRoute from "./components/ProtectedRoute";
 import TopBar from "./components/TopBar";
 import Payments from "./pages/Payment";
-import Dashbords from "./pages/Dashboard"
-import QueueMonitor from './pages/queue'
+import Dashboards from "./pages/Dashboard"
+import Queues from './pages/Queue'
 function App() {
   return (
     <BrowserRouter>
@@ -25,13 +25,13 @@ function App() {
                   <TopBar />
                   <div className="p-5">
                     <Routes>
-                      <Route path="/dashbord" element={<Dashbords />} />
+                      <Route path="/dashbord" element={<Dashboards />} />
                       <Route path="/order" element={<Orders />} />
                       <Route path="/user" element={<User />} />
                       <Route path="/service" element={<Services />} />
                       <Route path="/branch" element={<Branch />} />
                       <Route path="/payments" element={<Payments />} />
-                      <Route path="/queues" element={<QueueMonitor />} />
+                      <Route path="/queues" element={<Queues />} />
                     </Routes>
                   </div>
                 </div>

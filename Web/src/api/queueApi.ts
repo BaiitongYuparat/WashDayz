@@ -15,7 +15,17 @@ export type Queue = {
     called_at: string | null
     finished_at: string | null
     branch_machine_id: string | null
-    
+    order?: {
+        user?: { name: string }
+        items?: { machine?: { type: string; capacity: number } }[]
+    }
+    branch?: {
+        branch_name: string
+    }
+    branch_machine?: {
+        machine?: { name: string }
+    }
+
 }
 // สร้างคิว
 export const createQueue = async (order_id: string, branch_id: string) => {
@@ -56,11 +66,11 @@ export const resetQueue = async (queue_id: string) => {
 }
 
 export function subscribeToQueue(onUpdate: () => void): () => void {
-  const es = new EventSource("http://localhost:8080/queues/subscribe")
-  es.onmessage = (e) => {
-    const data = JSON.parse(e.data)
-    if (data.type === "queue_updated") onUpdate()
-  }
-  es.onerror = () => es.close()
-  return () => es.close() // cleanup function
+    const es = new EventSource("http://localhost:8080/queues/subscribe")
+    es.onmessage = (e) => {
+        const data = JSON.parse(e.data)
+        if (data.type === "queue_updated") onUpdate()
+    }
+    es.onerror = () => es.close()
+    return () => es.close() // cleanup function
 }
