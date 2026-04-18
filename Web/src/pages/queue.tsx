@@ -3,10 +3,10 @@ import { getQueues, deleteQueue } from "../api/queueApi"
 import type { Queue } from "../api/queueApi"
 import { FaTrash, FaEdit } from "react-icons/fa";
 
-function getStatus(q: Queue): "waiting" | "processing" | "finished" | "cancelled"  {
-    if (q.cancelled_at) return "cancelled" 
+function getStatus(q: Queue): "waiting" | "processing" | "finished" | "cancelled" {
+    if (q.cancelled_at) return "cancelled"
     if (q.finished_at) return "finished"
-    if (q.called_at) return "processing"
+    if (q.branch_machine_id || q.started_at) return "processing"
     return "waiting"
 }
 
@@ -14,7 +14,7 @@ const statusLabel: Record<string, { label: string; className: string }> = {
     waiting: { label: "WAITING", className: "bg-amber-100 text-amber-700" },
     processing: { label: "WASHING", className: "bg-blue-100 text-blue-700" },
     finished: { label: "FINISHED", className: "bg-green-100 text-green-700" },
-    cancelled:  { label: "CANCELLED",  className: "bg-red-100 text-red-700" },
+    cancelled: { label: "CANCELLED", className: "bg-red-100 text-red-700" },
 }
 
 function Queues() {
@@ -47,7 +47,7 @@ function Queues() {
         waiting: queues.filter(q => getStatus(q) === "waiting").length,
         processing: queues.filter(q => getStatus(q) === "processing").length,
         finished: queues.filter(q => getStatus(q) === "finished").length,
-        
+
     }
 
     return (

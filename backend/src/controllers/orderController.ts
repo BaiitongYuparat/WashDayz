@@ -198,11 +198,13 @@ export const putOrderStatus = async (req: Request, res: Response) => {
 
                 for (const queue of activeQueues) {
                     if (queue.branch_machine_id) {
+                        // คืนเครื่อง
                         await tx.branchMachine.update({
                             where: { branch_machine_id: queue.branch_machine_id },
                             data: { status: "AVAILABLE" }
                         })
 
+                        // หาคิวถัดไปของ order อื่นที่รอเครื่องประเภทเดียวกัน
                         const nextQueue = await tx.queue.findFirst({
                             where: {
                                 branch_id: queue.branch_id,
@@ -236,6 +238,7 @@ export const putOrderStatus = async (req: Request, res: Response) => {
                         }
                     }
 
+                    // ✅ ทุก queue ไม่ว่าจะมีเครื่องหรือยังรออยู่ → mark cancelled
                     await tx.queue.update({
                         where: { queue_id: queue.queue_id },
                         data: {

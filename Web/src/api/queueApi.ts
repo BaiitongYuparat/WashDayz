@@ -9,6 +9,7 @@ export type Queue = {
     branch_id: string
     cancelled_at: string
     branch_name?: string
+    started_at: string
     machine_type: "WASHER" | "DRYER" | null
     created_at: string
     called_at: string | null
