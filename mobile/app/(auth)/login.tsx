@@ -23,8 +23,10 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import axios from "axios";
 import { useRouter } from "expo-router";
 import * as AuthSession from "expo-auth-session";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "@/provider/UserProvider";
+import { useDispatch } from "react-redux";
+import { setSelectedAddress, setSelectedLocation } from "@/redux/addressSlice";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -34,14 +36,20 @@ export default function Login() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
       "835147090474-mqutule76dtajpbkbobgdlijbnjdtv62.apps.googleusercontent.com",
-    webClientId:  "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
-    responseType: "id_token",
   });
   const router = useRouter();
-  const {user,setUser} = useUser();
+  const { user, setUser } = useUser();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    
+  console.log("request redirect =", request?.redirectUri);
+}, [request]);
+useEffect(() => {
+  console.log("login")
+  const uri = AuthSession.makeRedirectUri()
+  console.log("redirect URI:", uri)
+}, [])
+  useEffect(() => {
     if (response?.type === "success") {
       const idToken = response.params?.id_token;
       console.log("RESPONSE:", response);
@@ -53,24 +61,43 @@ export default function Login() {
     }
   }, [response]);
 
-  const handleGoogleLogin = async (idToken: string) => {
-  try {
-    const result = await sendTokenToBackend(idToken);
-    await AsyncStorage.setItem("token", result.token);
+  const setDefaultAddress = (user: any) => {
+    const addresses = user.addresses;
+    if (!addresses?.length) return;
 
-    console.log("result:", result.token)
-    if (result.isNewUser || !result.hasAddress) {
-      router.push("/address");
+    const preferred =
+      addresses.find((a: any) => a.lat && a.lng) ?? addresses[0];
 
-    } else {
-      router.replace("/(tabs)");
+    dispatch(setSelectedAddress(preferred));
+
+    if (preferred.lat && preferred.lng) {
+      dispatch(
+        setSelectedLocation({
+          latitude: preferred.lat,
+          longitude: preferred.lng,
+        }),
+      );
     }
-    setUser(result.user)
+  };
 
-  } catch (err) {
-    console.log(err);
-  }
-};
+  const handleGoogleLogin = async (idToken: string) => {
+    try {
+      const result = await sendTokenToBackend(idToken);
+      await AsyncStorage.setItem("token", result.token);
+
+      console.log("result:", result.token);
+      if (result.isNewUser || !result.hasAddress) {
+        router.push("/address");
+      } else {
+        router.replace("/(tabs)");
+      }
+      setUser(result.user);
+      setDefaultAddress(result.user);
+    
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleSubmit = async () => {
     console.log("press handlesubmit");
@@ -80,30 +107,32 @@ export default function Login() {
       return;
     }
     try {
-       const result = await login(email, password); // login → response จาก backend
-    console.log("login result:", result);
+      const result = await login(email, password); // login → response จาก backend
+      console.log("login result:", result);
 
-    // เก็บ token
-    await AsyncStorage.setItem("token", result.token);
+      // เก็บ token
+      await AsyncStorage.setItem("token", result.token);
 
-    // เก็บ user ใน context
-    setUser(result.user);
+      // เก็บ user ใน context
+      setUser(result.user);
+      setUser(result.user);
+      setDefaultAddress(result.user);
 
-    // redirect ตาม hasAddress
-    if (!result.hasAddress) {
-      router.push("/address");
-    } else {
-      router.replace("/(tabs)");
-    }
+      // redirect ตาม hasAddress
+      if (!result.hasAddress) {
+        router.push("/address");
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
 
         if (status === 401 || status == 404) {
-          console.log(response)
+          console.log(response);
           alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
         } else {
-          alert("เกิดข้อผิดพลาด")
+          alert("เกิดข้อผิดพลาด");
         }
       } else {
         alert("เชื่อมต่อ server ไม่ได้");
@@ -158,10 +187,10 @@ export default function Login() {
           </Pressable>
 
           <View className="flex-row gap-2 justify-center mt-6">
-             <Text className="text-gray-400">No account?</Text>
-             <Pressable onPress={() => router.push('/register')}>
-              <Text  className="font-bold text-blue-main" >Sign up</Text>
-             </Pressable>
+            <Text className="text-gray-400">No account?</Text>
+            <Pressable onPress={() => router.push("/register")}>
+              <Text className="font-bold text-blue-main">Sign up</Text>
+            </Pressable>
           </View>
         </View>
       </KeyboardAwareScrollView>

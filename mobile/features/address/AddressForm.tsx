@@ -2,6 +2,11 @@ import CustomInput from "@/components/ui/CustomInput";
 import { useState } from "react";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { View, Text, ScrollView } from "react-native";
+import { router } from "expo-router";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/redux/store";
+import { clearGeoAddress } from "@/redux/addressSlice";
+import { useEffect } from "react";
 
 type Props = {
   initialData?: any;
@@ -19,6 +24,20 @@ export default function AddressForm({ initialData, onSubmit }: Props) {
   const [label, setLabel] = useState(initialData?.label || "");
   const [name, setName] = useState(initialData?.receiver_name || "");
 
+  const dispatch = useDispatch();
+  const geoAddress = useSelector((state: RootState) => state.address.geoAddress);
+
+  useEffect(() => {
+    if (!geoAddress) return;
+    if (geoAddress.district) setDist(geoAddress.district);
+    if (geoAddress.subDistrict) setSubDist(geoAddress.subDistrict);
+    if (geoAddress.province) setProvince(geoAddress.province);
+    if (geoAddress.postal_code) setPostCode(geoAddress.postal_code);
+    if (geoAddress.details) setDetails(geoAddress.details);
+
+    dispatch(clearGeoAddress()); // clear หลังเติมแล้ว
+  }, [geoAddress]);
+  
   return (
     <View className="flex-1 bg-white">
       <ScrollView
@@ -65,6 +84,12 @@ export default function AddressForm({ initialData, onSubmit }: Props) {
             <CustomInput  label="บันทึกชื่อที่อยู่" value={label} onChangeText={setLabel} placeholder="ป้ายกำกับ เช่น บ้าน, ที่ทำงาน" />
           </View>
         </View>
+
+         <CustomButton
+              className="mb-4"
+              title="📍 ปักหมุดบนแผนที่"
+              onPress={() => router.push("/map-picker")}
+            />
 
       </ScrollView>
 

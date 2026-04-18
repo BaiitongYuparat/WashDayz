@@ -18,8 +18,9 @@ import { useUser } from "@/provider/UserProvider";
 import { createAddress } from "@/services/address";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedAddress, setSelectedLocation } from "../../redux/addressSlice";
+import { setSelectedAddress, setSelectedLocation ,setGeoAddress , clearGeoAddress} from "../../redux/addressSlice";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { RootState } from "@/redux/store";
 
 export default function AddressForm() {
   const router = useRouter();
@@ -38,6 +39,7 @@ export default function AddressForm() {
     (state: any) => state.address.selectedLocation,
   );
   const { from } = useLocalSearchParams();
+  const geoAddress = useSelector((state: RootState) => state.address.geoAddress);
 
   useEffect(() => {
     const getToken = async () => {
@@ -57,6 +59,16 @@ export default function AddressForm() {
     };
     getToken();
   }, []);
+
+  useEffect(() => {
+  if (!geoAddress) return;
+  if (geoAddress.district) setDist(geoAddress.district);
+  if (geoAddress.subDistrict) setSubDist(geoAddress.subDistrict);
+  if (geoAddress.province) setProvince(geoAddress.province);
+  if (geoAddress.postal_code) setPostCode(geoAddress.postal_code);
+  if (geoAddress.details) setDetails(geoAddress.details);
+  dispatch(clearGeoAddress());
+}, [geoAddress]);
 
   const handleSubmit = async () => {
     console.log("press handlesubmit");

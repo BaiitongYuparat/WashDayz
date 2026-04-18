@@ -8,10 +8,19 @@ type SelectedLocation = {
 interface AddressState {
     selectedAddress: UserAddresses | null;
     selectedLocation: SelectedLocation | null; 
+    geoAddress: {
+    houseNo?: string;
+    district?: string;
+    subDistrict?: string;
+    province?: string;
+    postal_code?: string;
+    details?: string;
+  } | null;
 }
 const initialState: AddressState = {
   selectedAddress: null, 
   selectedLocation: null,
+  geoAddress: null,
 };
 
 const addressSlice = createSlice({
@@ -27,8 +36,14 @@ const addressSlice = createSlice({
     clearSelectedAddress: (state) => {
       state.selectedAddress = null;
     },
+    setGeoAddress: (state, action: PayloadAction<AddressState["geoAddress"]>) => {
+  state.geoAddress = action.payload;
+},
+clearGeoAddress: (state) => {
+  state.geoAddress = null;
+},
   },
 });
 
-export const { setSelectedAddress, clearSelectedAddress , setSelectedLocation } = addressSlice.actions;
+export const { setSelectedAddress, clearSelectedAddress , setSelectedLocation, setGeoAddress, clearGeoAddress } = addressSlice.actions;
 export default addressSlice.reducer;
