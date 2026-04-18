@@ -18,9 +18,9 @@ export const CustomButton = ({
   disabled = false,
 }: CustomButtonProp) => {
   const variantClasses = {
-    primary: "bg-blue-second border-2 border-blue-main active:bg-blue-700",
+    primary: "bg-blue-second border-2 border-blue-main active:bg-blue-700 shadow-blue-main ",
     secondary: "bg-gray-500 active:bg-gray-700",
-    danger: "bg-red-500 active:bg-red-700",
+    danger: "bg-red-500 active:bg-red-700 shadow-red-400",
   };
   const sizeClasses = {
     sm: "px-2 py-1 text-sm shadow-sm",
@@ -38,7 +38,7 @@ export const CustomButton = ({
       className={[
         variantClasses[variant],
         sizeClasses[size],
-        "rounded-3xl active:bg-opacity-70 w-full items-center shadow-blue-main",
+        "rounded-3xl active:bg-opacity-70 w-full items-center",
         className,
         disabled ? "opacity-50" : "active:bg-opacity-70",
       ].join(" ")}

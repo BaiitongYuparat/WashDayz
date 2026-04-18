@@ -29,26 +29,37 @@ export default function OrderHistoryCard({ order, onPress }: Props) {
     <Pressable
       onPress={onPress}
       className="bg-white rounded-3xl p-4 mb-3 border border-gray-100"
+      style={{
+    shadowColor: "#00ACC3",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
+  }}
     >
-      <View className="flex-row items-start justify-between mb-3">
+      <View className="flex-row items-start gap-2 justify-between mb-3">
         <View className="flex-1">
           <Text className="font-bold text-gray-800 mb-1">{order.branch.branch_name}</Text>
           <Text className="text-xs text-gray-400">#{order.order_id.slice(0, 8)}</Text>
         </View>
-        <OrderStatusBadge status={order.status} size="sm" />
+        <View className="items-center gap-2 flex-row">
+            <OrderStatusBadge status={order.status} size="sm" />
              {isActive && (
             <View className="flex-row items-center gap-1">
               <Text className="text-xs text-blue-main">ติดตาม</Text>
               <MaterialCommunityIcons name="chevron-right" size={14} color="#00ACC3" />
             </View>
           )}
+        </View>
+             
       </View>
+      
 
       <View className="h-px bg-gray-100 mb-3" />
 
-      <View className="flex-row items-center justify-between">
+      <View className="bg-gray-50/80 rounded-2xl p-3 flex-row items-center justify-between">
         <View className="flex-row items-center gap-1">
-          <MaterialCommunityIcons name="washing-machine" size={14} color="#888" />
+          <MaterialCommunityIcons name="washing-machine" size={14} color="#00ACC3" />
           <Text className="text-xs text-gray-400">{machineNames}</Text>
         </View>
         <Text className="font-bold text-blue-main">{order.total_price.toLocaleString()} ฿</Text>
@@ -59,6 +70,7 @@ export default function OrderHistoryCard({ order, onPress }: Props) {
           day: "numeric", month: "long", year: "numeric",
         })}
       </Text>
+      
     </Pressable>
   )
 }

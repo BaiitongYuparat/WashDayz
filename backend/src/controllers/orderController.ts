@@ -3,7 +3,7 @@ import { prisma } from '../../lib/prisma';
 
 
 export const createOrder = async (req: Request, res: Response) => {
-    const { user_id, branch_id, address_id, addon_id, machine_id } = req.body
+    const { user_id, branch_id, address_id, addon_id, machine_id,service } = req.body
 
     try {
         if (!user_id || !branch_id || !machine_id?.length) {
@@ -35,6 +35,7 @@ export const createOrder = async (req: Request, res: Response) => {
                 branch_id,
                 address_id,
                 total_price,
+                service,
                 items: {
                     create: machine_id.map((machine_id: string) => ({
                         machine_id,

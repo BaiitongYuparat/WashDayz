@@ -12,6 +12,8 @@ import { useUser } from "@/provider/UserProvider";
 import PaymentMethodSelector from "@/features/payment/PaymentMethodSelector";
 import { confirmPayment, createPayment } from "@/services/paymentService";
 import { createQueue } from "@/services/queueService";
+import { useSelector} from "react-redux";
+import { RootState } from "@/redux/store";
 
 export default function OrderSummaryScreen() {
   const router = useRouter();
@@ -25,6 +27,9 @@ export default function OrderSummaryScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string>("CASH");
+  const selectedAddress = useSelector(
+  (state: RootState) => state.address.selectedAddress
+);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -68,6 +73,8 @@ export default function OrderSummaryScreen() {
         branch_id: branchId as string,
         machine_id: machineIdList,
         addon_id: addonIdList,
+        service: serviceId as string,
+        address_id: selectedAddress?.address_id
       });
       const payment = await createPayment(result.order_id, selectedPayment)
       // ไป route ตามช่องทางการชำระเงินที่เลือก
@@ -152,6 +159,7 @@ const handleEditAddon = () => {
           totalPrice={Number(totalPrice)}
           handleEditAddon={handleEditAddon}
           handleEditBranch={handleEdit}
+        address={selectedAddress}
         />
         
 

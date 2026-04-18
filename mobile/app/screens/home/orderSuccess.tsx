@@ -27,10 +27,10 @@ export default function OrderSuccessScreen() {
       {/* ปุ่ม */}
       <View className="w-full gap-3 mt-4">
         <CustomButton
-          title="ดูคำสั่งซื้อ"
+          title="กลับหน้าหลัก"
           onPress={() =>
             router.push({
-              pathname: "/screens/home/orderDetail",
+              pathname: "/(tabs)",
               params: { orderId },
             })
           }

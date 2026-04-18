@@ -4,6 +4,7 @@ import { useUser } from "@/provider/UserProvider";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 export const UserHeader = () => {
   const router = useRouter();
@@ -14,7 +15,7 @@ export const UserHeader = () => {
 
   return (
     <Pressable onPress={() => router.push("/screens/AddressListScreen")}>
-      <View className="rounded-full px-4 py-3 flex-row items-center bg-white border-b border-gray-100">
+      <View className=" rounded-full px-4 py-4 flex-row items-center bg-white border-2 border-blue-second">
 
         {/* Profile */}
         <View className="w-11 h-11 rounded-full overflow-hidden border-2 border-blue-main">

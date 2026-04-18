@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { UserAddress } from "./address"
 
 const API_URL = "http://172.20.10.2:8080"
 
@@ -7,15 +8,12 @@ export type OrderDetail = {
   status: string
   total_price: number
   created_at: string
+  service: string
   branch: {
     branch_id: string
     branch_name: string
   }
-  address?: {
-    address_id: string
-    label: string
-    details: string
-  }
+  address?: UserAddress
   items: {
     order_item_id: string
     machine: {
@@ -41,6 +39,7 @@ export type CreateOrderPayload = {
   address_id?: string
   machine_id: string[]
   addon_id: string[]
+  service: string
 }
 
 const getToken = async () => {
@@ -65,7 +64,8 @@ export const createOrder = async (
       branch_id: payload.branch_id,
       address_id: payload.address_id,
       machine_id: payload.machine_id, 
-      addon_id: payload.addon_id,     
+      addon_id: payload.addon_id, 
+      service: payload.service,    
     }),
   })
   const data = await res.json()

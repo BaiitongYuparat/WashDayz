@@ -11,7 +11,7 @@ export default function ProfileMenuButton ({title , icon , onPress}: MenuButtonP
     return(
         <TouchableOpacity
         onPress={onPress}
-        className="bg-white p-2"
+        className="bg-white p-4 border-b border-gray-200"
         >   
             <View className="flex-row items-center ">
                 <View className="mr-2">{icon}</View>

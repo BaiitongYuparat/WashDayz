@@ -187,3 +187,17 @@ export const deletePaymentId = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to delete payment" })
   }
 }
+
+export const getPaymentByOrderId = async (req: Request, res: Response) => {
+  const order_id = req.params.order_id as string
+  try {
+    const payment = await prisma.payment.findUnique({
+      where: { order_id },
+    })
+    if (!payment) return res.status(404).json({ error: "Payment not found" })
+    res.json(payment)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "Failed to fetch payment" })
+  }
+}

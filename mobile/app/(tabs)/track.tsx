@@ -1,40 +1,48 @@
-import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native"
-import { useRouter } from "expo-router"
-import { useEffect, useState } from "react"
-import { getOrdersByUser, OrderDetail } from "@/services/orderService"
-import { useUser } from "@/provider/UserProvider"
-import OrderHistoryCard from "@/components/OrderHistoryCard"
+import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { getOrdersByUser, OrderDetail } from "@/services/orderService";
+import { useUser } from "@/provider/UserProvider";
+import OrderHistoryCard from "@/components/OrderHistoryCard";
+import { useFocusEffect } from "expo-router";
 
-const ACTIVE_STATUSES = ["WAITING", "WASHING"]
+const ACTIVE_STATUSES = ["WAITING", "WASHING"];
 
 export default function OrderActiveTrackingScreen() {
-  const router = useRouter()
-  const { user } = useUser()
-  const [orders, setOrders] = useState<OrderDetail[]>([])
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const { user } = useUser();
+  const [orders, setOrders] = useState<OrderDetail[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user?.user_id) return
+  useFocusEffect(
+  useCallback(() => {
+    if (!user?.user_id) return;
+
+    setLoading(true);
+
     const fetchOrders = async () => {
       try {
-        const data = await getOrdersByUser(user.user_id)
-        setOrders(data.filter((o) => ACTIVE_STATUSES.includes(o.status)))
-        console.log("order",orders)
-      } catch (err) {
-        Alert.alert("Error", "โหลดข้อมูลไม่สำเร็จ")
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchOrders()
-  }, [user?.user_id])
+        const data = await getOrdersByUser(user.user_id);
 
+        setOrders(
+          data.filter((o) => ACTIVE_STATUSES.includes(o.status))
+        );
+      } catch (err) {
+        Alert.alert("Error", "โหลดข้อมูลไม่สำเร็จ");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [user?.user_id])
+);
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#00ACC3" />
       </View>
-    )
+    );
   }
 
   return (
@@ -43,7 +51,9 @@ export default function OrderActiveTrackingScreen() {
         {orders.length === 0 ? (
           <View className="items-center justify-center mt-20 gap-3">
             <Text className="text-5xl">✅</Text>
-            <Text className="text-gray-400 text-sm">ไม่มีคำสั่งซื้อที่กำลังดำเนินการ</Text>
+            <Text className="text-gray-400 text-sm">
+              ไม่มีคำสั่งซื้อที่กำลังดำเนินการ
+            </Text>
           </View>
         ) : (
           orders.map((order) => (
@@ -52,7 +62,7 @@ export default function OrderActiveTrackingScreen() {
               order={order}
               onPress={() =>
                 router.push({
-                  pathname: "/screens/track/orderTracking",  // ← ไป tracking
+                  pathname: "/screens/track/orderTracking", // ← ไป tracking
                   params: { orderId: order.order_id },
                 })
               }
@@ -61,5 +71,5 @@ export default function OrderActiveTrackingScreen() {
         )}
       </ScrollView>
     </View>
-  )
+  );
 }
