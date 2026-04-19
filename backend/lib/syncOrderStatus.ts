@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client"
 
 const MUST_WAIT_FOR: Record<string, string> = {
     DRYER: "WASHER",
