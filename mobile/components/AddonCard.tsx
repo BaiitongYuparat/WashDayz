@@ -20,9 +20,9 @@ export default function AddonCard({ addon, onPress, isSelected }: AddonCardProps
       <View className={`w-full h-28 items-center justify-center ${
         isSelected ? "bg-blue-light" : "bg-gray-50"
       }`}>
-        {addon.img ? (
+        {addon.image_url  ? (
           <Image
-            source={{ uri: addon.img }}
+            source={{ uri: addon.image_url  }}
             className="w-full h-full"
             resizeMode="cover"
           />

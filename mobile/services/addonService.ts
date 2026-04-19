@@ -8,7 +8,7 @@ export interface AddonType {
   description: string;
   price: number;
   type: string;
-  img ?: string;
+  image_url  ?: string;
 }
 
 export const getAddonByMainServiceId = async (main_service_id:string): Promise<AddonType[]> => {
