@@ -16,14 +16,14 @@ type UserFormProps = {
   };
   onSubmit: (data: UserFormData) => void;
   submitText: string;
-  mode?: "register" | "edit"  
+  mode?: "register" | "edit";
 };
 
 export default function UserForm({
   defaultValues,
   onSubmit,
   submitText,
-  mode = "register",  // ← default เป็น register
+  mode = "register", // ← default เป็น register
 }: UserFormProps) {
   const {
     control,
@@ -41,7 +41,7 @@ export default function UserForm({
     },
   });
 
-  const passwordValue = watch("password")
+  const passwordValue = watch("password");
   const isGoogleUser = !!defaultValues?.googleId;
 
   useEffect(() => {
@@ -58,7 +58,6 @@ export default function UserForm({
 
   return (
     <View className="gap-4">
-
       {/* NAME */}
       <Controller
         control={control}
@@ -66,8 +65,15 @@ export default function UserForm({
         rules={{ required: "กรุณากรอกชื่อ" }}
         render={({ field: { onChange, value } }) => (
           <View>
-            <CustomInput value={value} onChangeText={onChange} placeholder="ชื่อผู้รับ" label="ชื่อ" />
-            {errors.name && <Text className="text-red-500">{errors.name.message}</Text>}
+            <CustomInput
+              value={value}
+              onChangeText={onChange}
+              placeholder="ชื่อผู้รับ"
+              label="ชื่อ"
+            />
+            {errors.name && (
+              <Text className="text-red-500">{errors.name.message}</Text>
+            )}
           </View>
         )}
       />
@@ -76,17 +82,30 @@ export default function UserForm({
       <Controller
         control={control}
         name="phone"
-        rules={{ required: "กรุณากรอกเบอร์โทร" }}
+        rules={{
+          required: "กรุณากรอกเบอร์โทร",
+          pattern: {
+            value: /^[0-9]{10}$/,
+            message: "เบอร์โทรต้องเป็นตัวเลข 10 หลัก",
+          },
+        }}
         render={({ field: { onChange, value } }) => (
           <View>
-            <CustomInput value={value} onChangeText={onChange} placeholder="เบอร์โทร" label="เบอร์โทร" />
-            {errors.phone && <Text className="text-red-500">{errors.phone.message}</Text>}
+            <CustomInput
+              value={value}
+              onChangeText={onChange}
+              placeholder="เบอร์โทร"
+              label="เบอร์โทร"
+            />
+            {errors.phone && (
+              <Text className="text-red-500">{errors.phone.message}</Text>
+            )}
           </View>
         )}
       />
 
       {/* EMAIL */}
-        {isGoogleUser ? (
+      {isGoogleUser ? (
         <View className="bg-gray-100 rounded-xl p-4 flex-row items-center gap-2">
           <Ionicons name="logo-google" size={16} color="#888" />
           <Text className="text-gray-500 text-sm">
@@ -103,8 +122,16 @@ export default function UserForm({
           }}
           render={({ field: { onChange, value } }) => (
             <View>
-              <CustomInput value={value} onChangeText={onChange} placeholder="example@email.com" label="อีเมล" keyboardType="email-address" />
-              {errors.email && <Text className="text-red-500">{errors.email.message}</Text>}
+              <CustomInput
+                value={value}
+                onChangeText={onChange}
+                placeholder="example@email.com"
+                label="อีเมล"
+                keyboardType="email-address"
+              />
+              {errors.email && (
+                <Text className="text-red-500">{errors.email.message}</Text>
+              )}
             </View>
           )}
         />
@@ -125,11 +152,21 @@ export default function UserForm({
                 <CustomInput
                   value={value}
                   onChangeText={onChange}
-                  placeholder={mode === "edit" ? "กรอกเพื่อเปลี่ยนรหัสผ่าน (ถ้าต้องการ)" : "รหัสผ่าน"}
-                  label={mode === "edit" ? "รหัสผ่านใหม่ (ไม่บังคับ)" : "รหัสผ่าน"}
+                  placeholder={
+                    mode === "edit"
+                      ? "กรอกเพื่อเปลี่ยนรหัสผ่าน (ถ้าต้องการ)"
+                      : "รหัสผ่าน"
+                  }
+                  label={
+                    mode === "edit" ? "รหัสผ่านใหม่ (ไม่บังคับ)" : "รหัสผ่าน"
+                  }
                   secureTextEntry
                 />
-                {errors.password && <Text className="text-red-500">{errors.password.message}</Text>}
+                {errors.password && (
+                  <Text className="text-red-500">
+                    {errors.password.message}
+                  </Text>
+                )}
               </View>
             )}
           />
@@ -152,7 +189,9 @@ export default function UserForm({
                     secureTextEntry
                   />
                   {errors.confirmPassword && (
-                    <Text className="text-red-500">{errors.confirmPassword.message}</Text>
+                    <Text className="text-red-500">
+                      {errors.confirmPassword.message}
+                    </Text>
                   )}
                 </View>
               )}
@@ -161,7 +200,6 @@ export default function UserForm({
         </>
       )}
 
-      
       <CustomButton
         title={isSubmitting ? "กำลังบันทึก..." : submitText}
         onPress={handleSubmit(onSubmit)}

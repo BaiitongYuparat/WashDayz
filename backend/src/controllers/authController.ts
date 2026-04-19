@@ -24,6 +24,12 @@ export const registerUser = async (req: Request, res: Response) => {
       });
     }
 
+    if (!phone || phone.length !== 10) {
+      return res.status(400).json({
+        message: "Phone must be at least 10 characters"
+      });
+    }
+
     // check user ซ้ำ
     const existingUser = await prisma.user.findUnique({
       where: { email }
