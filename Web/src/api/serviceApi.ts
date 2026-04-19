@@ -16,6 +16,7 @@ export type AddonService = {
     description: string
     price: number
     type: string
+      image_url?: string;
 }
 
 export type ServiceResponse = {
@@ -67,7 +68,7 @@ export const deleteAddonService = async (id: string): Promise<void> => {
     await axios.delete(`${ADDON_API}/${id}`);
 };
 
-export const updateAddonService = async (id: string, data: { name: string; description: string; price: number; type: string; }): Promise<void> => {
+export const updateAddonService = async (id: string, data: { name: string; description: string; price: number; type: string; image_url?: string }): Promise<void> => {
     await axios.put(`${ADDON_API}/${id}`, data);
 };
 
@@ -99,3 +100,15 @@ export const createMainService = async (data: any) => {
     const res = await axios.post(MAIN_API, data);
     return res.data;
 }
+
+export const uploadAddonImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await axios.post<{ url: string }>(
+     "http://localhost:8080/addonservice/addon",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return res.data.url;
+};

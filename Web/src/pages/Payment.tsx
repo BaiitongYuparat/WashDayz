@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { deletePayment, getPayments, putPayment } from "../api/paymentApi";
 import type { Payment } from "../api/paymentApi";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import SearchInput from "../components/SearchInput";
+import { CustomButton } from "../components/Button"
 
 function Payments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -135,9 +135,8 @@ function Payments() {
       {selectedPayment && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
-            <h2 className="text-xl font-bold">Edit Payment Status</h2>
-            <p>Payment ID: {selectedPayment.payment_id}</p>
-            <p>Customer: {selectedPayment.order?.user?.name}</p>
+            <h2 className="text-xl font-bold">แก้ไขการชำระเงิน</h2>
+            <p>ลูกค้า: {selectedPayment.order?.user?.name}</p>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
@@ -151,21 +150,21 @@ function Payments() {
               </select>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setSelectedPayment(null)}
-                className="px-4 py-2 rounded-lg border text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
+              <CustomButton
+                title="ยกเลิก"
+                variant="cancel"
+                size="md"
+                onPress={() => setSelectedPayment(null)}
+              />
+              <CustomButton
+                title="บันทึก"
+                variant="primary"
+                size="md"
+                onPress={() => {
                   handleAddorder(selectedPayment.payment_id, editStatus);
                   setSelectedPayment(null);
                 }}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-              >
-                Save
-              </button>
+              />
             </div>
           </div>
         </div>

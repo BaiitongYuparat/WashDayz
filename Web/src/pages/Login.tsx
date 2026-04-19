@@ -79,7 +79,7 @@ function Login() {
 
         {/* Button */}
         <CustomButton
-          title={loading ? "Logging in..." : "Login"}
+          title={loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           onPress={handleLogin}
         />
 

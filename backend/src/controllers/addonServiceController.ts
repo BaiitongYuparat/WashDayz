@@ -1,18 +1,22 @@
 import { Request, Response } from "express"
 import { prisma } from "../../lib/prisma"
+import { supabase } from "../../lib/supabase";
+import multer from 'multer'
 
+export const upload = multer({ storage: multer.memoryStorage() });
 
 export const createAddonService = async (req: Request, res: Response) => {
-    const { name, description, price , type } = req.body
+    const { name, description, price, type ,image_url } = req.body
 
     try {
         const addonservice = await prisma.addonService.create({
             data: {
                 name,
                 description,
-                price,
-                type
-                
+                price: parseFloat(price),
+                type,
+                image_url
+
             }
         })
 
@@ -54,7 +58,7 @@ export const getAddonServiceId = async (req: Request, res: Response) => {
 
 export const putAddonServiceId = async (req: Request, res: Response) => {
     const id = req.params.id as string
-    const { name, description, price , type } = req.body
+    const { name, description, price, type ,image_url } = req.body
 
     try {
         const service = await prisma.addonService.update({
@@ -65,7 +69,8 @@ export const putAddonServiceId = async (req: Request, res: Response) => {
                 name,
                 description,
                 price,
-                type
+                type, 
+                image_url
             }
         })
 
@@ -119,3 +124,24 @@ export const getAddonByIds = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal server error" })
   }
 }
+export const uploadAddonImage = async (req: Request, res: Response) => {
+    const file = req.file;
+    if (!file) return res.status(400).json({ error: "No file" });
+
+    const fileName = `${Date.now()}_${file.originalname}`;
+
+    const { error } = await supabase.storage
+        .from("images")
+        .upload(`addon/${fileName}`, file.buffer, {
+            contentType: file.mimetype,
+            upsert: false,
+        });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const { data } = supabase.storage
+        .from("images")
+        .getPublicUrl(`addon/${fileName}`);
+
+    res.json({ url: data.publicUrl });
+};
