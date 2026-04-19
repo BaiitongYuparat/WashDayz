@@ -1,107 +1,118 @@
 import { NavLink } from "react-router-dom";
 
 function Sidebar() {
-    return (
-        <div className="min-h-screen  bg-blue-100 shadow-md p-5">
+  return (
+    <div className="min-h-screen  bg-blue-100 shadow-md p-5">
+      <label className="text-blue-900 text-3xl font-bold">WashDayZ</label>
 
-            <label className="text-blue-900 text-3xl font-bold">
-                WashDayZ
-            </label>
+      <ul className="list-none p-0 mt-6 space-y-3">
+        <li>
+          <NavLink
+            to="/dashbord"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            Dashbord
+          </NavLink>
+        </li>
 
-            <ul className="list-none p-0 mt-6 space-y-3">
+        <li>
+          <NavLink
+            to="/order"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            Order
+          </NavLink>
+        </li>
 
-                <li>
-                    <NavLink
-                        to="/dashbord"
-                        className={({ isActive }) =>
-                            `block py-2 transition ${isActive
-                                ? "text-blue-400 font-bold text-2xl"
-                                : "text-gray-500 text-lg hover:text-blue-400"
-                            }`
-                        }
-                    >
-                        Dashbord
-                    </NavLink>
-                </li>
+        <li>
+          <NavLink
+            to="/service"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            Service
+          </NavLink>
+        </li>
 
-                <li>
-                    <NavLink
-                        to="/order"
-                        className={({ isActive }) =>
-                            `block py-2 transition ${isActive
-                                ? "text-blue-400 font-bold text-2xl"
-                                : "text-gray-500 text-lg hover:text-blue-400"
-                            }`
-                        }
-                    >
-                        Order
-                    </NavLink>
-                </li>
+        <li>
+          <NavLink
+            to="/user"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            User
+          </NavLink>
+        </li>
 
-                <li>
-                    <NavLink
-                        to="/service"
-                        className={({ isActive }) =>
-                            `block py-2 transition ${isActive
-                                ? "text-blue-400 font-bold text-2xl"
-                                : "text-gray-500 text-lg hover:text-blue-400"
-                            }`
-                        }
-                    >
-                        Service
-                    </NavLink>
-                </li>
+        <li>
+          <NavLink
+            to="/branch"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            Branch
+          </NavLink>
+        </li>
 
-                <li>
-                    <NavLink
-                        to="/user"
-                        className={({ isActive }) =>
-                            `block py-2 transition ${isActive
-                                ? "text-blue-400 font-bold text-2xl"
-                                : "text-gray-500 text-lg hover:text-blue-400"
-                            }`
-                        }
-                    >
-                        User
-                    </NavLink>
-                </li>
+        <li>
+          <NavLink
+            to="/payments"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            Payment
+          </NavLink>
+        </li>
 
-                <li>
-                    <NavLink
-                        to="/branch"
-                        className={({ isActive }) =>
-                            `block py-2 transition ${isActive
-                                ? "text-blue-400 font-bold text-2xl"
-                                : "text-gray-500 text-lg hover:text-blue-400"
-                            }`
-                        }
-                    >
-                        Branch
-                    </NavLink>
-                </li>
-
-
-                <li>
-                    <NavLink
-                        to="/payments"
-                        className={({ isActive }) =>
-                            `block py-2 transition ${isActive
-                                ? "text-blue-400 font-bold text-2xl"
-                                : "text-gray-500 text-lg hover:text-blue-400"
-                            }`
-                        }
-                    >
-                        Payment
-                    </NavLink>
-                </li>
-
-
-
-            </ul>
-
-
-        </div>
-    );
+        <li>
+          <NavLink
+            to="/queues"
+            className={({ isActive }) =>
+              `block py-2 transition ${
+                isActive
+                  ? "text-blue-400 font-bold text-2xl"
+                  : "text-gray-500 text-lg hover:text-blue-400"
+              }`
+            }
+          >
+            Queue
+          </NavLink>
+        </li>
+      </ul>
+    </div>
+  );
 }
 
 export default Sidebar;

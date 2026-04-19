@@ -15,6 +15,7 @@ export type Queue = {
     called_at: string | null
     finished_at: string | null
     branch_machine_id: string | null
+    queue_number: number
     order?: {
         user?: { name: string }
         items?: { machine?: { type: string; capacity: number } }[]
