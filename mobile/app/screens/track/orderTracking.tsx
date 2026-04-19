@@ -27,15 +27,19 @@ export default function OrderTrackingScreen() {
   const [cancelling, setCancelling] = useState(false);
   const [queues, setQueues] = useState<Queue[]>([]);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchOrder = async () => {
+  const fetchOrder = async (isPolling = false) => {
     try {
-      setLoading(true);
+      if (isPolling) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const [data, queueData] = await Promise.all([
         getOrderById(orderId as string),
         getQueueByOrderId(orderId as string), // ← เพิ่ม
       ]);
-      console.log("queueData:", queueData);
       setOrder(data);
       setQueues(queueData);
 
@@ -47,13 +51,14 @@ export default function OrderTrackingScreen() {
       console.log("fetch order error:", err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     fetchOrder();
     // polling ทุก 30 วินาที
-    pollingRef.current = setInterval(fetchOrder, 30000);
+    pollingRef.current = setInterval(() => fetchOrder(true), 30000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
