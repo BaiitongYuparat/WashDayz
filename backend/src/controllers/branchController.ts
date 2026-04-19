@@ -21,7 +21,19 @@ export const createBranch = async (req: Request, res: Response) => {
 
 export const getBranch = async (req: Request, res: Response) => {
     try {
-        const branch = await prisma.branch.findMany();
+        const branch = await prisma.branch.findMany({
+            include: {
+                queue: {
+                    where: { finished_at: null },
+                    select: { machine_type: true } 
+                },
+                 branchMachines: {
+                    include: {
+                        machine: true 
+                    }
+        }      
+            }
+        });
         res.json(branch);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch branch' })

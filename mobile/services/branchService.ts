@@ -39,6 +39,16 @@ export type Branch = {
   branch_id: string
   branch_name: string
   address?: string
+  lat_branch?: number
+  lng_branch?: number
+  queue?: { finished_at: string | null }[]
+  branchMachines?: {
+    status: string
+    machine: {
+      type: string
+    }
+  }[]
+  
 }
 
 
