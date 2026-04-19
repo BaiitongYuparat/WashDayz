@@ -65,6 +65,7 @@ model AddonService {
   addon_service_id String           @id @default(uuid())
   orderItemAddons  OrderItemAddon[]
   service          Service[]
+  image_url        String?
 }
 
 model Order {

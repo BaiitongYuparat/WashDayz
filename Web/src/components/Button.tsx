@@ -3,8 +3,9 @@
 type CustomButtonProps = {
     title: string;
     onPress: () => void;
-    variant?: "primary" | "secondary" | "success" | "danger";
+    variant?: "primary" | "secondary" | "success" | "danger" | "cancel";
     size?: "md" | "lg";
+     disabled?: boolean; 
 };
 
 export const CustomButton = ({
@@ -12,6 +13,7 @@ export const CustomButton = ({
     onPress,
     variant = "primary",
     size = "md",
+    disabled = false,
 }: CustomButtonProps) => {
 
     const variantClasses = {
@@ -19,7 +21,7 @@ export const CustomButton = ({
         secondary: "bg-blue-50 hover:bg-blue-100 text-white",
         success: "bg-green-500 hover:bg-green-600 text-white",
         danger: "bg-red-500 hover:bg-red-600 text-white",
-
+        cancel: "bg-gray-400 hover:bg-gray-500 text-white",
     };
 
     const sizeClasses = {
@@ -30,6 +32,7 @@ export const CustomButton = ({
     return (
         <button
             onClick={onPress}
+            disabled={disabled}
             className={`${variantClasses[variant]} ${sizeClasses[size]} rounded-lg`}
         >
             {title}

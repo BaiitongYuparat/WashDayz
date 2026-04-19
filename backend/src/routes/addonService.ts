@@ -1,5 +1,5 @@
 import express from 'express'
-import {createAddonService , getAddonService ,getAddonServiceId ,putAddonServiceId ,deleteAddonServiceId} from '../controllers/addonServiceController'
+import {createAddonService , getAddonService ,getAddonServiceId ,putAddonServiceId ,deleteAddonServiceId,uploadAddonImage,upload} from '../controllers/addonServiceController'
 
 
 const router = express.Router()
@@ -9,5 +9,6 @@ router.get('/',getAddonService)
 router.get('/:id',getAddonServiceId)
 router.put('/:id', putAddonServiceId)
 router.delete('/:id' ,deleteAddonServiceId)
+router.post("/addon", upload.single("file"), uploadAddonImage);
 
 export default router

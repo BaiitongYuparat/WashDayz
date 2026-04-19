@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getService, deleteAddonService, deleteMainService, updateMainService, updateAddonService, getServiceRelations, createServiceRelation, deleteServiceRelation, createAddonService, createMainService, getMainService } from "../api/serviceApi";
+import { getService, deleteAddonService, deleteMainService, updateMainService, uploadAddonImage, updateAddonService, getServiceRelations, createServiceRelation, deleteServiceRelation, createAddonService, createMainService, getMainService } from "../api/serviceApi";
 import type { ServiceResponse, ServiceRelation, MainService, AddonService } from "../api/serviceApi";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import SearchInput from "../components/SearchInput";
@@ -19,6 +19,8 @@ function Services() {
     const [editMain, setEditMain] = useState<MainService | null>(null);
     const [editAddon, setEditAddon] = useState<AddonService | null>(null);
     const [editRelation, setEditRelation] = useState<MainService | null>(null);
+    const [editAddonImageFile, setEditAddonImageFile] = useState<File | null>(null);
+    const [editAddonImagePreview, setEditAddonImagePreview] = useState<string>("");
 
     //บันทึกการอัพเดต
     const [formMain, setFormMain] = useState({ name: "", description: "" });
@@ -34,6 +36,10 @@ function Services() {
     const [openCreateAddon, setOpenCreateAddon] = useState(false);
     const [openCreateRelation, setOpenCreateRelation] = useState(false);
 
+
+    // เพิ่ม upphoto
+    const [addonImageFile, setAddonImageFile] = useState<File | null>(null);
+    const [addonImagePreview, setAddonImagePreview] = useState<string>("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -114,15 +120,24 @@ function Services() {
     const openEditAddon = (item: AddonService) => {
         setEditAddon(item);
         setFormAddon({ name: item.name, description: item.description, price: item.price, type: item.type })
+        setEditAddonImagePreview(item.image_url ?? "");
+        setEditAddonImageFile(null);
     }
     //
     const handleSaveAddon = async () => {
         if (!editAddon) return;
-        await updateAddonService(editAddon.addon_service_id, { name: formAddon.name, description: formAddon.description, price: formAddon.price, type: formAddon.type });
+        let image_url = editAddon.image_url ?? "";  // ใช้รูปเดิมก่อน
+        if (editAddonImageFile) {
+            image_url = await uploadAddonImage(editAddonImageFile);  // ✅ อัปโหลดรูปใหม่ถ้าเลือก
+        }
+
+        await updateAddonService(editAddon.addon_service_id, { name: formAddon.name, description: formAddon.description, price: formAddon.price, type: formAddon.type, image_url });
         setService((prev) => ({
             ...prev,
             addon: prev.addon.map((a) => a.addon_service_id === editAddon.addon_service_id ? { ...a, ...formAddon } : a)
         }));
+        setEditAddonImageFile(null);
+        setEditAddonImagePreview("");
         setEditAddon(null);
     };
 
@@ -187,25 +202,27 @@ function Services() {
     }
 
     const handleCreateAddon = async () => {
-        await createAddonService(newAddon);
+        let image_url = "";
+
+        if (addonImageFile) {
+            image_url = await uploadAddonImage(addonImageFile); // อัปโหลดก่อน
+        }
+
+        await createAddonService({ ...newAddon, image_url });
         const data = await getService();
         setService(data);
         setNewAddon({ name: "", description: "", price: "", type: "" });
+        setAddonImageFile(null);
+        setAddonImagePreview("");
         setOpenCreateAddon(false);
     };
-
-    //     const statusStyle = (status: string) => {
-    //     if (status === "ADDON") return "bg-yellow-100 text-yellow-700";
-    //     if (status === "EXTRA") return "bg-blue-100 text-blue-700";
-    //     return "";
-    // };
 
 
 
     return (
         <div className="p-8 space-y-12">
             <div>
-              
+
 
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
@@ -260,14 +277,19 @@ function Services() {
                                 </div>
 
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <button onClick={() => setOpenCreateRelation(false)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
-                                    <button
-                                        onClick={handleRelation}
+                                    <CustomButton
+                                        title="ยกเลิก"
+                                        variant="cancel"
+                                        size="md"
+                                        onPress={() => setOpenCreateRelation(false)}
+                                    />
+                                    <CustomButton
+                                        title="สร้าง"
+                                        variant="primary"
+                                        size="md"
+                                        onPress={handleRelation}
                                         disabled={!newRelationMainId || newRelationAddonIds.length === 0}
-                                        className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600 disabled:opacity-40"
-                                    >
-                                        สร้าง
-                                    </button>
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -329,8 +351,18 @@ function Services() {
                             ))}
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setEditRelation(null)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
-                            <button onClick={handleSaveRelation} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">บันทึก</button>
+                            <CustomButton
+                                title="ยกเลิก"
+                                variant="cancel"
+                                size="md"
+                                onPress={() => setEditRelation(null)}
+                            />
+                            <CustomButton
+                                title="บันทึก"
+                                variant="primary"
+                                size="md"
+                                onPress={handleSaveRelation}
+                            />
                         </div>
                     </div>
                 </div>
@@ -370,8 +402,18 @@ function Services() {
                                     />
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <button onClick={() => setOpenCreateMain(false)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
-                                    <button onClick={handleMain} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">สร้าง</button>
+                                    <CustomButton
+                                        title="ยกเลิก"
+                                        variant="cancel"
+                                        size="md"
+                                        onPress={() => setOpenCreateMain(false)}
+                                    />
+                                    <CustomButton
+                                        title="สร้าง"
+                                        variant="primary"
+                                        size="md"
+                                        onPress={handleMain}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -426,9 +468,20 @@ function Services() {
                             <label className="text-sm text-gray-500">คำอธิบาย</label>
                             <textarea className="w-full border rounded-lg p-2 text-sm" value={formMain.description} onChange={(e) => setFormMain({ ...formMain, description: e.target.value })} />
                         </div>
+
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setEditMain(null)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
-                            <button onClick={handleSaveMain} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">บันทึก</button>
+                            <CustomButton
+                                title="ยกเลิก"
+                                variant="cancel"
+                                size="md"
+                                onPress={() => setEditMain(null)}
+                            />
+                            <CustomButton
+                                title="บันทึก"
+                                variant="primary"
+                                size="md"
+                                onPress={handleSaveMain}
+                            />
                         </div>
                     </div>
                 </div>
@@ -479,6 +532,27 @@ function Services() {
                                         onChange={(e) => setNewAddon({ ...newAddon, price: e.target.value })}
                                     />
                                 </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm text-gray-500">รูปภาพบริการ</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="w-full border rounded-lg p-2 text-sm"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setAddonImageFile(file);
+                                                setAddonImagePreview(URL.createObjectURL(file));
+                                            }
+                                        }}
+                                    />
+                                    {addonImagePreview && (
+                                        <img
+                                            src={addonImagePreview}
+                                            className="mt-2 h-24 w-24 object-cover rounded-lg border"
+                                        />
+                                    )}
+                                </div>
                                 <select
                                     className="w-full border rounded-lg p-2 text-sm"
                                     value={newAddon.type}
@@ -488,9 +562,20 @@ function Services() {
                                     <option value="ADDON">บริการเสริม</option>
                                     <option value="EXTRA">บริการพิเศษ</option>
                                 </select>
+
                                 <div className="flex justify-end gap-2 pt-2">
-                                    <button onClick={() => setOpenCreateAddon(false)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
-                                    <button onClick={handleCreateAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">สร้าง</button>
+                                    <CustomButton
+                                        title="ยกเลิก"
+                                        variant="cancel"
+                                        size="md"
+                                        onPress={() => setOpenCreateAddon(false)}
+                                    />
+                                    <CustomButton
+                                        title="สร้าง"
+                                        variant="primary"
+                                        size="md"
+                                        onPress={handleCreateAddon}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -505,6 +590,7 @@ function Services() {
                                 <th className="p-5 text-left">คำอธิบาย</th>
                                 <th className="p-5 text-left">ราคา</th>
                                 <th className="p-5 text-left">ประเภทบริการ</th>
+                                <th className="p-5 text-left">รูปภาพ</th>
                                 <th className="p-5 text-left">การจัดการ</th>
                             </tr>
                         </thead>
@@ -525,6 +611,13 @@ function Services() {
                                         >
                                             {item.type}
                                         </span>
+                                    </td>
+                                    <td className="p-4">
+                                        {item.image_url ? (
+                                            <img src={item.image_url} className="h-10 w-10 object-cover rounded-lg" />
+                                        ) : (
+                                            <span className="text-gray-400 text-sm">-</span>
+                                        )}
                                     </td>
                                     <td className="p-5">
                                         <button
@@ -570,9 +663,39 @@ function Services() {
                             </select>
                         </div>
 
+                        <div className="space-y-1">
+                            <label className="text-sm text-gray-500">รูปภาพบริการ</label>
+                            {editAddonImagePreview && (
+                                <img src={editAddonImagePreview}
+                                    className="h-24 w-24 object-cover rounded-lg border mb-2" />
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="w-full border rounded-lg p-2 text-sm"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        setEditAddonImageFile(file);
+                                        setEditAddonImagePreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                            />
+                        </div>
+
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setEditAddon(null)} className="px-4 py-2 rounded-lg border text-sm">ยกเลิก</button>
-                            <button onClick={handleSaveAddon} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">บันทึก</button>
+                            <CustomButton
+                                title="ยกเลิก"
+                                variant="cancel"
+                                size="md"
+                                onPress={() => { setEditAddon(null); setEditAddonImageFile(null); setEditAddonImagePreview(""); }}
+                            />
+                            <CustomButton
+                                title="บันทึก"
+                                variant="primary"
+                                size="md"
+                                onPress={handleSaveAddon}
+                            />
                         </div>
                     </div>
                 </div>

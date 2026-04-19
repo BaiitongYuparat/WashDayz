@@ -3,7 +3,7 @@ import { deleteOrder, getOrders, putOrder, putOrderStatus } from "../api/orderAp
 import type { Order, OrderItem } from "../api/orderApi";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import SearchInput from "../components/SearchInput";
-
+import { CustomButton } from "../components/Button"
 function Orders() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [search, setSearch] = useState("");
@@ -161,8 +161,6 @@ function Orders() {
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl space-y-4">
                         <h2 className="text-xl font-bold">แก้ไขคำสั่งซื้อ</h2>
-
-                        <p>รหัสคำสั่งซื้อ: {selectedOrder.order_id}</p>
                         <p>ลูกค้า: {selectedOrder.user?.name}</p>
 
                         <div>
@@ -182,21 +180,21 @@ function Orders() {
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <button
-                                onClick={() => setOpenEditorder(false)}
-                                className="px-4 py-2 rounded-lg border text-sm"
-                            >
-                                ยกเลิก
-                            </button>
-                            <button
-                                onClick={() => {
+                            <CustomButton
+                                title="ยกเลิก"
+                                variant="cancel"
+                                size="md"
+                                onPress={() => setOpenEditorder(false)}
+                            />
+                            <CustomButton
+                                title="บันทึก"
+                                variant="primary"
+                                size="md"
+                                onPress={() => {
                                     handleAddorder(selectedOrder.order_id, editStatus); //ส่ง editStatus
                                     setOpenEditorder(false);
                                 }}
-                                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-                            >
-                                บันทึก
-                            </button>
+                            />
                         </div>
                     </div>
                 </div>

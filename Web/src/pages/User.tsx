@@ -258,24 +258,19 @@ function User() {
                   <option value="USER">USER</option>
                 </select>
               </div>
-
               <div className="flex justify-end gap-2 pt-2">
-                <button
-                  onClick={() => setOpenModal(false)}
-                  className="px-4 py-2 rounded-lg border text-sm"
-                >
-                  ยกเลิก
-                </button>
-
-                <button
-                  onClick={async () => {
-                    await handleAddUser();
-                    setOpenModal(false);
-                  }}
-                  className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-                >
-                  เพิ่ม
-                </button>
+                <CustomButton
+                  title="ยกเลิก"
+                  variant="cancel"
+                  size="md"
+                  onPress={() => setOpenModal(false)}
+                />
+                <CustomButton
+                  title="เพิ่ม"
+                  variant="primary"
+                  size="md"
+                  onPress={async () => { await handleAddUser(); setOpenModal(false); }}
+                />
               </div>
 
             </div>
@@ -412,7 +407,7 @@ function User() {
               />
             </div>
 
-             <div className="space-y-1">
+            <div className="space-y-1">
               <label className="text-sm text-gray-500">บ้านเลขที่</label>
               <input
                 className="w-full border rounded-lg p-2 text-sm"
@@ -467,20 +462,19 @@ function User() {
                 onChange={(e) => setAddress({ ...address, phone: e.target.value })}
               />
             </div>
-
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setOpenAddressModal(false)}
-                className="px-4 py-2 rounded-lg border text-sm"
-              >
-                ยกเลิก
-              </button>
-              <button
-                onClick={handleAddAddress}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-              >
-                เพิ่ม
-              </button>
+              <CustomButton
+                title="ยกเลิก"
+                variant="cancel"
+                size="md"
+                onPress={() => setOpenAddressModal(false)}
+              />
+              <CustomButton
+                title="เพิ่ม"
+                variant="primary"
+                size="md"
+                onPress={handleAddAddress}
+              />
             </div>
           </div>
         </div>
@@ -540,18 +534,18 @@ function User() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => { setOpenEditModal(false); setEditForm(null); }}
-                className="px-4 py-2 rounded-lg border text-sm"
-              >
-                ยกเลิก
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-              >
-                บันทึก
-              </button>
+              <CustomButton
+                title="ยกเลิก"
+                variant="cancel"
+                size="md"
+                onPress={() => { setOpenEditModal(false); setEditForm(null); }}
+              />
+              <CustomButton
+                title="บันทึก"
+                variant="primary"
+                size="md"
+                onPress={handleSaveEdit}
+              />
             </div>
           </div>
         </div>
@@ -580,81 +574,80 @@ function User() {
               />
             </div>
 
+            <div className="space-y-1">
+              <label className="text-sm text-gray-500">บ้านเลขที่</label>
+              <input
+                className="w-full border rounded-lg p-2 text-sm"
+                value={editAddressForm.houseNo}
+                onChange={(e) => setEditAddressForm({ ...editAddressForm, houseNo: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">บ้านเลขที่</label>
+                <label className="text-sm text-gray-500">อำเภอ</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
-                  value={editAddressForm.houseNo}
-                  onChange={(e) => setEditAddressForm({ ...editAddressForm, houseNo: e.target.value })}
+                  value={editAddressForm.district}
+                  onChange={(e) => setEditAddressForm({ ...editAddressForm, district: e.target.value })}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">อำเภอ</label>
-                  <input
-                    className="w-full border rounded-lg p-2 text-sm"
-                    value={editAddressForm.district}
-                    onChange={(e) => setEditAddressForm({ ...editAddressForm, district: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">ตำบล</label>
-                  <input
-                    className="w-full border rounded-lg p-2 text-sm"
-                    value={editAddressForm.subDistrict ?? ""}
-                    onChange={(e) => setEditAddressForm({ ...editAddressForm, subDistrict: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">จังหวัด</label>
-                  <input
-                    className="w-full border rounded-lg p-2 text-sm"
-                    value={editAddressForm.province ?? ""}
-                    onChange={(e) => setEditAddressForm({ ...editAddressForm, province: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-500">รหัสไปรษณีย์</label>
-                  <input
-                    className="w-full border rounded-lg p-2 text-sm"
-                    value={editAddressForm.postal_code}
-                    onChange={(e) => setEditAddressForm({ ...editAddressForm, postal_code: e.target.value })}
-                  />
-                </div>
-              </div>
-
               <div className="space-y-1">
-                <label className="text-sm text-gray-500">เบอร์โทร</label>
+                <label className="text-sm text-gray-500">ตำบล</label>
                 <input
                   className="w-full border rounded-lg p-2 text-sm"
-                  value={editAddressForm.phone ?? ""}
-                  onChange={(e) => setEditAddressForm({ ...editAddressForm, phone: e.target.value })}
+                  value={editAddressForm.subDistrict ?? ""}
+                  onChange={(e) => setEditAddressForm({ ...editAddressForm, subDistrict: e.target.value })}
                 />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  onClick={() => setEditAddressForm(null)}
-                  className="px-4 py-2 rounded-lg border text-sm"
-                >
-                  ยกเลิก
-                </button>
-                <button
-                  onClick={handleSaveEditAddress}
-                  className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600"
-                >
-                  บันทึก
-                </button>
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-sm text-gray-500">จังหวัด</label>
+                <input
+                  className="w-full border rounded-lg p-2 text-sm"
+                  value={editAddressForm.province ?? ""}
+                  onChange={(e) => setEditAddressForm({ ...editAddressForm, province: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-gray-500">รหัสไปรษณีย์</label>
+                <input
+                  className="w-full border rounded-lg p-2 text-sm"
+                  value={editAddressForm.postal_code}
+                  onChange={(e) => setEditAddressForm({ ...editAddressForm, postal_code: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm text-gray-500">เบอร์โทร</label>
+              <input
+                className="w-full border rounded-lg p-2 text-sm"
+                value={editAddressForm.phone ?? ""}
+                onChange={(e) => setEditAddressForm({ ...editAddressForm, phone: e.target.value })}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <CustomButton
+                title="ยกเลิก"
+                variant="cancel"
+                size="md"
+                onPress={() => setEditAddressForm(null)}
+              />
+              <CustomButton
+                title="บันทึก"
+                variant="primary"
+                size="md"
+                onPress={handleSaveEditAddress}
+              />
+            </div>
           </div>
-      )}
         </div>
-      );
+      )}
+    </div>
+  );
 }
 
-      export default User;
+export default User;
