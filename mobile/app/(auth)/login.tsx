@@ -41,28 +41,26 @@ export default function Login() {
     androidClientId:
       "835147090474-mqutule76dtajpbkbobgdlijbnjdtv62.apps.googleusercontent.com",
     webClientId:
-     "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
-     redirectUri
+      "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
+    redirectUri,
   });
   const router = useRouter();
   const { user, setUser } = useUser();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    if (response?.type === "success") {
+      const idToken =
+        response.params?.id_token ?? response.authentication?.idToken;
 
-useEffect(() => {
-  if (response?.type === "success") {
-    const idToken =
-      response.params?.id_token ??
-      response.authentication?.idToken;
+      if (!idToken) {
+        console.log("NO ID TOKEN FOUND", response);
+        return;
+      }
 
-    if (!idToken) {
-      console.log("NO ID TOKEN FOUND", response);
-      return;
+      handleGoogleLogin(idToken);
     }
-
-    handleGoogleLogin(idToken);
-  }
-}, [response]);
+  }, [response]);
 
   const setDefaultAddress = (user: any) => {
     const addresses = user.addresses;
@@ -95,7 +93,6 @@ useEffect(() => {
       }
       setUser(result.user);
       setDefaultAddress(result.user);
-    
     } catch (err) {
       console.log(err);
     }
@@ -143,18 +140,23 @@ useEffect(() => {
   };
 
   return (
-    <LinearGradient colors={["#00ACC3", "#C7ECF7"]} className="flex-1">
+    <LinearGradient
+      colors={["#00ACC3", "#C7ECF7", "#F8FAFC"]}
+      className="flex-1"
+    >
       <KeyboardAwareScrollView
         enableOnAndroid
         extraScrollHeight={100}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={require("../../assets/images/Logo_WDZ.png")}
-          style={{ width: "100%", aspectRatio: 1 }}
-          resizeMode="contain"
-        />
+        <View className="items-center">
+          <Image
+            source={require("../../assets/images/Logo_WDZ.png")}
+            style={{ width: "100%", aspectRatio: 1 }}
+            resizeMode="contain"
+          />
+        </View>
 
         <View className="p-8 h-full rounded-t-3xl bg-white">
           <Text className="font-bold text-4xl mb-6">Login</Text>

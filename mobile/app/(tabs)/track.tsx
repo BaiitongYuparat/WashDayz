@@ -5,7 +5,7 @@ import { getOrdersByUser, OrderDetail } from "@/services/orderService";
 import { useUser } from "@/provider/UserProvider";
 import OrderHistoryCard from "@/components/OrderHistoryCard";
 import { useFocusEffect } from "expo-router";
-
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 const ACTIVE_STATUSES = ["WAITING", "WASHING"];
 
 export default function OrderActiveTrackingScreen() {
@@ -50,7 +50,7 @@ export default function OrderActiveTrackingScreen() {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         {orders.length === 0 ? (
           <View className="items-center justify-center mt-20 gap-3">
-            <Text className="text-5xl">✅</Text>
+            <MaterialCommunityIcons name="check-circle-outline" size={64} color="#9CA3AF" />
             <Text className="text-gray-400 text-sm">
               ไม่มีคำสั่งซื้อที่กำลังดำเนินการ
             </Text>

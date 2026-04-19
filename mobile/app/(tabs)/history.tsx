@@ -1,16 +1,32 @@
-import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { getOrdersByUser, OrderDetail } from "@/services/orderService";
 import { useUser } from "@/provider/UserProvider";
 import OrderHistoryCard from "@/components/OrderHistoryCard";
 import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function OrderHistoryScreen() {
   const router = useRouter();
   const { user } = useUser();
   const [orders, setOrders] = useState<OrderDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"ALL" | "COMPLETED" | "CANCELLED">(
+    "ALL",
+  );
+
+  const filtered = orders.filter((o) => {
+    if (filter === "ALL") return true;
+    return o.status === filter;
+  });
 
   useEffect(() => {
     if (!user?.user_id) return;
@@ -42,6 +58,31 @@ export default function OrderHistoryScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
+      <View className="flex-row gap-2 px-4 py-3">
+        {[
+          { key: "ALL", label: "ทั้งหมด" },
+          { key: "FINISHED", label: "เสร็จสิ้น" },
+          { key: "CANCELLED", label: "ยกเลิก" },
+        ].map((tab) => (
+          <Pressable
+            key={tab.key}
+            onPress={() => setFilter(tab.key as any)}
+            className={`px-4 py-1.5 rounded-full ${
+              filter === tab.key
+                ? "bg-blue-main"
+                : "bg-white border border-gray-200"
+            }`}
+          >
+            <Text
+              className={`text-xs font-bold ${
+                filter === tab.key ? "text-white" : "text-gray-500"
+              }`}
+            >
+              {tab.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       <LinearGradient
         colors={["#E0F7FA", "#F8FAFC", "#FFFF"]}
         className="flex-1"
@@ -49,13 +90,13 @@ export default function OrderHistoryScreen() {
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
           {orders.length === 0 ? (
             <View className="items-center justify-center mt-20 gap-3">
-              <Text className="text-5xl">🧺</Text>
+              <MaterialCommunityIcons name="basket-outline" size={64} color="#9CA3AF" />
               <Text className="text-gray-400 text-sm">
                 ยังไม่มีประวัติคำสั่งซื้อ
               </Text>
             </View>
           ) : (
-            orders.map((order) => (
+            filtered.map((order) => (
               <OrderHistoryCard
                 key={order.order_id}
                 order={order}

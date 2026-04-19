@@ -122,10 +122,9 @@ export default function AddressForm() {
   return (
     <LinearGradient
       colors={["#00ACC3", "#C7ECF7"]}
-      className="flex-1 bg-blue-light justify-between"
+      className="flex-1 bg-blue-light "
     >
       <View
-        style={{ flexShrink: 0, width: "100%" }}
         className="flex-1 mt-14 p-8 rounded-t-3xl bg-white shadow-xl shadow-blue-main justify-between"
       >
         <View className="items-center gap-2 mb-4">
@@ -140,8 +139,9 @@ export default function AddressForm() {
           extraScrollHeight={100}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
         >
-          <View className="flex-1 justify-start">
+          <View className="flex-1 gap-2">
             {/* adddress field */}
             <CustomInput
               value={name}
@@ -198,15 +198,10 @@ export default function AddressForm() {
               onChangeText={setLabel}
               placeholder="บันทึกชื่อที่อยู่ เช่น บ้าน หอพัก"
             />
-            {selectedLocation && (
-              <Text>
-                📍 เลือกแล้ว: {selectedLocation.latitude},{" "}
-                {selectedLocation.longitude}
-              </Text>
-            )}
           </View>
+           <CustomButton onPress={handleSubmit} title="บันทึกที่อยู่่" size="md" />
         </KeyboardAwareScrollView>
-        <CustomButton onPress={handleSubmit} title="บันทึกที่อยู่่" size="md" />
+       
       </View>
     </LinearGradient>
   );
