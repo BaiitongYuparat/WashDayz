@@ -348,13 +348,21 @@ function Branche() {
                             />
                         </div>
                         <MapPicker value={pickedLatLng} onChange={setPickedLatLng} />
+
+
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setOpenModal(false)} className="px-4 py-2 rounded-lg border text-sm">
-                                ยกเลิก
-                            </button>
-                            <button onClick={handleSave} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">
-                                {editTarget ? "แก้ไขสาขา" : "เพิ่มสาขา"}
-                            </button>
+                            <CustomButton
+                                title="ยกเลิก"
+                                variant="cancel"
+                                size="md"
+                                onPress={() => setOpenModal(false)}
+                            />
+                            <CustomButton
+                                title={editTarget ? "แก้ไขสาขา" : "เพิ่มสาขา"}
+                                variant="primary"
+                                size="md"
+                                onPress={handleSave}
+                            />
                         </div>
                     </div>
                 </div>
@@ -392,14 +400,19 @@ function Branche() {
                                 onChange={e => setMachineForm({ ...machineForm, quantity: Number(e.target.value) })}
                             />
                         </div>
-
-                        <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setOpenMachineModal(false)} className="px-4 py-2 rounded-lg border text-sm">
-                                ยกเลิก
-                            </button>
-                            <button onClick={handleAddMachine} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600">
-                                เพิ่มเครื่อง
-                            </button>
+                         <div className="flex justify-end gap-2 pt-2">
+                            <CustomButton
+                                title="ยกเลิก"
+                                variant="cancel"
+                                size="md"
+                                onPress={() => setOpenMachineModal(false)} 
+                            />
+                            <CustomButton
+                                title="เพิ่มเครื่อง"
+                                variant="primary"
+                                size="md"
+                                onPress={handleAddMachine}
+                            />
                         </div>
                     </div>
                 </div>
