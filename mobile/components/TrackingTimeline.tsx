@@ -20,7 +20,7 @@ const STEPS: Step[] = [
   },
   {
     id: "WASHING",
-    label: "กำลังซัก",
+    label: "กำลังซัก/อบ",
     description: "เครื่องกำลังทำงานอยู่",
     icon: "washing-machine",
   },
