@@ -30,36 +30,39 @@ import { setSelectedAddress, setSelectedLocation } from "@/redux/addressSlice";
 
 WebBrowser.maybeCompleteAuthSession();
 
+const redirectUri = AuthSession.makeRedirectUri({
+  scheme: "com.washdayz.mobile",
+});
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId:
       "835147090474-mqutule76dtajpbkbobgdlijbnjdtv62.apps.googleusercontent.com",
+    webClientId:
+     "835147090474-43uc89ghnlej9lj0a75cdnukvqi53mi0.apps.googleusercontent.com",
+     redirectUri
   });
   const router = useRouter();
   const { user, setUser } = useUser();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-  console.log("request redirect =", request?.redirectUri);
-}, [request]);
+
 useEffect(() => {
-  console.log("login")
-  const uri = AuthSession.makeRedirectUri()
-  console.log("redirect URI:", uri)
-}, [])
-  useEffect(() => {
-    if (response?.type === "success") {
-      const idToken = response.params?.id_token;
-      console.log("RESPONSE:", response);
-      if (idToken) {
-        handleGoogleLogin(idToken);
-      } else {
-        console.log("NO ID TOKEN");
-      }
+  if (response?.type === "success") {
+    const idToken =
+      response.params?.id_token ??
+      response.authentication?.idToken;
+
+    if (!idToken) {
+      console.log("NO ID TOKEN FOUND", response);
+      return;
     }
-  }, [response]);
+
+    handleGoogleLogin(idToken);
+  }
+}, [response]);
 
   const setDefaultAddress = (user: any) => {
     const addresses = user.addresses;
@@ -84,7 +87,6 @@ useEffect(() => {
     try {
       const result = await sendTokenToBackend(idToken);
       await AsyncStorage.setItem("token", result.token);
-
       console.log("result:", result.token);
       if (result.isNewUser || !result.hasAddress) {
         router.push("/address");

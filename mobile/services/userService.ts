@@ -21,6 +21,7 @@ export type Address = {
 
 export type User = {
   user_id: string;
+  googleId: string;
   email: string;
   name: string;
   phone: string;

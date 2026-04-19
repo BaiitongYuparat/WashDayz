@@ -1,6 +1,7 @@
 import axios from "axios"
 
-const API_URL = "http://172.20.10.2:8080"
+const BASE_URL = "http://172.20.10.2:8080"
+const API_URL = "http://172.20.10.2:8080/branches"
 
 export type BranchScore = {
   branch_id: string
@@ -46,7 +47,7 @@ export const recommendBranch = async (
   token: string
 ): Promise<RecommendResult> => {
   const res = await axios.post(
-    `${API_URL}/recommend-branch`,
+    `${BASE_URL}/recommend-branch`,
     input,
     {
       headers: {
@@ -61,11 +62,11 @@ export const recommendBranch = async (
 export const getBranchById = async (
   id: string
 ): Promise<Branch> => {
-  const res = await axios.get(`${API_URL}/branches/${id}`);
+  const res = await axios.get(`${API_URL}/${id}`);
   return res.data;
 };
 
 export const getAllBranches = async (): Promise<Branch[]> => {
-  const res = await axios.get(`${API_URL}/branches`);
+  const res = await axios.get(`${API_URL}`);
   return res.data;
 };

@@ -23,14 +23,15 @@ import { RootState } from "@/redux/store";
 import { useRef } from "react";
 import { UserHeader } from "@/components/UserHeader";
 
-const MACHINE_TYPE_LABELS: Record<string, string> = {
-  WASHER: "เครื่องซัก",
-  DRYER: "เครื่องอบ",
+const MACHINE_TYPE_ORDER: Record<string, number> = {
+  WASHER: 0,
+  DRYER: 1,
 };
 
 export default function BranchSelectScreen() {
   const router = useRouter();
-  const { serviceId, machineIds, editMode, addonIds, totalPrice } = useLocalSearchParams();
+  const { serviceId, machineIds, editMode, addonIds, totalPrice } =
+    useLocalSearchParams();
 
   const selectedLocation = useSelector(
     (state: RootState) => state.address.selectedLocation,
@@ -47,66 +48,74 @@ export default function BranchSelectScreen() {
   const [showAllBranches, setShowAllBranches] = useState(false);
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const data = await getMachinesByMainService(serviceId as string)
-      setMachines(data)
+    const fetchData = async () => {
+      try {
+        const data = await getMachinesByMainService(serviceId as string);
+        const sorted = [...data].sort(
+          (a, b) =>
+            (MACHINE_TYPE_ORDER[a.type] ?? 99) -
+            (MACHINE_TYPE_ORDER[b.type] ?? 99),
+        );
+        setMachines(sorted);
 
-      if (machineIds) {
-        const ids =
-          typeof machineIds === "string"
-            ? machineIds.split(",").filter(Boolean)
-            : Array.isArray(machineIds)
-            ? machineIds
-            : []
+        if (machineIds) {
+          const ids =
+            typeof machineIds === "string"
+              ? machineIds.split(",").filter(Boolean)
+              : Array.isArray(machineIds)
+                ? machineIds
+                : [];
 
-        if (ids.length > 0) {
-          setSelectedMachines(ids)
-          await fetchRecommend(ids, data) // ส่ง data ตรงๆ ไม่ใช้ state
+          if (ids.length > 0) {
+            setSelectedMachines(ids);
+            await fetchRecommend(ids, data); // ส่ง data ตรงๆ ไม่ใช้ state
+          }
         }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err)
+    };
+    fetchData();
+  }, []);
+
+  const fetchRecommend = async (
+    selected: string[],
+    machinesData: Machine[],
+  ) => {
+    if (selected.length === 0) {
+      setRecommendResult(null);
+      return;
     }
-  }
-  fetchData()
-}, [])
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
 
-  const fetchRecommend = async (selected: string[], machinesData: Machine[]) => {
-  if (selected.length === 0) {
-    setRecommendResult(null)
-    return
-  }
-  try {
-    setLoading(true)
-    const token = await AsyncStorage.getItem("token")
-    if (!token) return
-
-    const selectedMachinesData = machinesData.filter((m) =>
-      selected.includes(m.machine_id)
-    )
-    const result = await recommendBranch(
-      {
-        userLat: selectedLocation?.latitude ?? 13.7563,
-        userLng: selectedLocation?.longitude ?? 100.5018,
-        machineTypes: selectedMachinesData.map(m => ({
-          type: m.type,
-          capacity: m.capacity
-        })),
-        mainServiceId: serviceId as string,
-      },
-      token
-    )
-    setRecommendResult(result)
-    setSelectedBranchId(result.recommendedBranchId)
-  } catch (err) {
-      console.log("fetchRecommend error:", err)        // เพิ่ม
-    console.log("fetchRecommend error JSON:", JSON.stringify(err))
-    Alert.alert("Error", "ไม่สามารถโหลดข้อมูลสาขาได้")
-  } finally {
-    setLoading(false)
-  }
-}
+      const selectedMachinesData = machinesData.filter((m) =>
+        selected.includes(m.machine_id),
+      );
+      const result = await recommendBranch(
+        {
+          userLat: selectedLocation?.latitude ?? 13.7563,
+          userLng: selectedLocation?.longitude ?? 100.5018,
+          machineTypes: selectedMachinesData.map((m) => ({
+            type: m.type,
+            capacity: m.capacity,
+          })),
+          mainServiceId: serviceId as string,
+        },
+        token,
+      );
+      setRecommendResult(result);
+      setSelectedBranchId(result.recommendedBranchId);
+    } catch (err) {
+      console.log("fetchRecommend error:", err); // เพิ่ม
+      console.log("fetchRecommend error JSON:", JSON.stringify(err));
+      Alert.alert("Error", "ไม่สามารถโหลดข้อมูลสาขาได้");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleMachine = (id: string) => {
     setSelectedMachines((prev) => {
@@ -123,7 +132,7 @@ export default function BranchSelectScreen() {
       }
 
       debounceRef.current = setTimeout(() => {
-        fetchRecommend(next, machines) 
+        fetchRecommend(next, machines);
       }, 1000); // รอ 1 วินาทีหลังจากเลือกครั้งสุดท้าย
 
       return next;
@@ -131,33 +140,33 @@ export default function BranchSelectScreen() {
   };
 
   // branch.tsx
-const handleConfirm = () => {
-  if (!selectedBranchId) return;
+  const handleConfirm = () => {
+    if (!selectedBranchId) return;
 
-  const isEditMode = editMode === "true"; 
+    const isEditMode = editMode === "true";
 
-  if (isEditMode) {
-    router.replace({
-      pathname: "/screens/home/orderSummary",
-      params: {
-        serviceId,
-        branchId: selectedBranchId,
-        machineIds: selectedMachines.join(","),
-        addonIds: addonIds ?? "",      
-        totalPrice: totalPrice ?? "",   
-      },
-    });
-  } else {
-    router.push({
-      pathname: "/screens/order",
-      params: {
-        serviceId,
-        branchId: selectedBranchId,
-        machineIds: selectedMachines.join(","),
-      },
-    });
-  }
-};
+    if (isEditMode) {
+      router.replace({
+        pathname: "/screens/home/orderSummary",
+        params: {
+          serviceId,
+          branchId: selectedBranchId,
+          machineIds: selectedMachines.join(","),
+          addonIds: addonIds ?? "",
+          totalPrice: totalPrice ?? "",
+        },
+      });
+    } else {
+      router.push({
+        pathname: "/screens/order",
+        params: {
+          serviceId,
+          branchId: selectedBranchId,
+          machineIds: selectedMachines.join(","),
+        },
+      });
+    }
+  };
 
   return (
     <View className="flex-1 bg-gray-50">

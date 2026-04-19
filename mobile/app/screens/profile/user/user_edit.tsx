@@ -13,7 +13,6 @@ export default function EditProfileScreen() {
   const { user, setUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(user?.profile_image || null);
-
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -39,8 +38,8 @@ export default function EditProfileScreen() {
       }
     }
   };
-
-  // ← รับ data จาก UserForm แทน useState
+  
+  // รับ data จาก UserForm แทน useState
   const handleUpdate = async (data: UserFormData) => {
     if (!user?.user_id) {
       Alert.alert("Error", "User not found");
@@ -94,6 +93,7 @@ export default function EditProfileScreen() {
           name: user?.name,
           phone: user?.phone,
           email: user?.email,
+          googleId: user?.googleId
         }}
         onSubmit={handleUpdate}  // ← ส่ง data มาจาก form โดยตรง
         submitText={loading ? "กำลังบันทึก..." : "บันทึก"}

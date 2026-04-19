@@ -10,6 +10,10 @@ interface MachineCardProps {
   onPress: () => void;
   isSelected?: boolean;
 }
+const MACHINE_TYPE_LABELS: Record<string, string> = {
+  WASHER: "เครื่องซัก",
+  DRYER: "เครื่องอบ",
+};
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"]
 
 const SERVICE_ICONS: Record<string, IconName> = {
@@ -47,7 +51,7 @@ export default function MachineCard({ img, type, duration_minutes, isSelected, o
           <Text className={`text-base font-bold tracking-tight ${
             isSelected ? "text-blue-main" : "text-gray-800"
           }`}>
-            {type}
+            {MACHINE_TYPE_LABELS[type] ?? type}
           </Text>
 
           {/* Time badge */}
@@ -58,7 +62,7 @@ export default function MachineCard({ img, type, duration_minutes, isSelected, o
             <Text className={`text-xs font-medium ${
               isSelected ? "text-blue-main" : "text-gray-400"
             }`}>
-              {duration_minutes}
+             ใช้เวลา {duration_minutes} นาที
             </Text>
             
           </View>
@@ -68,11 +72,11 @@ export default function MachineCard({ img, type, duration_minutes, isSelected, o
             <View className={`flex-row items-center gap-1 px-2 py-0.5 rounded-full ${
               isSelected ? "bg-blue-main/10" : "bg-gray-100"
             }`}>
-              <Text className="text-xs">👕</Text>
-              <Text className={`text-xs font-medium ${
+              <Text className="text-sm">👕</Text>
+              <Text className={`text-sm font-medium ${
                 isSelected ? "text-blue-main" : "text-gray-400"
               }`}>
-                {capacity} กก.
+               ขนาด {capacity} กก.
               </Text>
             </View>
 

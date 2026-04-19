@@ -16,28 +16,33 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
     arr.slice(i * size, i * size + size),
   );
 }
-type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"]
+type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 const MACHINE_TYPE_LABELS: Record<string, string> = {
   WASHER: "เครื่องซัก",
   DRYER: "เครื่องอบ",
-}
+};
 
 const MACHINE_ICONS: Record<string, IconName> = {
   WASHER: "washing-machine",
   DRYER: "tumble-dryer",
-}
+};
+
+const SERVICE_ICONS: Record<string, IconName> = {
+  WASHER: "washing-machine",
+  DRYER: "tumble-dryer",
+};
 
 export default function OrderScreen() {
   const router = useRouter();
-  const { serviceId,branchId, machineIds, addonIds  } = useLocalSearchParams();
+  const { serviceId, branchId, machineIds, addonIds } = useLocalSearchParams();
   const [service, setService] = useState<MainService | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState<number>(0);
   const [addon, setAddon] = useState<AddonType[]>([]);
   const [selectedAddons, setSelectedAddons] = useState<string[]>(() => {
-  return (addonIds as string)?.split(",").filter(Boolean) ?? []
-});
+    return (addonIds as string)?.split(",").filter(Boolean) ?? [];
+  });
   const [machinePrice, setMachinePrice] = useState<number>(0);
   const [selectedMachines, setSelectedMachines] = useState<Machine[]>([]);
 
@@ -49,14 +54,14 @@ export default function OrderScreen() {
       const addonData = await getAddonByMainServiceId(serviceId as string);
       setAddon(addonData);
 
-       const ids = (machineIds as string)?.split(",").filter(Boolean)
-       
+      const ids = (machineIds as string)?.split(",").filter(Boolean);
+
       if (ids?.length) {
-        const machineData = await getMachinesByIds(ids)
-        setSelectedMachines(machineData)
-        console.log(selectedMachines)
-        const total = machineData.reduce((sum, m) => sum + m.price, 0)
-        setMachinePrice(total)
+        const machineData = await getMachinesByIds(ids);
+        setSelectedMachines(machineData);
+        console.log(selectedMachines);
+        const total = machineData.reduce((sum, m) => sum + m.price, 0);
+        setMachinePrice(total);
       }
     };
     fetchServices();
@@ -68,7 +73,7 @@ export default function OrderScreen() {
       .filter((a) => selectedAddons.includes(a.addon_service_id))
       .reduce((sum, a) => sum + a.price, 0);
     setPrice(machinePrice + selectedAddonPrice);
-  }, [quantity, selectedAddons, service, addon , machinePrice]);
+  }, [quantity, selectedAddons, service, addon, machinePrice]);
 
   const toggleAddon = (id: string) => {
     setSelectedAddons((prev) =>
@@ -110,7 +115,13 @@ export default function OrderScreen() {
               elevation: 6,
             }}
           >
-            <Ionicons name="shirt" size={44} color="#00ACC3" />
+            <MaterialCommunityIcons
+              name={
+                SERVICE_ICONS[selectedMachines[0]?.type] ?? "washing-machine"
+              }
+              size={44}
+              color="#00ACC3"
+            />
           </View>
 
           <Text
@@ -127,15 +138,24 @@ export default function OrderScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           className="mx-4 rounded-3xl p-5 mb-4"
-          style={{ borderWidth: 1, borderColor: "rgba(0, 172, 195, 0.15)", elevation: 3 }}
+          style={{
+            borderWidth: 1,
+            borderColor: "rgba(0, 172, 195, 0.15)",
+            elevation: 3,
+          }}
         >
           <View className="w-10 h-1 rounded-full bg-blue-main mb-4 self-center opacity-60" />
 
           {selectedMachines.length > 0 ? (
             <View className="gap-3">
-              <Text className="font-bold text-center text-xl">เครื่องที่เลือก</Text>
+              <Text className="font-bold text-center text-xl">
+                เครื่องที่เลือก
+              </Text>
               {selectedMachines.map((m) => (
-                <View key={m.machine_id} className="flex-row items-center gap-3">
+                <View
+                  key={m.machine_id}
+                  className="flex-row items-center gap-3"
+                >
                   {/* icon */}
                   <View className="w-12 h-12 rounded-2xl bg-blue-main/10 items-center justify-center">
                     <MaterialCommunityIcons
@@ -160,7 +180,9 @@ export default function OrderScreen() {
             </View>
           ) : (
             <View className="items-center gap-1">
-              <Text className="font-bold text-xl text-gray-800">เครื่องที่เลือก</Text>
+              <Text className="font-bold text-xl text-gray-800">
+                เครื่องที่เลือก
+              </Text>
               <Text className="text-gray-400 text-sm">ไม่พบข้อมูลเครื่อง</Text>
             </View>
           )}
@@ -189,17 +211,17 @@ export default function OrderScreen() {
         <CustomButton
           title="สั่งซื้อ"
           onPress={() =>
-    router.push({
-      pathname: "/screens/home/orderSummary",
-      params: {
-        serviceId,
-        branchId,
-        machineIds,
-        addonIds: selectedAddons.join(","),
-        totalPrice: price,
-      },
-    })
-  }
+            router.push({
+              pathname: "/screens/home/orderSummary",
+              params: {
+                serviceId,
+                branchId,
+                machineIds,
+                addonIds: selectedAddons.join(","),
+                totalPrice: price,
+              },
+            })
+          }
           className="p-4 rounded-lg"
         />
       </View>

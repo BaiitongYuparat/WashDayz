@@ -17,10 +17,19 @@
     },
     "android": {
       "package": "com.washdayz.mobile",
-      "permissions": [
-         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.washdayz.mobile"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
       ],
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -36,7 +45,7 @@
         }
       }
     },
-    
+
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
