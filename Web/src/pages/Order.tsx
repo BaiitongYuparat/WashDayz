@@ -73,7 +73,7 @@ function Orders() {
 
             <div className="mb-6 flex justify-between items-center">
                 <label className="text-black text-3xl font-bold">
-                    ออเดอร์
+                    Order
                 </label>
             </div>
 

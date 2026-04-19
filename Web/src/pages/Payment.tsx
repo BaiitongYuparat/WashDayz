@@ -56,7 +56,7 @@ function Payments() {
   return (
     <div className="p-8">
       <div className="mb-6 flex justify-between items-center">
-        <label className="text-black text-3xl font-bold">การชำระเงิน</label>
+        <label className="text-black text-3xl font-bold">Payment</label>
       </div>
 
       <div className="grid grid-cols-4 gap-3 mb-6">

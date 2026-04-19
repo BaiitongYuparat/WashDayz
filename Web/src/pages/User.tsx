@@ -193,7 +193,7 @@ function User() {
 
       <div className="mb-6 flex justify-between items-center">
         <label className="text-black text-3xl font-bold">
-          ผู้ใช้งาน
+          User
         </label>
 
         <CustomButton

@@ -207,7 +207,7 @@ function Branche() {
 
             {/* Header สาขา */}
             <div className="mb-4 flex justify-between items-center">
-                <label className="text-black text-3xl font-bold">สาขา</label>
+                <label className="text-black text-3xl font-bold">Branch</label>
                 <CustomButton title="+ Add Branch" variant="primary" size="md" onPress={handleOpenAdd} />
             </div>
             <SearchInput value={search} onChange={setSearch} placeholder="ค้นหา..." />
@@ -256,7 +256,7 @@ function Branche() {
             <div className="mt-8">
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-3">
-                        <label className="text-black text-3xl font-bold">เครื่องสาขา</label>
+                        <label className="text-black text-3xl font-bold">Branch Machine</label>
                         {selectedBranchName && (
                             <span className="bg-blue-100 text-blue-700 text-sm font-medium px-3 py-1 rounded-full">
                                 {selectedBranchName}

@@ -86,7 +86,7 @@ function Dashboards() {
 
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
-        <label className="text-black text-3xl font-bold">แดชบอร์ด</label>
+        <label className="text-black text-3xl font-bold">Dashboard</label>
       </div>
 
       {/* Stat Cards */}

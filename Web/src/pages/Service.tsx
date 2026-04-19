@@ -226,7 +226,7 @@ function Services() {
 
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        บริการ
+                        Service
                     </label>
 
                     <CustomButton
@@ -371,7 +371,7 @@ function Services() {
             <div>
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        บริการหลัก
+                        Main Service
                     </label>
 
                     <CustomButton
@@ -493,7 +493,7 @@ function Services() {
             <div>
                 <div className="mb-6 flex justify-between items-center">
                     <label className="text-black text-3xl font-bold">
-                        บริการเสริม
+                        Addon Service
                     </label>
 
                     <CustomButton

@@ -53,7 +53,7 @@ function Queues() {
     return (
         <div className="p-8">
             <div className="mb-6 flex justify-between items-center">
-                <label className="text-black text-3xl font-bold">คิว</label>
+                <label className="text-black text-3xl font-bold">Queue</label>
             </div>
 
             {/* Stats */}
