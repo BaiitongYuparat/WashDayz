@@ -106,7 +106,7 @@ export default function OrderScreen() {
         <View className="items-center pt-6 pb-4 px-4 gap-3">
           {/* Icon with glow background */}
           <View
-            className="w-20 h-20 rounded-3xl bg-blue-50 items-center justify-center shadow-sm"
+            className="w-28 h-28 rounded-3xl bg-blue-50 items-center justify-center shadow-sm"
             style={{
               shadowColor: "#00ACC3",
               shadowOffset: { width: 0, height: 4 },
@@ -119,7 +119,7 @@ export default function OrderScreen() {
               name={
                 SERVICE_ICONS[selectedMachines[0]?.type] ?? "washing-machine"
               }
-              size={44}
+              size={82}
               color="#00ACC3"
             />
           </View>
